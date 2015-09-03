@@ -3,15 +3,15 @@ fixed-width fields.  Useful for printing tabular data and similar.
 
 # Setup
 
-## C++
+### C++
 
 Requires a C++14 compiler.  
 
-## Python
+### Python
 
 Requires Python 3.4 or later.
 
-## Google Test
+### Google Test
 
 Requires [Google Test](https://github.com/google/googletest) for building
 and running the C++ tests:
