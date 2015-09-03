@@ -7,6 +7,8 @@ fixed-width fields.  Useful for printing tabular data and similar.
 
 Requires a C++14 compiler.  
 
+Maybe one day I'll try to rewrite it in Rust.
+
 ### Python
 
 Requires Python 3.4 or later.
