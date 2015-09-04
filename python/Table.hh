@@ -4,7 +4,7 @@
 
 #include <Python.h>
 
-#include "column.hh"
+#include "table.hh"
 #include "fixfmt.hh"
 #include "py.hh"
 
