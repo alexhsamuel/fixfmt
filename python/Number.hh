@@ -6,7 +6,7 @@
 #include <Python.h>
 
 #include "base.hh"
-#include "number.hh"
+#include "fixfmt.hh"
 #include "py.hh"
 
 using namespace py;

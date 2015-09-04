@@ -23,7 +23,7 @@ setup(
       sources=[
         "Bool.cc",
         "fixfmt.cc",
-        "type_Number.cc",
+        "Number.cc",
         "String.cc",
         "Table.cc",
       ],

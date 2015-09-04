@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include "number.hh"
+#include "fixfmt.hh"
 #include "gtest/gtest.h"
 
 using namespace fixfmt;
