@@ -1,6 +1,6 @@
 #include <Python.h>
 
-#include "type_Number.hh"
+#include "Number.hh"
 #include "py.hh"
 
 using namespace py;

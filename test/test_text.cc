@@ -1,4 +1,4 @@
-#include "text.hh"
+#include "fixfmt/text.hh"
 #include "gtest/gtest.h"
 
 using namespace fixfmt;

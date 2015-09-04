@@ -3,13 +3,13 @@
 #include <cassert>
 #include <string>
 
-#include "text.hh"
-
-using std::string;
+#include "fixfmt/text.hh"
 
 //------------------------------------------------------------------------------
 
 namespace fixfmt {
+
+using std::string;
 
 class Bool
 {

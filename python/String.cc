@@ -6,10 +6,8 @@
 
 #include <Python.h>
 
-#include "base.hh"
 #include "py.hh"
-#include "string.hh"
-#include "text.hh"
+#include "fixfmt.hh"
 
 using namespace py;
 

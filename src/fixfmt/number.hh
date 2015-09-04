@@ -5,15 +5,15 @@
 #include <iostream>
 #include <string>
 
-#include "base.hh"
-#include "math.hh"
-#include "text.hh"
-
-using std::string;
+#include "fixfmt/base.hh"
+#include "fixfmt/math.hh"
+#include "fixfmt/text.hh"
 
 //------------------------------------------------------------------------------
 
 namespace fixfmt {
+
+using std::string;
 
 class Number
 {

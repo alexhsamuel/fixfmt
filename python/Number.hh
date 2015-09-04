@@ -5,7 +5,6 @@
 
 #include <Python.h>
 
-#include "base.hh"
 #include "fixfmt.hh"
 #include "py.hh"
 

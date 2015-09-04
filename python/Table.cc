@@ -5,10 +5,9 @@
 
 #include <Python.h>
 
-#include "base.hh"
 #include "column.hh"
 #include "py.hh"
-#include "type_Number.hh"
+#include "Number.hh"
 
 using namespace py;
 using std::unique_ptr;

@@ -1,1 +1,3 @@
-#include "fixfmt_number.hh"
+#include "fixfmt/bool.hh"
+#include "fixfmt/number.hh"
+#include "fixfmt/string.hh"

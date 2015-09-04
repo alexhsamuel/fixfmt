@@ -6,8 +6,6 @@
 
 #include <Python.h>
 
-using std::string;
-
 //------------------------------------------------------------------------------
 
 namespace py {
@@ -236,15 +234,15 @@ public:
   void ready_and_add_type(PyTypeObject* type)
   {
     // Make sure the qualified name of the type includes this module's name.
-    string const qualname = type->tp_name;
-    string const mod_name = PyModule_GetName(this);
+    std::string const qualname = type->tp_name;
+    std::string const mod_name = PyModule_GetName(this);
     auto dot = qualname.find_last_of('.');
-    assert(dot != string::npos);
+    assert(dot != std::string::npos);
     assert(qualname.compare(0, dot, mod_name) == 0);
     // Ready the type.
     int const result = PyType_Ready(type);
     assert(result == 0);
-    unused(result);
+    (void) result;  // FIXME;
     // Add it, under its unqualified name.
     AddObject(qualname.substr(dot + 1).c_str(), (PyObject*) type);
   }

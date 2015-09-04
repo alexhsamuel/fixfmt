@@ -6,8 +6,7 @@
 
 #include <Python.h>
 
-#include "base.hh"
-#include "bool.hh"
+#include "fixfmt.hh"
 #include "py.hh"
 
 using namespace py;

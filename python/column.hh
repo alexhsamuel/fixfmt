@@ -7,12 +7,12 @@
 #include <utility>
 #include <vector>
 
-using std::string;
-using std::unique_ptr;
-
 //------------------------------------------------------------------------------
 
 namespace fixfmt {
+
+using std::string;
+using std::unique_ptr;
 
 class Column
 {

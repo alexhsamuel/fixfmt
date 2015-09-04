@@ -3,13 +3,13 @@
 #include <cassert>
 #include <string>
 
-#include "math.hh"
-
-using std::string;
+#include "fixfmt/math.hh"
 
 //------------------------------------------------------------------------------
 
 namespace fixfmt {
+
+using std::string;
 
 constexpr char const* ELLIPSIS = "\u2026";
 

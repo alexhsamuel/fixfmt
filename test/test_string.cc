@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "string.hh"
+#include "fixfmt.hh"
 
 using namespace fixfmt;
 
