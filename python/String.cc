@@ -6,10 +6,10 @@
 
 #include <Python.h>
 
-#include "string.hh"
-#include "py.hh"
-#include "text.hh"
 #include "base.hh"
+#include "py.hh"
+#include "string.hh"
+#include "text.hh"
 
 using namespace py;
 
