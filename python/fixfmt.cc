@@ -1,5 +1,6 @@
 #include <Python.h>
 
+#include "type_Number.hh"
 #include "py.hh"
 
 using namespace py;
@@ -27,16 +28,17 @@ PyModuleDef testmod_module = {
 //------------------------------------------------------------------------------
 
 extern PyTypeObject* get_Bool();
-extern PyTypeObject* get_Number();
 extern PyTypeObject* get_String();
+extern PyTypeObject* get_Table();
 
 PyMODINIT_FUNC
 PyInit_fixfmt(void)
 {
   auto module = Module::Create(&testmod_module);
   module->add(get_Bool());
-  module->add(get_Number());
+  module->ready_and_add_type(&Number::type);
   module->add(get_String());
+  module->add(get_Table());
   return module.release();
 }
 
