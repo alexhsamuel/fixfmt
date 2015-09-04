@@ -1,5 +1,3 @@
-#pragma once
-
 #include <memory>
 
 #include <Python.h>
@@ -9,14 +7,14 @@
 
 //------------------------------------------------------------------------------
 
-class Number
+class String
   : public py::ExtensionType
 {
 public:
 
   static py::Type type_;
 
-  std::unique_ptr<fixfmt::Number> fmt_;
+  std::unique_ptr<fixfmt::String> fmt_;
 
 };
 

@@ -1,72 +1,60 @@
-#include <cstring>
-#include <iostream>
 #include <memory>
-#include <string>
 #include <utility>
 
 #include <Python.h>
 
-#include "py.hh"
-#include "fixfmt.hh"
+#include "String.hh"
 
 using namespace py;
+using std::unique_ptr;
 
 //------------------------------------------------------------------------------
 
 namespace {
 
-class String
-  : public ExtensionType
+int tp_init(String* self, PyObject* args, PyObject* kw_args)
 {
-  std::unique_ptr<fixfmt::String> fmt_;
+  static char const* arg_names[] 
+      = {"size", "ellipsis", "pad", "position", "pad_left", nullptr};
 
-  static int tp_init(String* self, PyObject* args, PyObject* kw_args)
-  {
-    static char const* arg_names[] 
-        = {"size", "ellipsis", "pad", "position", "pad_left", nullptr};
+  int         size;
+  char const* ellipsis = "...";
+  char        pad = ' ';
+  double      position = 1.0;
+  bool        pad_left = false;
+  if (!PyArg_ParseTupleAndKeywords(
+      args, kw_args, "i|sCdb", (char**) arg_names,
+      &size, &ellipsis, &pad, &position, &pad_left)) 
+    return -1;
 
-    int         size;
-    char const* ellipsis = "...";
-    char        pad = ' ';
-    double      position = 1.0;
-    bool        pad_left = false;
-    if (PyArg_ParseTupleAndKeywords(
-        args, kw_args, "i|sCdb", (char**) arg_names,
-        &size, &ellipsis, &pad, &position, &pad_left)) {
-      // FIXME: Validate args.
-      self->fmt_ = std::unique_ptr<fixfmt::String>(
-          new fixfmt::String(size, ellipsis, pad, position, pad_left));
-      return 0;
-    }
-    else
-      return -1;
-  }
+  // FIXME: Validate args.
+  self->fmt_ = unique_ptr<fixfmt::String>(
+      new fixfmt::String(size, ellipsis, pad, position, pad_left));
+  return 0;
+}
 
-  static PyObject* tp_call(String* self, PyObject* args, PyObject* kw_args)
-  {
-    static char const* arg_names[] = {"str", nullptr};
-    char* val;
-    if (PyArg_ParseTupleAndKeywords(
-        args, kw_args, "s", (char**) arg_names, &val)) 
-      return Unicode::from((*self->fmt_)(val)).release();
-    else
-      return nullptr;
-  }
 
-  static PyMethodDef const tp_methods[];
+PyObject* tp_call(String* self, PyObject* args, PyObject* kw_args)
+{
+  static char const* arg_names[] = {"str", nullptr};
+  char* val;
+  if (!PyArg_ParseTupleAndKeywords(
+      args, kw_args, "s", (char**) arg_names, &val)) 
+    return nullptr;
 
-public:
+  return Unicode::from((*self->fmt_)(val)).release();
+}
 
-  static PyTypeObject type;
 
-};
-
-PyMethodDef const String::tp_methods[] = {
+PyMethodDef const tp_methods[] = {
   METHODDEF_END
 };
 
 
-PyTypeObject String::type = {
+}  // anonymous namespace
+
+
+Type String::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
   "fixfmt.String",             // tp_name
   sizeof(String),              // tp_basicsize
@@ -107,16 +95,5 @@ PyTypeObject String::type = {
   nullptr,                     // tp_alloc
   PyType_GenericNew,           // tp_new
 };
-
-
-}  // anonymous namespace
-
-
-PyTypeObject* get_String()
-{
-  int result = PyType_Ready(&String::type);
-  assert(result == 0); unused(result);
-  return &String::type;
-}
 
 

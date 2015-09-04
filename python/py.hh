@@ -210,39 +210,14 @@ public:
   void AddObject(char const* name, PyObject* val)
     { check_return(PyModule_AddObject(this, name, incref(val))); }
 
-  // FIXME: Deprecated; remove.
   void add(PyTypeObject* type)
-  {
-    // Extract the unqualified name.
-    char const* name = strrchr(type->tp_name, '.');
-    if (name == nullptr)
-      name = type->tp_name;
-    else
-      ++name;
-    AddObject(name, (PyObject*) type);
-  }
-
-  /**
-   * Readies a type and adds it to this module.
-   *
-   * The type's name must be qualified by this module's name.  For example,
-   * to add type 'Val' to module 'foo', the type's name must be 'foo.Val'.
-   *
-   * '*type' must have storage lifetime as long as the type is in the module,
-   * generally static.
-   */
-  void ready_and_add_type(PyTypeObject* type)
   {
     // Make sure the qualified name of the type includes this module's name.
     std::string const qualname = type->tp_name;
     std::string const mod_name = PyModule_GetName(this);
     auto dot = qualname.find_last_of('.');
     assert(dot != std::string::npos);
-    assert(qualname.compare(0, dot, mod_name) == 0);
-    // Ready the type.
-    int const result = PyType_Ready(type);
-    assert(result == 0);
-    (void) result;  // FIXME;
+    assert(qualname.compare(0, dot, mod_name) == 1);
     // Add it, under its unqualified name.
     AddObject(qualname.substr(dot + 1).c_str(), (PyObject*) type);
   }
@@ -259,8 +234,20 @@ public:
 
   PyObject_HEAD
 
-  static void Ready(PyTypeObject* type)
-    { check_return(PyType_Ready(type)); }
+};
+
+
+//------------------------------------------------------------------------------
+
+class Type
+  : public PyTypeObject
+{
+public:
+
+  Type(PyTypeObject o) : PyTypeObject(o) {}
+
+  void Ready()
+    { check_return(PyType_Ready(this)); }
 
 };
 

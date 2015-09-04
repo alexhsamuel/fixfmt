@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstring>
-#include <iostream>
 #include <string>
 
 #include "fixfmt/base.hh"

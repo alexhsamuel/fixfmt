@@ -4,19 +4,20 @@
 
 #include <Python.h>
 
+#include "column.hh"
 #include "fixfmt.hh"
 #include "py.hh"
 
 //------------------------------------------------------------------------------
 
-class Number
+class Table
   : public py::ExtensionType
 {
 public:
 
   static py::Type type_;
 
-  std::unique_ptr<fixfmt::Number> fmt_;
+  std::unique_ptr<fixfmt::Table> table_;
 
 };
 

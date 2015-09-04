@@ -1,5 +1,8 @@
 #include "Number.hh"
 
+using namespace py;
+using std::unique_ptr;
+
 //------------------------------------------------------------------------------
 
 namespace {
@@ -19,17 +22,16 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
   char const*    inf         = "inf";
   int            point       = '.';
   int            bad         = '#';
-  if (PyArg_ParseTupleAndKeywords(
+  if (!PyArg_ParseTupleAndKeywords(
       args, kw_args, "i|i$CCssCC", (char**) arg_names,
-      &size, &precision, &pad, &sign, &nan, &inf, &point, &bad)) {
-    self->fmt_ = unique_ptr<fixfmt::Number>(
-        new fixfmt::Number(
-            size, precision, (char) pad, (char) sign, std::string(nan),
-            std::string(inf), (char) point, (char) bad));
-    return 0;
-  }
-  else
+      &size, &precision, &pad, &sign, &nan, &inf, &point, &bad)) 
     return -1;
+
+  self->fmt_ = unique_ptr<fixfmt::Number>(
+      new fixfmt::Number(
+          size, precision, (char) pad, (char) sign, std::string(nan),
+          std::string(inf), (char) point, (char) bad));
+  return 0;
 }
 
 static PyObject* tp_call(Number* self, PyObject* args, PyObject* kw_args)
@@ -56,7 +58,7 @@ PyMethodDef const tp_methods[] = {
 }  // anonymous namespace
 
 
-PyTypeObject Number::type = {
+Type Number::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
   "fixfmt.Number",             // tp_name
   sizeof(Number),              // tp_basicsize

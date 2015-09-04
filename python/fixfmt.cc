@@ -1,7 +1,10 @@
 #include <Python.h>
 
+#include "Bool.hh"
 #include "Number.hh"
 #include "py.hh"
+#include "String.hh"
+#include "Table.hh"
 
 using namespace py;
 
@@ -27,18 +30,23 @@ PyModuleDef testmod_module = {
 
 //------------------------------------------------------------------------------
 
-extern PyTypeObject* get_Bool();
-extern PyTypeObject* get_String();
-extern PyTypeObject* get_Table();
-
 PyMODINIT_FUNC
 PyInit_fixfmt(void)
 {
   auto module = Module::Create(&testmod_module);
-  module->add(get_Bool());
-  module->ready_and_add_type(&Number::type);
-  module->add(get_String());
-  module->add(get_Table());
+
+  Bool::type_.Ready();
+  module->add(&Bool::type_);
+
+  Number::type_.Ready();
+  module->add(&Number::type_);
+
+  String::type_.Ready();
+  module->add(&String::type_);
+
+  Table::type_.Ready();
+  module->add(&Table::type_);
+
   return module.release();
 }
 

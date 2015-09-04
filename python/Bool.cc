@@ -6,71 +6,62 @@
 
 #include <Python.h>
 
+#include "Bool.hh"
 #include "fixfmt.hh"
 #include "py.hh"
 
 using namespace py;
+using std::string;
+using std::unique_ptr;
 
 //------------------------------------------------------------------------------
 
 namespace {
 
-class Bool
-  : public ExtensionType
+int tp_init(Bool* self, PyObject* args, PyObject* kw_args)
 {
-  std::unique_ptr<fixfmt::Bool> fmt_;
+  static char const* arg_names[] = {"true", "false", "size", "pad_left", nullptr};
+  char const*    true_str    = "true";
+  char const*    false_str   = "false";
+  int            size        = -1;
+  bool           pad_left    = false;
+  if (!PyArg_ParseTupleAndKeywords(
+      args, kw_args, "|ssib", (char**) arg_names,
+      &true_str, &false_str, &size, &pad_left)) 
+    return -1;
 
-  static int tp_init(Bool* self, PyObject* args, PyObject* kw_args)
-  {
-    static char const* arg_names[] = {"true", "false", "size", "pad_left", nullptr};
+  if (size < 0)
+    size = std::max(strlen(true_str), strlen(false_str));
+  self->fmt_ = unique_ptr<fixfmt::Bool>(
+      new fixfmt::Bool(string(true_str), string(false_str), size, pad_left));
+  return 0;
+}
 
-    char const*    true_str    = "true";
-    char const*    false_str   = "false";
-    int            size        = -1;
-    bool           pad_left    = false;
-    if (PyArg_ParseTupleAndKeywords(
-        args, kw_args, "|ssib", (char**) arg_names,
-        &true_str, &false_str, &size, &pad_left)) {
-      if (size < 0)
-        size = std::max(strlen(true_str), strlen(false_str));
-      self->fmt_ = std::unique_ptr<fixfmt::Bool>(
-          new fixfmt::Bool(
-              std::string(true_str), std::string(false_str), size, pad_left));
-      return 0;
-    }
-    else
-      return -1;
-  }
 
-  static PyObject* tp_call(Bool* self, PyObject* args, PyObject* kw_args)
-  {
-    static char const* arg_names[] = {"value", nullptr};
-    bool val;
-    if (PyArg_ParseTupleAndKeywords(
-        args, kw_args, "b", (char**) arg_names, &val)) {
-      fixfmt::Bool& fmt = *self->fmt_;
-      // FIXME
-      std::string const& str = fmt(val);
-      return Unicode::FromStringAndSize((char*) str.c_str(), str.length()).release();
-    }
-    else
-      return nullptr;
-  }
+PyObject* tp_call(Bool* self, PyObject* args, PyObject* kw_args)
+{
+  static char const* arg_names[] = {"value", nullptr};
+  bool val;
+  if (!PyArg_ParseTupleAndKeywords(
+      args, kw_args, "b", (char**) arg_names, &val)) 
+    return nullptr;
 
-  static PyMethodDef const tp_methods[];
+  fixfmt::Bool& fmt = *self->fmt_;
+  // FIXME
+  string const& str = fmt(val);
+  return Unicode::FromStringAndSize((char*) str.c_str(), str.length()).release();
+}
 
-public:
 
-  static PyTypeObject type;
-
-};
-
-PyMethodDef const Bool::tp_methods[] = {
+PyMethodDef const tp_methods[] = {
   METHODDEF_END
 };
 
 
-PyTypeObject Bool::type = {
+}  // anonymous namespace
+
+
+Type Bool::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
   "fixfmt.Bool",               // tp_name
   sizeof(Bool),                // tp_basicsize
@@ -111,16 +102,5 @@ PyTypeObject Bool::type = {
   nullptr,                     // tp_alloc
   PyType_GenericNew,           // tp_new
 };
-
-
-}  // anonymous namespace
-
-
-PyTypeObject* get_Bool()
-{
-  int result = PyType_Ready(&Bool::type);
-  assert(result == 0); unused(result);
-  return &Bool::type;
-}
 
 
