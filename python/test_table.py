@@ -5,8 +5,8 @@ x0 = np.arange(12).astype("float64")
 x1 = x0 ** 2 + 1
 x2 = np.sqrt(x0)
 
-f0 = fixfmt.Number(2, 0)
-f1 = fixfmt.Number(3, 1)
+f0 = fixfmt.Number(2)
+f1 = fixfmt.Number(3, 1, pad='0')
 f2 = fixfmt.Number(1, 3)
 
 t = fixfmt.Table()

@@ -14,13 +14,13 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
   int            size;
   int            precision   = fixfmt::Number::PRECISION_NONE;
   int            pad         = fixfmt::Number::PAD_SPACE;
-  int            sign        = fixfmt::Number::SIGN_ALWAYS;
+  int            sign        = fixfmt::Number::SIGN_NEGATIVE;
   char const*    nan         = "NaN";
   char const*    inf         = "inf";
   int            point       = '.';
   int            bad         = '#';
   if (PyArg_ParseTupleAndKeywords(
-      args, kw_args, "i|iCCssCC", (char**) arg_names,
+      args, kw_args, "i|i$CCssCC", (char**) arg_names,
       &size, &precision, &pad, &sign, &nan, &inf, &point, &bad)) {
     self->fmt_ = unique_ptr<fixfmt::Number>(
         new fixfmt::Number(
