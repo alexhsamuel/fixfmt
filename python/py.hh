@@ -104,7 +104,7 @@ inline PyObject* decref(PyObject* obj)
 }
 
 
-//------------------------------------------------------------------------------
+//==============================================================================
 
 class Object
   : public PyObject
@@ -131,48 +131,6 @@ template<typename T>
 inline std::ostream& operator<<(std::ostream& os, ref<T>& ref)
 {
   os << ref->str()->as_utf8();
-  return os;
-}
-
-
-//------------------------------------------------------------------------------
-
-class Unicode
-  : public Object
-{
-public:
-
-  static bool Check(PyObject* obj)
-    { return PyUnicode_Check(obj); }
-
-  static auto FromString(char* utf8)
-    { return ref<Unicode>::take(PyUnicode_FromString(utf8)); }
-  // FIXME: Cast on const here?
-  static auto FromStringAndSize(char* utf8, size_t length)
-    { return ref<Unicode>::take(PyUnicode_FromStringAndSize(utf8, length)); }
-
-  static auto from(std::string const& str)
-    { return FromStringAndSize(const_cast<char*>(str.c_str()), str.length()); }
-
-  char* as_utf8() { return PyUnicode_AsUTF8(this); }
-
-  std::string as_utf8_string()
-  {
-    Py_ssize_t length;
-    char* const utf8 = PyUnicode_AsUTF8AndSize(this, &length);
-    if (utf8 == nullptr)
-      throw Exception();
-    else
-      return std::string(utf8, length);
-  }
-
-};
-
-
-template<>
-inline std::ostream& operator<<(std::ostream& os, ref<Unicode>& ref)
-{
-  os << ref->as_utf8();
   return os;
 }
 
@@ -227,18 +185,6 @@ public:
 
 //------------------------------------------------------------------------------
 
-class ExtensionType
-  : public Object
-{
-public:
-
-  PyObject_HEAD
-
-};
-
-
-//------------------------------------------------------------------------------
-
 class Type
   : public PyTypeObject
 {
@@ -248,6 +194,60 @@ public:
 
   void Ready()
     { check_return(PyType_Ready(this)); }
+
+};
+
+
+//------------------------------------------------------------------------------
+
+class Unicode
+  : public Object
+{
+public:
+
+  static bool Check(PyObject* obj)
+    { return PyUnicode_Check(obj); }
+
+  static auto FromString(char* utf8)
+    { return ref<Unicode>::take(PyUnicode_FromString(utf8)); }
+  // FIXME: Cast on const here?
+  static auto FromStringAndSize(char* utf8, size_t length)
+    { return ref<Unicode>::take(PyUnicode_FromStringAndSize(utf8, length)); }
+
+  static auto from(std::string const& str)
+    { return FromStringAndSize(const_cast<char*>(str.c_str()), str.length()); }
+
+  char* as_utf8() { return PyUnicode_AsUTF8(this); }
+
+  std::string as_utf8_string()
+  {
+    Py_ssize_t length;
+    char* const utf8 = PyUnicode_AsUTF8AndSize(this, &length);
+    if (utf8 == nullptr)
+      throw Exception();
+    else
+      return std::string(utf8, length);
+  }
+
+};
+
+
+template<>
+inline std::ostream& operator<<(std::ostream& os, ref<Unicode>& ref)
+{
+  os << ref->as_utf8();
+  return os;
+}
+
+
+//==============================================================================
+
+class ExtensionType
+  : public Object
+{
+public:
+
+  PyObject_HEAD
 
 };
 
