@@ -23,33 +23,36 @@ int tp_init(Table* self, PyObject* args, PyObject* kw_args)
   return 0;
 }
 
-PyObject* tp_call(Table* self, PyObject* args, PyObject* kw_args)
+
+ref<Object> tp_call(Table* self, Object* args, Object* kw_args)
 {
   static char const* arg_names[] = {"index", nullptr};
   long index;
   if (!PyArg_ParseTupleAndKeywords(
       args, kw_args, "l", (char**) arg_names, &index)) 
-    return nullptr;
+    throw Exception();
 
   long const width = self->table_->get_width();
   char buf[width];
   self->table_->format(index, buf);
-  return Unicode::FromStringAndSize(buf, width).release();
+  return Unicode::FromStringAndSize(buf, width);
 }
 
-PyObject* add_string(Table* self, PyObject* args, PyObject* kw_args)
+
+ref<Object> add_string(Table* self, Object* args, Object* kw_args)
 {
   static char const* arg_names[] = {"str", nullptr};
   char* str;
   if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "s", (char**) arg_names, &str))
-    return nullptr;
+      args, kw_args, "s", (char**) arg_names, &str)) 
+    throw Exception();
 
   self->table_->add_string(std::string(str));
-  return incref(Py_None);
+  return ref<Object>::of(Py_None);
 }
 
-PyObject* add_float64(Table* self, PyObject* args, PyObject* kw_args)
+
+ref<Object> add_float64(Table* self, Object* args, Object* kw_args)
 {
   static char const* arg_names[] = {"buf", "format", nullptr};
   const char* buf;
@@ -58,19 +61,25 @@ PyObject* add_float64(Table* self, PyObject* args, PyObject* kw_args)
   if (!PyArg_ParseTupleAndKeywords(
       args, kw_args, "y#O!", (char**) arg_names, 
       &buf, &buf_len, &Number::type_, &format))
-    return nullptr;
+    throw Exception();
 
   unique_ptr<fixfmt::Column> col(
       new fixfmt::ColumnImpl<double, fixfmt::Number>(
-          reinterpret_cast<double const*>(buf), *format->fmt_));
+        reinterpret_cast<double const*>(buf), *format->fmt_));
   self->table_->add_column(std::move(col));
-  return incref(Py_None);
+  return ref<Object>::of(Py_None);
 }
 
 
 PyMethodDef const tp_methods[] = {
-  {"add_string", (PyCFunction) add_string, METH_VARARGS | METH_KEYWORDS, nullptr},
-  {"add_float64", (PyCFunction) add_float64, METH_VARARGS | METH_KEYWORDS, nullptr},
+  {"add_string", 
+   (PyCFunction) wrap_method<Table, add_string>, 
+   METH_VARARGS | METH_KEYWORDS, 
+   nullptr},
+  {"add_float64", 
+   (PyCFunction) wrap_method<Table, add_float64>, 
+   METH_VARARGS | METH_KEYWORDS, 
+   nullptr},
   METHODDEF_END
 };
 
@@ -93,7 +102,8 @@ Type Table::type_ = PyTypeObject{
   nullptr,                     // tp_as_sequence
   nullptr,                     // tp_as_mapping
   nullptr,                     // tp_hash
-  (ternaryfunc) tp_call,       // tp_call
+  (ternaryfunc) wrap_method<Table, tp_call>,
+                                // tp_call
   nullptr,                     // tp_str
   nullptr,                     // tp_getattro
   nullptr,                     // tp_setattro

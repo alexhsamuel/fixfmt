@@ -27,7 +27,7 @@ setup(
         "String.cc",
         "Table.cc",
       ],
-      depends=glob("../src/*.hh"),
+      depends=glob("*.hh") + glob("../src/*.hh"),
     ),
 
   ]

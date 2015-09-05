@@ -50,23 +50,46 @@ class ref
 {
 public:
 
-  // FIXME: Do we need this?
-  static ref<T> take(T* obj)
-    { return ref(obj); }
-
+  /**
+   * Takes an existing reference.
+   *
+   * Call this method on an object pointer that comes with an assumed reference,
+   * such as the return value of an API call that returns ownership.
+   */
   static ref<T> take(PyObject* obj)
     { return ref(cast<T>(obj)); }
 
+  /**
+   * Creates a new reference.
+   */
   static ref<T> of(T* obj)
     { incref(obj); return ref{obj}; }
 
+  /**
+   * Creates a new reference, casting.
+   */
   static ref<T> of(PyObject* obj)
     { return of(cast<T>(obj)); }
 
+  /** 
+   * Default ctor: null reference.  
+   */
   ref()
     : obj_(nullptr) {}
+
+  /** 
+   * Move ctor.  
+   */
   ref(ref<T>&& ref)
     : obj_(ref.release()) {}
+
+  /** 
+   * Move ctor from another ref type.  
+   */
+  template<typename U>
+  ref(ref<U>&& ref)
+    : obj_(ref.release()) {}
+
   ~ref()
     { if (obj_ != nullptr) decref(obj_); }
 
