@@ -160,11 +160,11 @@ public:
   Object() = delete;
   ~Object() = delete;
 
-  auto length()
+  auto Length()
     { return PyObject_Length(this); }
-  auto repr()
+  auto Repr()
     { return ref<Unicode>::take(PyObject_Repr(this)); }
-  auto str()
+  auto Str()
     { return ref<Unicode>::take(PyObject_Str(this)); }
 
 };
@@ -173,7 +173,7 @@ public:
 template<typename T>
 inline std::ostream& operator<<(std::ostream& os, ref<T>& ref)
 {
-  os << ref->str()->as_utf8();
+  os << ref->Str()->as_utf8();
   return os;
 }
 

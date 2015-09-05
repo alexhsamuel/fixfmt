@@ -86,15 +86,15 @@ public:
 
   Table() : width_(0) {}
 
-  void add_string(string str)
-  {
-    add_column(unique_ptr<Column>(new StringColumn(std::move(str))));
-  }
-
   void add_column(unique_ptr<Column> col)
   {
     width_ += col->get_width();
     columns_.push_back(std::move(col));
+  }
+
+  void add_string(string str)
+  {
+    add_column(unique_ptr<Column>(new StringColumn(std::move(str))));
   }
 
   virtual size_t get_width() const { return width_; }

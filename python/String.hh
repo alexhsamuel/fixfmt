@@ -12,9 +12,14 @@ class String
 {
 public:
 
+  /**
+   * The wrapped formatter type.
+   */
+  using Formatter = fixfmt::String;
+
   static py::Type type_;
 
-  std::unique_ptr<fixfmt::String> fmt_;
+  std::unique_ptr<Formatter> fmt_;
 
 };
 

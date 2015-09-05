@@ -60,16 +60,67 @@ template<typename TYPE, typename PYFMT>
 ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"buf", "format", nullptr};
-  const char* buf;
+  const TYPE* buf;
   int buf_len;
   PYFMT* format;
   Arg::ParseTupleAndKeywords(
       args, kw_args, "y#O!", arg_names, 
       &buf, &buf_len, &PYFMT::type_, &format);
 
-  unique_ptr<fixfmt::Column> col(
-      new fixfmt::ColumnImpl<TYPE, typename PYFMT::Formatter>(
-        reinterpret_cast<TYPE const*>(buf), *format->fmt_));
+  using Column = fixfmt::ColumnImpl<TYPE, typename PYFMT::Formatter>;
+
+  unique_ptr<fixfmt::Column> col(new Column(buf, *format->fmt_));
+  self->table_->add_column(std::move(col));
+  return none_ref();
+}
+
+
+/**
+ * Column of Python object pointers, with an object first converted with 'str()'
+ * and then formatted as a string.
+ */
+class StrObjectColumn
+  : public fixfmt::Column
+{
+public:
+
+  StrObjectColumn(Object** values, fixfmt::String format)
+  : values_(values),
+    format_(std::move(format))
+  {
+  }
+
+  virtual ~StrObjectColumn() override {}
+
+  virtual size_t get_width() const override { return format_.get_width(); }
+
+  virtual void format(size_t const index, char* const buf) const override
+  {
+    // Convert (or cast) to string.
+    auto str = values_[index]->Str();
+    // Format the string.
+    format_.format(str->as_utf8_string(), buf);
+  }
+
+private:
+
+  Object** const values_;
+  fixfmt::String const format_;
+
+};
+
+
+ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
+{
+  static char const* arg_names[] = {"buf", "format", nullptr};
+  Object** buf;
+  int buf_len;
+  String* format;
+  Arg::ParseTupleAndKeywords(
+      args, kw_args, "y#O!", arg_names,
+      &buf, &buf_len, &String::type_, &format);
+  
+  unique_ptr<fixfmt::Column> col(new StrObjectColumn(buf, *format->fmt_));
   self->table_->add_column(std::move(col));
   return none_ref();
 }
@@ -106,6 +157,10 @@ PyMethodDef const tp_methods[] = {
    nullptr},
   {"add_float64", 
    (PyCFunction) wrap_method<Table, add_column<double, Number>>, 
+   METH_VARARGS | METH_KEYWORDS, 
+   nullptr},
+  {"add_str_object", 
+   (PyCFunction) wrap_method<Table, add_str_object_column>,
    METH_VARARGS | METH_KEYWORDS, 
    nullptr},
   METHODDEF_END
