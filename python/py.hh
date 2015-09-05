@@ -26,12 +26,26 @@ public:
 };
 
 
-inline void check_return(int value)
+/**
+ * Raises 'Exception' if value is not zero.
+ */
+inline void check_zero(int value)
 {
   assert(value == 0 || value == -1);
   if (value != 0)
     throw Exception();
 }
+
+
+/**
+ * Raises 'Exception' if value is not true.
+ */
+inline void check_true(int value)
+{
+  if (value == 0)
+    throw Exception();
+}
+
 
 //------------------------------------------------------------------------------
 
@@ -44,6 +58,20 @@ inline T* cast(PyObject* obj)
 
 
 //------------------------------------------------------------------------------
+
+inline PyObject* incref(PyObject* obj)
+{
+  Py_INCREF(obj);
+  return obj;
+}
+
+
+inline PyObject* decref(PyObject* obj)
+{
+  Py_DECREF(obj);
+  return obj;
+}
+
 
 template<typename T>
 class ref
@@ -113,17 +141,9 @@ private:
 };
 
 
-inline PyObject* incref(PyObject* obj)
+inline ref<Object> none_ref()
 {
-  Py_INCREF(obj);
-  return obj;
-}
-
-
-inline PyObject* decref(PyObject* obj)
-{
-  Py_DECREF(obj);
-  return obj;
+  return ref<Object>::of(Py_None);
 }
 
 
@@ -160,6 +180,19 @@ inline std::ostream& operator<<(std::ostream& os, ref<T>& ref)
 
 //------------------------------------------------------------------------------
 
+class Dict
+  : public Object
+{
+public:
+
+  static bool Check(PyObject* obj)
+    { return PyDict_Check(obj); }
+
+};
+
+
+//------------------------------------------------------------------------------
+
 class Long
   : public Object
 {
@@ -189,7 +222,7 @@ public:
     { return ref<Module>::take(PyModule_Create(def)); }
 
   void AddObject(char const* name, PyObject* val)
-    { check_return(PyModule_AddObject(this, name, incref(val))); }
+    { check_zero(PyModule_AddObject(this, name, incref(val))); }
 
   void add(PyTypeObject* type)
   {
@@ -208,6 +241,19 @@ public:
 
 //------------------------------------------------------------------------------
 
+class Tuple
+  : public Object
+{
+public:
+
+  static bool Check(PyObject* obj)
+    { return PyTuple_Check(obj); }
+
+};
+
+
+//------------------------------------------------------------------------------
+
 class Type
   : public PyTypeObject
 {
@@ -216,7 +262,7 @@ public:
   Type(PyTypeObject o) : PyTypeObject(o) {}
 
   void Ready()
-    { check_return(PyType_Ready(this)); }
+    { check_zero(PyType_Ready(this)); }
 
 };
 
@@ -265,6 +311,25 @@ inline std::ostream& operator<<(std::ostream& os, ref<Unicode>& ref)
 
 //==============================================================================
 
+namespace Arg {
+
+inline void ParseTupleAndKeywords(
+    Tuple* args, Dict* kw_args, 
+    char const* format, char const* const* keywords, ...)
+{
+  va_list vargs;
+  va_start(vargs, keywords);
+  auto result = PyArg_VaParseTupleAndKeywords(
+      args, kw_args, (char*) format, (char**) keywords, vargs);
+  va_end(vargs);
+  check_true(result);
+}
+
+
+}  // namespace Arg
+
+//==============================================================================
+
 class ExtensionType
   : public Object
 {
@@ -278,13 +343,13 @@ public:
 //------------------------------------------------------------------------------
 
 template<typename T>
-using Method = ref<Object> (*)(T*, Object*, Object*);
+using Method = ref<Object> (*)(T*, Tuple*, Dict*);
 
 template<typename T, Method<T> M>
 PyObject* wrap_method(PyObject* self, PyObject* args, PyObject* kw_args)
 {
   try {
-    return M((T*) self, (Object*) args, (Object*) kw_args).release();
+    return M((T*) self, (Tuple*) args, (Dict*) kw_args).release();
   }
   catch (Exception) {
     return nullptr;

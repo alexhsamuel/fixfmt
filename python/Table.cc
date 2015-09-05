@@ -12,25 +12,22 @@ using std::unique_ptr;
 
 namespace {
 
-int tp_init(Table* self, PyObject* args, PyObject* kw_args)
+int tp_init(Table* self, Tuple* args, Dict* kw_args)
 {
   // No arguments.
   static char const* arg_names[] = {nullptr};
-  if (! PyArg_ParseTupleAndKeywords(args, kw_args, "", (char**) arg_names)) 
-    return -1;
+  Arg::ParseTupleAndKeywords(args, kw_args, "", (char**) arg_names);
 
   self->table_ = unique_ptr<fixfmt::Table>(new fixfmt::Table());
   return 0;
 }
 
 
-ref<Object> tp_call(Table* self, Object* args, Object* kw_args)
+ref<Object> tp_call(Table* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"index", nullptr};
   long index;
-  if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "l", (char**) arg_names, &index)) 
-    throw Exception();
+  Arg::ParseTupleAndKeywords(args, kw_args, "l", arg_names, &index);
 
   long const width = self->table_->get_width();
   char buf[width];
@@ -39,35 +36,32 @@ ref<Object> tp_call(Table* self, Object* args, Object* kw_args)
 }
 
 
-ref<Object> add_string(Table* self, Object* args, Object* kw_args)
+ref<Object> add_string(Table* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"str", nullptr};
   char* str;
-  if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "s", (char**) arg_names, &str)) 
-    throw Exception();
+  Arg::ParseTupleAndKeywords(args, kw_args, "s", arg_names, &str);
 
   self->table_->add_string(std::string(str));
-  return ref<Object>::of(Py_None);
+  return none_ref();
 }
 
 
-ref<Object> add_float64(Table* self, Object* args, Object* kw_args)
+ref<Object> add_float64(Table* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"buf", "format", nullptr};
   const char* buf;
   int buf_len;
   Number* format;
-  if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "y#O!", (char**) arg_names, 
-      &buf, &buf_len, &Number::type_, &format))
-    throw Exception();
+  Arg::ParseTupleAndKeywords(
+      args, kw_args, "y#O!", arg_names, 
+      &buf, &buf_len, &Number::type_, &format);
 
   unique_ptr<fixfmt::Column> col(
       new fixfmt::ColumnImpl<double, fixfmt::Number>(
         reinterpret_cast<double const*>(buf), *format->fmt_));
   self->table_->add_column(std::move(col));
-  return ref<Object>::of(Py_None);
+  return none_ref();
 }
 
 
