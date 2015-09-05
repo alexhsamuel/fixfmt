@@ -67,10 +67,10 @@ ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
       args, kw_args, "y#O!", arg_names, 
       &buf, &buf_len, &PYFMT::type_, &format);
 
+  using ColumnUptr = unique_ptr<fixfmt::Column>;
   using Column = fixfmt::ColumnImpl<TYPE, typename PYFMT::Formatter>;
 
-  unique_ptr<fixfmt::Column> col(new Column(buf, *format->fmt_));
-  self->table_->add_column(std::move(col));
+  self->table_->add_column(ColumnUptr(new Column(buf, *format->fmt_)));
   return none_ref();
 }
 
@@ -120,8 +120,9 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
       args, kw_args, "y#O!", arg_names,
       &buf, &buf_len, &String::type_, &format);
   
-  unique_ptr<fixfmt::Column> col(new StrObjectColumn(buf, *format->fmt_));
-  self->table_->add_column(std::move(col));
+  using ColumnUptr = unique_ptr<fixfmt::Column>;
+
+  self->table_->add_column(ColumnUptr(new StrObjectColumn(buf, *format->fmt_)));
   return none_ref();
 }
 
