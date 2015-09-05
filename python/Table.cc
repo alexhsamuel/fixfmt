@@ -2,7 +2,9 @@
 #include <string>
 #include <utility>
 
+#include "Bool.hh"
 #include "Number.hh"
+#include "String.hh"
 #include "Table.hh"
 
 using namespace py;
@@ -47,19 +49,27 @@ ref<Object> add_string(Table* self, Tuple* args, Dict* kw_args)
 }
 
 
-ref<Object> add_float64(Table* self, Tuple* args, Dict* kw_args)
+/**
+ * Template method for adding a column to the table.
+ *
+ * 'buf' is a 'bytes' object containing contiguous values of type 'TYPE', e.g.
+ * 'int' or 'double'.  'PYFMT" is a Python object that wraps a formatter for
+ * 'TYPE' values.
+ */
+template<typename TYPE, typename PYFMT>
+ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"buf", "format", nullptr};
   const char* buf;
   int buf_len;
-  Number* format;
+  PYFMT* format;
   Arg::ParseTupleAndKeywords(
       args, kw_args, "y#O!", arg_names, 
-      &buf, &buf_len, &Number::type_, &format);
+      &buf, &buf_len, &PYFMT::type_, &format);
 
   unique_ptr<fixfmt::Column> col(
-      new fixfmt::ColumnImpl<double, fixfmt::Number>(
-        reinterpret_cast<double const*>(buf), *format->fmt_));
+      new fixfmt::ColumnImpl<TYPE, typename PYFMT::Formatter>(
+        reinterpret_cast<TYPE const*>(buf), *format->fmt_));
   self->table_->add_column(std::move(col));
   return none_ref();
 }
@@ -70,8 +80,32 @@ PyMethodDef const tp_methods[] = {
    (PyCFunction) wrap_method<Table, add_string>, 
    METH_VARARGS | METH_KEYWORDS, 
    nullptr},
+  {"add_bool",
+   (PyCFunction) wrap_method<Table, add_column<bool, Bool>>,
+   METH_VARARGS | METH_KEYWORDS,
+   nullptr},
+  {"add_int8",
+   (PyCFunction) wrap_method<Table, add_column<char, Number>>,
+   METH_VARARGS | METH_KEYWORDS,
+   nullptr},
+  {"add_int16",
+   (PyCFunction) wrap_method<Table, add_column<short, Number>>,
+   METH_VARARGS | METH_KEYWORDS,
+   nullptr},
+  {"add_int32",
+   (PyCFunction) wrap_method<Table, add_column<int, Number>>,
+   METH_VARARGS | METH_KEYWORDS,
+   nullptr},
+  {"add_int64",
+   (PyCFunction) wrap_method<Table, add_column<long, Number>>,
+   METH_VARARGS | METH_KEYWORDS,
+   nullptr},
+  {"add_float32", 
+   (PyCFunction) wrap_method<Table, add_column<float, Number>>, 
+   METH_VARARGS | METH_KEYWORDS, 
+   nullptr},
   {"add_float64", 
-   (PyCFunction) wrap_method<Table, add_float64>, 
+   (PyCFunction) wrap_method<Table, add_column<double, Number>>, 
    METH_VARARGS | METH_KEYWORDS, 
    nullptr},
   METHODDEF_END

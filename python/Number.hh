@@ -14,9 +14,14 @@ class Number
 {
 public:
 
+  /**
+   * The wrapped formatter type.
+   */
+  using Formatter = fixfmt::Number;
+
   static py::Type type_;
 
-  std::unique_ptr<fixfmt::Number> fmt_;
+  std::unique_ptr<Formatter> fmt_;
 
 };
 

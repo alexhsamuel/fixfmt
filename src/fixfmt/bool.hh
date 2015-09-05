@@ -48,7 +48,12 @@ public:
 
   size_t get_size() const { return size_; }
 
-  string operator()(bool val)
+  void format(bool val, char* buf) const
+  {
+    operator()(val).copy(buf, size_);
+  }
+
+  string operator()(bool val) const
   {
     return val ? true_ : false_;
   }

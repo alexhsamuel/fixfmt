@@ -25,13 +25,13 @@ public:
 };
 
 
-template<typename Type, typename Format>
+template<typename TYPE, typename FMT>
 class ColumnImpl
   : public Column
 {
 public:
 
-  ColumnImpl(Type const* values, Format format)
+  ColumnImpl(TYPE const* values, FMT format)
   : values_(values),
     format_(std::move(format))
   {
@@ -49,8 +49,8 @@ public:
 
 private:
 
-  Type const* const values_;
-  Format const format_;
+  TYPE const* const values_;
+  FMT const format_;
 
 };
 

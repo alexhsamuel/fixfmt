@@ -12,9 +12,14 @@ class Bool
 {
 public:
 
+  /**
+   * The wrapped formatter type.
+   */
+  using Formatter = fixfmt::Bool;
+
   static py::Type type_;
 
-  std::unique_ptr<fixfmt::Bool> fmt_;
+  std::unique_ptr<Formatter> fmt_;
 
 };
 
