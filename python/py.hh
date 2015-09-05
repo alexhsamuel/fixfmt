@@ -254,6 +254,23 @@ public:
 
 //------------------------------------------------------------------------------
 
+template<typename T>
+using Method = ref<Object> (*)(T*, Object*, Object*);
+
+template<typename T, Method<T> M>
+PyObject* wrap_method(PyObject* self, PyObject* args, PyObject* kw_args)
+{
+  try {
+    return M((T*) self, (Object*) args, (Object*) kw_args).release();
+  }
+  catch (Exception) {
+    return nullptr;
+  }
+}
+
+
+//------------------------------------------------------------------------------
+
 }  // namespace py
 
 
