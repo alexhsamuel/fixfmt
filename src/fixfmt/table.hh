@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <limits>
 #include <memory>
 #include <numeric>
 #include <string>
@@ -14,13 +15,32 @@ namespace fixfmt {
 using std::string;
 using std::unique_ptr;
 
+static constexpr auto MAX_INDEX = std::numeric_limits<long>::max();
+
 class Column
 {
 public:
 
   virtual ~Column() = default;
-  virtual size_t get_width() const = 0;
-  virtual void format(size_t index, char* buf) const = 0;
+
+  /**
+   * Returns the formatted width of the column.
+   */
+  virtual int get_width() const = 0;
+
+  /**
+   * Returns the number of entries in the column.
+   */
+  virtual long get_length() const = 0;
+
+  /**
+   * Formats entry 'index' of the column into 'buf'.  
+   *
+   * 'index' must be at least zero and less than 'get_length()'.  'buf' must
+   * accommodate 'get_width()' characters.  The formatted entry is not
+   * NUL-terminated.
+   */
+  virtual void format(long index, char* buf) const = 0;
 
 };
 
@@ -31,17 +51,20 @@ class ColumnImpl
 {
 public:
 
-  ColumnImpl(TYPE const* values, FMT format)
+  ColumnImpl(TYPE const* values, long length, FMT format)
   : values_(values),
+    length_(length),
     format_(std::move(format))
   {
   }
 
   virtual ~ColumnImpl() override {};
 
-  virtual size_t get_width() const { return format_.get_width(); }
+  virtual int get_width() const override { return format_.get_width(); }
 
-  virtual void format(size_t const index, char* const buf) const
+  virtual long get_length() const override { return length_; }
+
+  virtual void format(long const index, char* const buf) const override
   {
     format_.format(values_[index], buf);
   };
@@ -50,6 +73,7 @@ public:
 private:
 
   TYPE const* const values_;
+  long const length_;
   FMT const format_;
 
 };
@@ -65,9 +89,11 @@ public:
   {
   }
 
-  virtual size_t get_width() const { return str_.length(); }
+  virtual int get_width() const override { return str_.length(); }
 
-  virtual void format(size_t const /* index */, char* const buf) const
+  virtual long get_length() const override { return MAX_INDEX; }
+
+  virtual void format(long const /* index */, char* const buf) const override
   {
     str_.copy(buf, str_.length());
   }
@@ -84,11 +110,12 @@ class Table
 {
 public:
 
-  Table() : width_(0) {}
+  Table() : width_(0), length_(MAX_INDEX) {}
 
   void add_column(unique_ptr<Column> col)
   {
     width_ += col->get_width();
+    length_ = std::min(length_, col->get_length());
     columns_.push_back(std::move(col));
   }
 
@@ -97,9 +124,11 @@ public:
     add_column(unique_ptr<Column>(new StringColumn(std::move(str))));
   }
 
-  virtual size_t get_width() const { return width_; }
+  virtual int get_width() const override { return width_; }
 
-  virtual void format(size_t const index, char* const buf) const
+  virtual long get_length() const override { return length_; }
+
+  virtual void format(long const index, char* const buf) const override
   {
     char* p = buf;
     for (auto i = columns_.begin(); i != columns_.end(); ++i) {
@@ -112,7 +141,8 @@ public:
 private:
 
   std::vector<unique_ptr<Column>> columns_;
-  size_t width_;
+  int width_;
+  long length_;
 
 };
 

@@ -31,11 +31,36 @@ ref<Object> tp_call(Table* self, Tuple* args, Dict* kw_args)
   long index;
   Arg::ParseTupleAndKeywords(args, kw_args, "l", arg_names, &index);
 
+  if (index < 0)
+    throw Exception(PyExc_IndexError, "negative index");
+  if (index >= self->table_->get_length())
+    throw Exception(PyExc_IndexError, "index larger than length");
+
   long const width = self->table_->get_width();
   char buf[width];
   self->table_->format(index, buf);
   return Unicode::FromStringAndSize(buf, width);
 }
+
+
+Py_ssize_t sq_length(Table* table)
+{
+  return table->table_->get_length();
+}
+
+
+PySequenceMethods const tp_as_sequence = {
+  (lenfunc)         sq_length,          // sq_length
+  (binaryfunc)      nullptr,            // sq_concat
+  (ssizeargfunc)    nullptr,            // sq_repeat
+  (ssizeargfunc)    nullptr,            // sq_item
+  (void*)           nullptr,            // was_sq_slice
+  (ssizeobjargproc) nullptr,            // sq_ass_item
+  (void*)           nullptr,            // was_sq_ass_slice
+  (objobjproc)      nullptr,            // sq_contains
+  (binaryfunc)      nullptr,            // sq_inplace_concat
+  (ssizeargfunc)    nullptr,            // sq_inplace_repeat
+};
 
 
 ref<Object> add_string(Table* self, Tuple* args, Dict* kw_args)
@@ -70,7 +95,8 @@ ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
   using ColumnUptr = unique_ptr<fixfmt::Column>;
   using Column = fixfmt::ColumnImpl<TYPE, typename PYFMT::Formatter>;
 
-  self->table_->add_column(ColumnUptr(new Column(buf, *format->fmt_)));
+  long const len = buf_len / sizeof(TYPE);
+  self->table_->add_column(ColumnUptr(new Column(buf, len, *format->fmt_)));
   return none_ref();
 }
 
@@ -84,17 +110,20 @@ class StrObjectColumn
 {
 public:
 
-  StrObjectColumn(Object** values, fixfmt::String format)
+  StrObjectColumn(Object** values, long const length, fixfmt::String format)
   : values_(values),
+    length_(length),
     format_(std::move(format))
   {
   }
 
   virtual ~StrObjectColumn() override {}
 
-  virtual size_t get_width() const override { return format_.get_width(); }
+  virtual int get_width() const override { return format_.get_width(); }
 
-  virtual void format(size_t const index, char* const buf) const override
+  virtual long get_length() const override { return length_; }
+
+  virtual void format(long const index, char* const buf) const override
   {
     // Convert (or cast) to string.
     auto str = values_[index]->Str();
@@ -105,6 +134,7 @@ public:
 private:
 
   Object** const values_;
+  long const length_;
   fixfmt::String const format_;
 
 };
@@ -122,7 +152,9 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
   
   using ColumnUptr = unique_ptr<fixfmt::Column>;
 
-  self->table_->add_column(ColumnUptr(new StrObjectColumn(buf, *format->fmt_)));
+  long const len = buf_len / sizeof(Object*);
+  self->table_->add_column(
+      ColumnUptr(new StrObjectColumn(buf, len, *format->fmt_)));
   return none_ref();
 }
 
@@ -168,50 +200,55 @@ PyMethodDef const tp_methods[] = {
 };
 
 
+PyGetSetDef const tp_getset[] = {
+  GETSETDEF_END
+};
+
+
 }  // anonymous namespace
 
 
 Type Table::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
-  "fixfmt.Table",              // tp_name
-  sizeof(Table),               // tp_basicsize
-  0,                           // tp_itemsize
-  nullptr,                     // tp_dealloc
-  nullptr,                     // tp_print
-  nullptr,                     // tp_getattr
-  nullptr,                     // tp_setattr
-  nullptr,                     // tp_reserved
-  nullptr,                     // tp_repr
-  nullptr,                     // tp_as_number
-  nullptr,                     // tp_as_sequence
-  nullptr,                     // tp_as_mapping
-  nullptr,                     // tp_hash
+  "fixfmt.Table",                       // tp_name
+  sizeof(Table),                        // tp_basicsize
+  0,                                    // tp_itemsize
+  nullptr,                              // tp_dealloc
+  nullptr,                              // tp_print
+  nullptr,                              // tp_getattr
+  nullptr,                              // tp_setattr
+  nullptr,                              // tp_reserved
+  nullptr,                              // tp_repr
+  nullptr,                              // tp_as_number
+  (PySequenceMethods*) &tp_as_sequence, // tp_as_sequence
+  nullptr,                              // tp_as_mapping
+  nullptr,                              // tp_hash
   (ternaryfunc) wrap_method<Table, tp_call>,
-                                // tp_call
-  nullptr,                     // tp_str
-  nullptr,                     // tp_getattro
-  nullptr,                     // tp_setattro
-  nullptr,                     // tp_as_buffer
+                                        // tp_call
+  nullptr,                              // tp_str
+  nullptr,                              // tp_getattro
+  nullptr,                              // tp_setattro
+  nullptr,                              // tp_as_buffer
   Py_TPFLAGS_DEFAULT
-  | Py_TPFLAGS_BASETYPE,       // tp_flags
-  nullptr,                     // tp_doc
-  nullptr,                     // tp_traverse
-  nullptr,                     // tp_clear
-  nullptr,                     // tp_richcompare
-  0,                           // tp_weaklistoffset
-  nullptr,                     // tp_iter
-  nullptr,                     // tp_iternext
-  (PyMethodDef*) tp_methods,   // tp_methods
-  nullptr,                     // tp_members
-  nullptr,                     // tp_getset
-  nullptr,                     // tp_base
-  nullptr,                     // tp_dict
-  nullptr,                     // tp_descr_get
-  nullptr,                     // tp_descr_set
-  0,                           // tp_dictoffset
-  (initproc) tp_init,          // tp_init
-  nullptr,                     // tp_alloc
-  PyType_GenericNew,           // tp_new
+  | Py_TPFLAGS_BASETYPE,                // tp_flags
+  nullptr,                              // tp_doc
+  nullptr,                              // tp_traverse
+  nullptr,                              // tp_clear
+  nullptr,                              // tp_richcompare
+  0,                                    // tp_weaklistoffset
+  nullptr,                              // tp_iter
+  nullptr,                              // tp_iternext
+  (PyMethodDef*) tp_methods,            // tp_methods
+  nullptr,                              // tp_members
+  (PyGetSetDef*) tp_getset,             // tp_getset
+  nullptr,                              // tp_base
+  nullptr,                              // tp_dict
+  nullptr,                              // tp_descr_get
+  nullptr,                              // tp_descr_set
+  0,                                    // tp_dictoffset
+  (initproc) tp_init,                   // tp_init
+  nullptr,                              // tp_alloc
+  PyType_GenericNew,                    // tp_new
 };
 
 

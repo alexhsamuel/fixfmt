@@ -1,7 +1,8 @@
 Things to do:
 
 - range-check columns
-- rename Number -> PyNumber, String -> PyString, Bool -> PyBool or similar
+- rename Number -> PyNumber, etc.
+- add iterable to Table
 - support UTF-8 ellipsis etc. (get strlen right)
 - fixed-length string columns
 - unsigned columns

@@ -15,6 +15,9 @@ class Unicode;
 
 constexpr PyMethodDef METHODDEF_END{nullptr, nullptr, 0, nullptr};
 
+constexpr PyGetSetDef GETSETDEF_END
+    {nullptr, nullptr, nullptr, nullptr, nullptr};
+
 //------------------------------------------------------------------------------
 
 class Exception
@@ -22,6 +25,18 @@ class Exception
 public:
 
   Exception() {}
+  
+  template<typename A>
+  Exception(PyObject* exception, A&& message)
+  {
+    std::string msg(std::forward<A>(message));
+    PyErr_SetString(exception, msg.c_str());
+  }
+
+  /**
+   * Clears up the Python exception state.  
+   */
+  static void Clear() { PyErr_Clear(); }
 
 };
 
@@ -200,7 +215,7 @@ public:
 
   static bool Check(PyObject* obj)
     { return PyLong_Check(obj); }
-  static auto create(long val)
+  static auto FromLong(long val)
     { return ref<Long>::take(PyLong_FromLong(val)); }
 
   operator long()
