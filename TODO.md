@@ -1,6 +1,5 @@
 Things to do:
 
-- range-check columns
 - rename Number -> PyNumber, etc.
 - add iterable to Table
 - support UTF-8 ellipsis etc. (get strlen right)
