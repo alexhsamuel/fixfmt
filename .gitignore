@@ -2,5 +2,5 @@
 *.exe
 *.o
 *.ok
-*~
 googletest
+__pycache__/
