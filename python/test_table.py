@@ -25,3 +25,5 @@ t.add_str_object(x4, fixfmt.String(5, ellipsis="/", position=0))
 for i in range(len(t)):
   print(t(i))
 
+print("=" * t.width)
+print(t.length)

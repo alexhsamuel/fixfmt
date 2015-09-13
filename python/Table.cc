@@ -200,7 +200,33 @@ PyMethodDef const tp_methods[] = {
 };
 
 
+Object* get_length(Table* const self, void* /* closure */)
+{
+  return Long::FromLong(self->table_->get_length()).release();
+}
+
+
+Object* get_width(Table* const self, void* /* closure */)
+{
+  return Long::FromLong(self->table_->get_width()).release();
+}
+
+
 PyGetSetDef const tp_getset[] = {
+  {
+    (char*)     "length",                                   // name
+    (getter)    get_length,                                 // get
+    (setter)    nullptr,                                    // set
+    (char*)     nullptr,                                    // doc
+    (void*)     nullptr,                                    // closure
+  },
+  {
+    (char*)     "width",                                    // name
+    (getter)    get_width,                                  // get
+    (setter)    nullptr,                                    // set
+    (char*)     nullptr,                                    // doc
+    (void*)     nullptr,                                    // closure
+  },
   GETSETDEF_END
 };
 
