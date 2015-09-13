@@ -134,7 +134,10 @@ public:
     : obj_(ref.release()) {}
 
   ~ref()
-    { if (obj_ != nullptr) decref(obj_); }
+    { clear(); }
+
+  void operator=(ref<T>&& ref)
+    { clear(); obj_ = ref.release(); }
 
   operator T*() const
     { return obj_; }
@@ -145,6 +148,8 @@ public:
   T* release()
     { auto obj = obj_; obj_ = nullptr; return obj; }
 
+  void clear()
+    { if (obj_ != nullptr) decref(obj_); }
 
 private:
 
@@ -355,21 +360,47 @@ public:
 };
 
 
-//------------------------------------------------------------------------------
+//==============================================================================
 
-template<typename T>
-using Method = ref<Object> (*)(T*, Tuple*, Dict*);
+template<typename CLASS>
+using MethodPtr = ref<Object> (*)(CLASS* self, Tuple* args, Dict* kw_args);
 
-template<typename T, Method<T> M>
-PyObject* wrap_method(PyObject* self, PyObject* args, PyObject* kw_args)
+
+template<typename CLASS, MethodPtr<CLASS> METHOD>
+class Method
 {
-  try {
-    return M((T*) self, (Tuple*) args, (Dict*) kw_args).release();
+public:
+
+  /**
+   * The name must not be deallocated.
+   */
+  Method(char const* const name) : name_(const_cast<char*>(name)) {}
+
+  operator PyMethodDef()
+  {
+    return {name_, (PyCFunction) method, METH_VARARGS | METH_KEYWORDS, nullptr};
   }
-  catch (Exception) {
-    return nullptr;
+  
+  static PyObject* method(PyObject* self, PyObject* args, PyObject* kw_args)
+  {
+    ref<Object> result;
+    try {
+      result = METHOD(
+        reinterpret_cast<CLASS*>(self),
+        reinterpret_cast<Tuple*>(args),
+        reinterpret_cast<Dict*>(kw_args));
+    }
+    catch (Exception) {
+      return nullptr;
+    }
+    return result.release();
   }
-}
+
+private:
+
+  char* const name_;
+
+};
 
 
 //------------------------------------------------------------------------------

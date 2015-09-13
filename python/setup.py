@@ -21,11 +21,11 @@ setup(
       extra_compile_args=["-std=c++14", ],
       include_dirs=["../src", ],
       sources=[
+        "Table.cc",
         "Bool.cc",
         "fixfmt.cc",
         "Number.cc",
         "String.cc",
-        "Table.cc",
       ],
       depends=glob("*.hh") + glob("../src/*.hh"),
     ),

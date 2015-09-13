@@ -160,42 +160,15 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
 
 
 PyMethodDef const tp_methods[] = {
-  {"add_string", 
-   (PyCFunction) wrap_method<Table, add_string>, 
-   METH_VARARGS | METH_KEYWORDS, 
-   nullptr},
-  {"add_bool",
-   (PyCFunction) wrap_method<Table, add_column<bool, Bool>>,
-   METH_VARARGS | METH_KEYWORDS,
-   nullptr},
-  {"add_int8",
-   (PyCFunction) wrap_method<Table, add_column<char, Number>>,
-   METH_VARARGS | METH_KEYWORDS,
-   nullptr},
-  {"add_int16",
-   (PyCFunction) wrap_method<Table, add_column<short, Number>>,
-   METH_VARARGS | METH_KEYWORDS,
-   nullptr},
-  {"add_int32",
-   (PyCFunction) wrap_method<Table, add_column<int, Number>>,
-   METH_VARARGS | METH_KEYWORDS,
-   nullptr},
-  {"add_int64",
-   (PyCFunction) wrap_method<Table, add_column<long, Number>>,
-   METH_VARARGS | METH_KEYWORDS,
-   nullptr},
-  {"add_float32", 
-   (PyCFunction) wrap_method<Table, add_column<float, Number>>, 
-   METH_VARARGS | METH_KEYWORDS, 
-   nullptr},
-  {"add_float64", 
-   (PyCFunction) wrap_method<Table, add_column<double, Number>>, 
-   METH_VARARGS | METH_KEYWORDS, 
-   nullptr},
-  {"add_str_object", 
-   (PyCFunction) wrap_method<Table, add_str_object_column>,
-   METH_VARARGS | METH_KEYWORDS, 
-   nullptr},
+  Method<Table, add_string>("add_string"),
+  Method<Table, add_column<bool,    Bool>>("add_bool"),
+  Method<Table, add_column<char,    Number>>("add_int8"),
+  Method<Table, add_column<short,   Number>>("add_int16"),
+  Method<Table, add_column<int,     Number>>("add_int32"),
+  Method<Table, add_column<long,    Number>>("add_int64"),
+  Method<Table, add_column<float,   Number>>("add_float32"),
+  Method<Table, add_column<double,  Number>>("add_float64"),
+  Method<Table, add_str_object_column>("add_str_object"),
   METHODDEF_END
 };
 
@@ -249,7 +222,7 @@ Type Table::type_ = PyTypeObject{
   (PySequenceMethods*)  &tp_as_sequence,                    // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping
   (hashfunc)            nullptr,                            // tp_hash
-  (ternaryfunc)         wrap_method<Table, tp_call>,        // tp_call
+  (ternaryfunc)         Method<Table, tp_call>::method,     // tp_call
   (reprfunc)            nullptr,                            // tp_str
   (getattrofunc)        nullptr,                            // tp_getattro
   (setattrofunc)        nullptr,                            // tp_setattro
