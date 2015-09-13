@@ -43,9 +43,9 @@ testfunc(PyObject* self, PyObject* args)
   PyArg_ParseTuple(args, "O", &arg);
   // FIXME: Something like this:
   //   parser(args).add(arg).parse();
-  auto name = arg->str();
+  auto name = arg->Str();
   std::cout << "Hello, " << name << "!\n";
-  return Long::create(name->length());
+  return Long::FromLong(name->Length());
 }
 
 

@@ -51,6 +51,24 @@ PyMethodDef const tp_methods[] = {
 };
 
 
+Object* get_width(String* const self, void* /* closure */)
+{
+  return Long::FromLong(self->fmt_->get_width()).release();
+}
+
+
+PyGetSetDef const tp_getset[] = {
+  {
+    (char*)     "width",                                    // name
+    (getter)    get_width,                                  // get
+    (setter)    nullptr,                                    // set
+    (char*)     nullptr,                                    // doc
+    (void*)     nullptr,                                    // closure
+  },
+  GETSETDEF_END
+};
+
+
 }  // anonymous namespace
 
 
@@ -85,7 +103,7 @@ Type String::type_ = PyTypeObject{
   (iternextfunc)        nullptr,                            // tp_iternext
   (PyMethodDef*)        tp_methods,                         // tp_methods
   (PyMemberDef*)        nullptr,                            // tp_members
-  (PyGetSetDef*)        nullptr,                            // tp_getset
+  (PyGetSetDef*)        tp_getset,                          // tp_getset
   (_typeobject*)        nullptr,                            // tp_base
   (PyObject*)           nullptr,                            // tp_dict
   (descrgetfunc)        nullptr,                            // tp_descr_get

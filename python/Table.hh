@@ -4,7 +4,6 @@
 
 #include <Python.h>
 
-#include "table.hh"
 #include "fixfmt.hh"
 #include "py.hh"
 
