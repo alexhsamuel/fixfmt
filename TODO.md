@@ -1,6 +1,5 @@
 Things to do:
 
-- add width properties
 - rename Number -> PyNumber, etc.
 - reorganize source into package
 - np Array formatter
