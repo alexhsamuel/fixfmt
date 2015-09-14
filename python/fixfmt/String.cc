@@ -116,7 +116,7 @@ Type String::type_ = PyTypeObject{
   (PyObject*)           nullptr,                            // tp_bases
   (PyObject*)           nullptr,                            // tp_mro
   (PyObject*)           nullptr,                            // tp_cache
-  (PyObject*)           nullptr,                            // tp_subclasses,
+  (PyObject*)           nullptr,                            // tp_subclasses
   (PyObject*)           nullptr,                            // tp_weaklist
   (destructor)          nullptr,                            // tp_del
   (unsigned int)        0,                                  // tp_version_tag
