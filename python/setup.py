@@ -11,21 +11,21 @@ setup(
   name="test",
   ext_modules=[
     Extension(
-      "testmod",
+      "fixfmt.testmod",
       extra_compile_args=["-std=c++14", ],
-      sources=["testmod.cc", ],
+      sources=["fixfmt/testmod.cc", ],
     ),
 
     Extension(
-      "fixfmt",
+      "fixfmt._ext",
       extra_compile_args=["-std=c++14", ],
       include_dirs=["../src", ],
       sources=[
-        "Table.cc",
-        "Bool.cc",
-        "fixfmt.cc",
-        "Number.cc",
-        "String.cc",
+        "fixfmt/Table.cc",
+        "fixfmt/Bool.cc",
+        "fixfmt/_ext.cc",
+        "fixfmt/Number.cc",
+        "fixfmt/String.cc",
       ],
       depends=glob("*.hh") + glob("../src/*.hh"),
     ),

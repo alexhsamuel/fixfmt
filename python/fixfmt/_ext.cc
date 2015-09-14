@@ -18,7 +18,7 @@ auto methods = Methods<Module>()
 
 PyModuleDef testmod_module = {
   PyModuleDef_HEAD_INIT,
-  "fixfmt",
+  "fixfmt._ext",
   nullptr,
   -1,
   methods
@@ -30,7 +30,7 @@ PyModuleDef testmod_module = {
 //------------------------------------------------------------------------------
 
 PyMODINIT_FUNC
-PyInit_fixfmt(void)
+PyInit__ext(void)
 {
   auto module = Module::Create(&testmod_module);
 

@@ -36,28 +36,24 @@ private:
 };
 
 
-static auto
-testfunc(PyObject* self, PyObject* args)
+ref<Object> testfunc(Module* self, Tuple* args, Dict* kw_args)
 {
   Object* arg;
-  PyArg_ParseTuple(args, "O", &arg);
-  // FIXME: Something like this:
-  //   parser(args).add(arg).parse();
+  static char const* arg_names[] = {"obj", nullptr};
+  Arg::ParseTupleAndKeywords(args, kw_args, "O", (char**) arg_names, &arg);
   auto name = arg->Str();
   std::cout << "Hello, " << name << "!\n";
   return Long::FromLong(name->Length());
 }
 
 
-static PyMethodDef methods[] = {
-  FunctionDef<testfunc>("testfunc"),
-  FunctionDef<nullptr>::END
-};
+auto methods = Methods<Module>()
+  .add<testfunc>("testfunc");
 
 
 static struct PyModuleDef testmod_module = {
   PyModuleDef_HEAD_INIT,
-  "testmod",
+  "fixfmt.testmod",
   nullptr,
   -1,
   methods

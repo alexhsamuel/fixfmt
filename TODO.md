@@ -1,7 +1,6 @@
 Things to do:
 
 - rename Number -> PyNumber, etc.
-- reorganize source into package
 - np Array formatter
 - add iterable to Table
 - support UTF-8 ellipsis etc. (get strlen right)
