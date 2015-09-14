@@ -12,9 +12,8 @@ using namespace py;
 
 namespace {
 
-static PyMethodDef methods[] = {
-  METHODDEF_END
-};
+auto methods = Methods<Module>()
+;
 
 
 PyModuleDef testmod_module = {

@@ -221,7 +221,7 @@ Type Table::type_ = PyTypeObject{
   (PySequenceMethods*)  &tp_as_sequence,                    // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping
   (hashfunc)            nullptr,                            // tp_hash
-  (ternaryfunc)         Method<Table, tp_call>::method,     // tp_call
+  (ternaryfunc)         wrap<Table, tp_call>,               // tp_call
   (reprfunc)            nullptr,                            // tp_str
   (getattrofunc)        nullptr,                            // tp_getattro
   (setattrofunc)        nullptr,                            // tp_setattro

@@ -13,8 +13,6 @@ namespace py {
 class Object;
 class Unicode;
 
-constexpr PyMethodDef METHODDEF_END{nullptr, nullptr, 0, nullptr};
-
 constexpr PyGetSetDef GETSETDEF_END
     {nullptr, nullptr, nullptr, nullptr, nullptr};
 
@@ -366,41 +364,25 @@ template<typename CLASS>
 using MethodPtr = ref<Object> (*)(CLASS* self, Tuple* args, Dict* kw_args);
 
 
+/**
+ * Wraps a method that takes args and kw_args and returns an object.
+ */
 template<typename CLASS, MethodPtr<CLASS> METHOD>
-class Method
+PyObject* wrap(PyObject* self, PyObject* args, PyObject* kw_args)
 {
-public:
-
-  /**
-   * The name must not be deallocated.
-   */
-  Method(char const* const name) : name_(const_cast<char*>(name)) {}
-
-  operator PyMethodDef()
-  {
-    return {name_, (PyCFunction) method, METH_VARARGS | METH_KEYWORDS, nullptr};
+  ref<Object> result;
+  try {
+    result = METHOD(
+      reinterpret_cast<CLASS*>(self),
+      reinterpret_cast<Tuple*>(args),
+      reinterpret_cast<Dict*>(kw_args));
   }
-  
-  static PyObject* method(PyObject* self, PyObject* args, PyObject* kw_args)
-  {
-    ref<Object> result;
-    try {
-      result = METHOD(
-        reinterpret_cast<CLASS*>(self),
-        reinterpret_cast<Tuple*>(args),
-        reinterpret_cast<Dict*>(kw_args));
-    }
-    catch (Exception) {
-      return nullptr;
-    }
-    return result.release();
+  catch (Exception) {
+    return nullptr;
   }
-
-private:
-
-  char* const name_;
-
-};
+  assert(result != nullptr);
+  return result.release();
+}
 
 
 template<typename CLASS>
@@ -411,17 +393,24 @@ public:
   Methods() : done_(false) {}
 
   template<MethodPtr<CLASS> METHOD>
-  Methods& add(char const* name)
+  Methods& add(char const* name, char const* doc=nullptr)
   {
+    assert(name != nullptr);
     assert(!done_);
-    methods_.push_back(Method<CLASS, METHOD>(name));
+    methods_.push_back({
+      name,
+      (PyCFunction) wrap<CLASS, METHOD>,
+      METH_VARARGS | METH_KEYWORDS,
+      doc
+    });
     return *this;
   }
 
   operator PyMethodDef*()
   {
     if (!done_) {
-      methods_.push_back(METHODDEF_END);
+      // Add the sentry.
+      methods_.push_back({nullptr, nullptr, 0, nullptr});
       done_ = true;
     }
     return &methods_[0];

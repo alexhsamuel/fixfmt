@@ -53,9 +53,8 @@ PyObject* tp_call(Bool* self, PyObject* args, PyObject* kw_args)
 }
 
 
-PyMethodDef const tp_methods[] = {
-  METHODDEF_END
-};
+auto methods = Methods<Bool>()
+;
 
 
 Object* get_width(Bool* const self, void* /* closure */)
@@ -108,7 +107,7 @@ Type Bool::type_ = PyTypeObject{
   (Py_ssize_t)          0,                                  // tp_weaklistoffset
   (getiterfunc)         nullptr,                            // tp_iter
   (iternextfunc)        nullptr,                            // tp_iternext
-  (PyMethodDef*)        tp_methods,                         // tp_methods
+  (PyMethodDef*)        methods,                            // tp_methods
   (PyMemberDef*)        nullptr,                            // tp_members
   (PyGetSetDef*)        tp_getset,                          // tp_getset
   (_typeobject*)        nullptr,                            // tp_base
