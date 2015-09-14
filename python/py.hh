@@ -403,6 +403,38 @@ private:
 };
 
 
+template<typename CLASS>
+class Methods
+{
+public:
+
+  Methods() : done_(false) {}
+
+  template<MethodPtr<CLASS> METHOD>
+  Methods& add(char const* name)
+  {
+    assert(!done_);
+    methods_.push_back(Method<CLASS, METHOD>(name));
+    return *this;
+  }
+
+  operator PyMethodDef*()
+  {
+    if (!done_) {
+      methods_.push_back(METHODDEF_END);
+      done_ = true;
+    }
+    return &methods_[0];
+  }
+
+private:
+
+  bool done_;
+  std::vector<PyMethodDef> methods_;
+
+};
+
+
 //------------------------------------------------------------------------------
 
 }  // namespace py

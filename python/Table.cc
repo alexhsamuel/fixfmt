@@ -159,18 +159,17 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
 }
 
 
-PyMethodDef const tp_methods[] = {
-  Method<Table, add_string>("add_string"),
-  Method<Table, add_column<bool,    Bool>>("add_bool"),
-  Method<Table, add_column<char,    Number>>("add_int8"),
-  Method<Table, add_column<short,   Number>>("add_int16"),
-  Method<Table, add_column<int,     Number>>("add_int32"),
-  Method<Table, add_column<long,    Number>>("add_int64"),
-  Method<Table, add_column<float,   Number>>("add_float32"),
-  Method<Table, add_column<double,  Number>>("add_float64"),
-  Method<Table, add_str_object_column>("add_str_object"),
-  METHODDEF_END
-};
+auto methods = Methods<Table>()
+  .add<add_string>                  ("add_string")
+  .add<add_column<bool,    Bool>>   ("add_bool")
+  .add<add_column<char,    Number>> ("add_int8")
+  .add<add_column<short,   Number>> ("add_int16")
+  .add<add_column<int,     Number>> ("add_int32")
+  .add<add_column<long,    Number>> ("add_int64")
+  .add<add_column<float,   Number>> ("add_float32")
+  .add<add_column<double,  Number>> ("add_float64")
+  .add<add_str_object_column>       ("add_str_object")
+;
 
 
 Object* get_length(Table* const self, void* /* closure */)
@@ -236,7 +235,7 @@ Type Table::type_ = PyTypeObject{
   (Py_ssize_t)          0,                                  // tp_weaklistoffset
   (getiterfunc)         nullptr,                            // tp_iter
   (iternextfunc)        nullptr,                            // tp_iternext
-  (PyMethodDef*)        tp_methods,                         // tp_methods
+  (PyMethodDef*)        methods,                            // tp_methods
   (PyMemberDef*)        nullptr,                            // tp_members
   (PyGetSetDef*)        tp_getset,                          // tp_getset
   (_typeobject*)        nullptr,                            // tp_base
