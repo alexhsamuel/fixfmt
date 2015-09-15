@@ -1,5 +1,6 @@
 Things to do:
 
+- wrap pad, elide, palide
 - rename Number -> PyNumber, etc.
 - np Array formatter
 - add iterable to Table
