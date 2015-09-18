@@ -1,5 +1,6 @@
 import builtins
 import re
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -70,13 +71,11 @@ def _get_formatter(formatters, name, arr):
     return fmt
 
 
-def _table_for_dataframe(df, cfg={}):
-    formatters = cfg.get("formatters", {})
-    separators = cfg.get("separators", {})
-    show_header = cfg.get("header", True)
-
+def _table_for_dataframe(df, names, cfg={}):
     table = Table()
 
+    formatters  = cfg.get("formatters", {})
+    separators  = cfg.get("separators", {})
     begin_sep   = separators.get("begin", "") or ""
     sep         = separators.get("between", " ") or ""
     end_sep     = separators.get("end", "") or "" 
@@ -84,7 +83,6 @@ def _table_for_dataframe(df, cfg={}):
     if begin_sep:
         table.add_string(begin_sep)
 
-    names = df.columns
     fmts = []
     for name in names:
         arr = df[name].values
@@ -98,6 +96,42 @@ def _table_for_dataframe(df, cfg={}):
     if end_sep:
         table.add_string(end_sep)
             
+    return table, fmts
+
+
+# FIXME: Specify names.
+# FIXME: By screen (repeating header?)
+# FIXME: Index, with underlining.
+# FIXME: Special sep after index.
+# FIXME: Justify header columns.
+
+# FIXME: Do what when it's too wide???
+
+def _print_dataframe(df, cfg={}):
+    # Slog through configuration.
+    separators  = cfg.get("separators", {})
+    begin_sep   = separators.get("begin", "") or ""
+    sep         = separators.get("between", " ") or ""
+    end_sep     = separators.get("end", "") or "" 
+    max_rows    = cfg.get("max_rows", "terminal")
+    if max_rows == "terminal":
+        # FIXME
+        max_rows = shutil.get_terminal_size().lines - 1
+    row_ellipsis = cfg.get(
+        "row_ellipsis", 
+        lambda nr: "... skipping {} rows ...".format(nr))
+    if not callable(row_ellipsis):
+        row_ellipsis = lambda nr: row_ellipsis
+    row_fraction = cfg.get("row_fraction", 0.85)
+    show_header = cfg.get("header", True)
+    underline = str(cfg.get("underline", "-"))
+    if len(underline) != 1:
+        raise ValueError("unerline must be one character")
+
+    names = df.columns
+    # FIXME: Get formats from table columns.
+    table, fmts = _table_for_dataframe(df, names, cfg)
+
     if show_header:
         header = []
         for name, fmt in zip(names, fmts):
@@ -112,17 +146,27 @@ def _table_for_dataframe(df, cfg={}):
         )
         builtins.print(
               " " * len(begin_sep)
-            + (" " * len(sep)).join( "-" * len(h) for h in header )
+            + (" " * len(sep)).join( underline * len(h) for h in header )
             + " " * len(end_sep)
         )
 
-
-    return table
+    num_rows = len(table)
+    if num_rows <= max_rows:
+        for i in range(len(table)):
+            builtins.print(table(i))
+    else:
+        extra_rows          = 1 + (2 if show_header else 0)
+        num_rows_top        = int(row_fraction * max_rows)
+        num_rows_bottom     = max_rows - extra_rows - num_rows_top
+        num_rows_skipped    = num_rows - num_rows_top - num_rows_bottom
+        for i in range(num_rows_top):
+            builtins.print(table(i))
+        builtins.print(row_ellipsis(num_rows_skipped).center(table.width))
+        for i in range(num_rows - num_rows_bottom, num_rows):
+            builtins.print(table(i))
 
 
 def print(df, **cfg):
-    table = _table_for_dataframe(df, cfg)
-    for i in range(len(table)):
-        builtins.print(table(i))
+    _print_dataframe(df, cfg)
 
 
