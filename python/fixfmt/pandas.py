@@ -139,6 +139,7 @@ def _print_dataframe(df, cfg={}):
             width = fmt.width
             # FIXME: Choose just.
             header.append(name[: width].rjust(width))
+        # FIXME: Is it right to use spaces?
         builtins.print(
               " " * len(begin_sep)
             + (" " * len(sep)).join(header)
