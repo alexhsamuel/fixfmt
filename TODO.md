@@ -2,6 +2,8 @@ Things to do:
 
 - wrap pad, elide, palide
 - rename Number -> PyNumber, etc.
+- category types
+- datetime types
 - np Array formatter
 - add iterable to Table
 - support UTF-8 ellipsis etc. (get strlen right)
