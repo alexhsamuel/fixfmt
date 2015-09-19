@@ -61,7 +61,7 @@ def _get_default_formatter(arr):
 def _get_formatter(formatters, name, arr):
     fmt = None
     for regex, value in formatters.items():
-        if re.match(key, name) is not None:
+        if isinstance(regex, str) and re.match(regex, name) is not None:
             fmt = value
     if fmt is None:
         fmt = formatters.get(arr.dtype, None)
