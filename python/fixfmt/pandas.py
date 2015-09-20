@@ -4,6 +4,7 @@ import shutil
 
 import numpy as np
 import pandas as pd
+import pln.ctr
 
 from   . import *
 
@@ -99,7 +100,6 @@ def _table_for_dataframe(df, names, cfg={}):
     return table, fmts
 
 
-# FIXME: Specify names.
 # FIXME: By screen (repeating header?)
 # FIXME: Index, with underlining.
 # FIXME: Special sep after index.
@@ -127,8 +127,9 @@ def _print_dataframe(df, cfg={}):
     underline = str(cfg.get("underline", "-"))
     if len(underline) != 1:
         raise ValueError("unerline must be one character")
+    names = cfg.get("names", pln.ctr.ALL)
 
-    names = df.columns
+    names = pln.ctr.select_ordered(df.columns, names)
     # FIXME: Get formats from table columns.
     table, fmts = _table_for_dataframe(df, names, cfg)
 
