@@ -85,7 +85,7 @@ template<typename TYPE, typename PYFMT>
 ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"buf", "format", nullptr};
-  const TYPE* buf;
+  TYPE const* buf;
   int buf_len;
   PYFMT* format;
   Arg::ParseTupleAndKeywords(

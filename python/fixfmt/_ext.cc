@@ -10,18 +10,18 @@ using namespace py;
 
 //------------------------------------------------------------------------------
 
+extern Methods<Module>& add_functions(Methods<Module>&);
+
 namespace {
 
-auto methods = Methods<Module>()
-;
-
+Methods<Module> methods;
 
 PyModuleDef testmod_module = {
   PyModuleDef_HEAD_INIT,
   "fixfmt._ext",
   nullptr,
   -1,
-  methods
+  add_functions(methods)
 };
 
 
