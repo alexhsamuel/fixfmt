@@ -11,12 +11,6 @@ setup(
   name="test",
   ext_modules=[
     Extension(
-      "fixfmt.testmod",
-      extra_compile_args=["-std=c++14", ],
-      sources=["fixfmt/testmod.cc", ],
-    ),
-
-    Extension(
       "fixfmt._ext",
       extra_compile_args=["-std=c++14", ],
       include_dirs=["../src", ],
@@ -24,6 +18,7 @@ setup(
         "fixfmt/Table.cc",
         "fixfmt/Bool.cc",
         "fixfmt/_ext.cc",
+        "fixfmt/functions.cc",
         "fixfmt/Number.cc",
         "fixfmt/String.cc",
       ],
