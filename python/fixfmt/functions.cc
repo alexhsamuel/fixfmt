@@ -13,7 +13,7 @@ using std::string;
 
 namespace {
 
-ref<Object> pad(Module* self, Tuple* args, Dict* kw_args)
+ref<Object> pad(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
     "string", "length", "pad", "left", nullptr};
@@ -29,6 +29,42 @@ ref<Object> pad(Module* self, Tuple* args, Dict* kw_args)
 }
 
 
+ref<Object> elide(Module* module, Tuple* args, Dict* kw_args)
+{
+  static char const* arg_names[] = {
+    "string", "length", "ellipsis", "position", nullptr};
+  char const* str;
+  int length;
+  char const* ellipsis = fixfmt::ELLIPSIS;
+  float position = 1.0;
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, "sI|sf", arg_names, &str, &length, &ellipsis, &position);
+
+  string r = fixfmt::elide(string(str), length, string(ellipsis), position);
+  return Unicode::from(r);
+}
+
+
+ref<Object> palide(Module* module, Tuple* args, Dict* kw_args)
+{
+  static char const* arg_names[] = {
+    "string", "length", "ellipsis", "pad", "position", "left", nullptr };
+  char const* str;
+  int length;
+  char const* ellipsis = fixfmt::ELLIPSIS;
+  int pad = ' ';
+  float position = 1.0;
+  int left = false;
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, "sI|sCfp", arg_names,
+    &str, &length, &ellipsis, &pad, &position, &left);
+
+  string r = fixfmt::palide(
+    string(str), length, string(ellipsis), (char) pad, position, (bool) left);
+  return Unicode::from(r);
+}
+
+
 }
 
 //------------------------------------------------------------------------------
@@ -36,7 +72,9 @@ ref<Object> pad(Module* self, Tuple* args, Dict* kw_args)
 Methods<Module>& add_functions(Methods<Module>& methods)
 {
   methods
+    .add<elide>("elide")
     .add<pad>("pad")
+    .add<palide>("palide")
     ;
   return methods;
 }
