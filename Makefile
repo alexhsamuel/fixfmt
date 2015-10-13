@@ -21,6 +21,7 @@ TEST_CPPFLAGS   = $(CPPFLAGS) -I$(GTEST_INCDIR)
 TEST_LIBS       = $(GTEST_LIB)
 
 PYTHON	    	= python3
+PYTEST	    	= py.test
 
 #-------------------------------------------------------------------------------
 
@@ -72,6 +73,11 @@ python:
 python-clean:
 	rm -rf python/build python/*.so
 
+.PHONY: python-test
+python-test:
+	$(PYTEST) python
+
 #-------------------------------------------------------------------------------
 
 include $(DEPS) $(TEST_DEPS)
+
