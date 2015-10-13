@@ -13,6 +13,8 @@ Maybe one day I'll try to rewrite it in Rust.
 
 Requires Python 3.4 or later.
 
+Requires [pytest](http://pytest.org) to run Python tests.
+
 ### Google Test
 
 Requires [Google Test](https://github.com/google/googletest) for building
