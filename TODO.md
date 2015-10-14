@@ -1,10 +1,11 @@
 Things to do:
 
+- proper Unicode support in formatters
+- Unicode support in pad/elide/palide
 - rename Number -> PyNumber, etc.
 - support UTF-8 ellipsis etc. (get strlen right)
 - category types
 - datetime types
-- proper Unicode support
 - np Array formatter
 - add iterable to Table
 - fixed-length string columns
