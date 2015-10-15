@@ -2,11 +2,11 @@ GTEST_DIR       = ./googletest/googletest
 GTEST_INCDIR    = $(GTEST_DIR)/include
 GTEST_LIB       = $(GTEST_DIR)/make/gtest_main.a
 
-CPPFLAGS        = -I./src
+CPPFLAGS        = -I./cxx
 CXXFLAGS        = -std=c++14 -g
 LDLIBS          = -lpthread
 
-SOURCES         = $(wildcard src/*.cc)
+SOURCES         = $(wildcard cxx/*.cc)
 DEPS            = $(SOURCES:%.cc=%.dd)
 OBJS            = $(SOURCES:%.cc=%.o)
 BINS            = $(SOURCES:%.cc=%)
@@ -26,24 +26,34 @@ PYTEST	    	= py.test
 #-------------------------------------------------------------------------------
 
 .PHONY: all
-all:			test 
+all:			test
+
+.PHONY: test
+test:			test-cxx test-python
 
 .PHONY: clean
-clean:			test-clean
-	rm -f $(OBJS) $(BINS) $(DEPS) $(OKS)
+clean:			clean-cxx clean-python testclean
+
+.PHONY: testclean
+testclean:		testclean-cxx testclean-python
+
+#-------------------------------------------------------------------------------
+# C++
 
 $(DEPS): %.dd: 		%.cc
 	@echo "generating $@"; set -e; \
 	$(CXX) -MM $(CPPFLAGS) $< | sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@
 
-#-------------------------------------------------------------------------------
+.PHONY: clean-cxx
+clean-cxx:
+	rm -f $(OBJS) $(BINS) $(DEPS) $(OKS)
 
-.PHONY: test-clean
-test-clean:
+.PHONY: testclean
+testclean-cxx:
 	rm -f $(TEST_DEPS) $(TEST_OBJS) $(TEST_BINS) $(TEST_OKS)
 
-.PHONY: test
-test: $(TEST_OKS)
+.PHONY: test-cxx
+test-cxx: $(TEST_OKS)
 
 $(TEST_DEPS): \
 %.dd: 			%.cc
@@ -64,18 +74,22 @@ $(TEST_OKS): \
 	$< && touch $@
 
 #-------------------------------------------------------------------------------
+# Python
 
 .PHONY: python
 python:
 	cd python; $(PYTHON) setup.py build_ext --inplace
 
-.PHONY: python-clean
-python-clean:
+.PHONY: clean-python
+clean-python:
 	rm -rf python/build python/*.so
 
-.PHONY: python-test
-python-test:
+.PHONY: test-python
+test-python:
 	$(PYTEST) python
+
+.PHONY: testclean-python
+testclean-python:
 
 #-------------------------------------------------------------------------------
 

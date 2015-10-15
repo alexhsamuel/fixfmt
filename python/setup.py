@@ -13,7 +13,7 @@ setup(
     Extension(
       "fixfmt._ext",
       extra_compile_args=["-std=c++14", ],
-      include_dirs=["../src", ],
+      include_dirs=["../cxx", ],
       sources=[
         "fixfmt/Table.cc",
         "fixfmt/Bool.cc",
@@ -22,7 +22,7 @@ setup(
         "fixfmt/Number.cc",
         "fixfmt/String.cc",
       ],
-      depends=glob("*.hh") + glob("../src/*.hh"),
+      depends=glob("*.hh") + glob("../cxx/*.hh"),
     ),
 
   ]
