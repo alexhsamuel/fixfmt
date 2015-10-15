@@ -17,7 +17,7 @@ public:
 
   String(
     int     size,
-    string  ellipsis="...",
+    string  ellipsis="\u2026",
     string  pad=" ",
     double  position=1.0,
     bool    pad_left=false);

@@ -18,7 +18,7 @@ int tp_init(String* self, PyObject* args, PyObject* kw_args)
       = {"size", "ellipsis", "pad", "position", "pad_left", nullptr};
 
   int         size;
-  char const* ellipsis = "...";
+  char const* ellipsis = "\u2026";
   char const* pad = " ";
   double      position = 1.0;
   bool        pad_left = false;

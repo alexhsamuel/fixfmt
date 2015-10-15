@@ -28,3 +28,13 @@ TEST(pad, basic) {
             "\u2026.\u2026.\u2026.\u2026Hello, world!");
 }
 
+TEST(elide, basic) {
+  string const s = "Hello, world!";
+  ASSERT_EQ(elide(s, 10), "Hello, wo\u2026");
+  ASSERT_EQ(elide(s, 12), "Hello, worl\u2026");
+  ASSERT_EQ(elide(s, 13), s);
+  ASSERT_EQ(elide(s, 20), s);
+  ASSERT_EQ(elide(s, 10, ELLIPSIS, 0.0 ), "\u2026o, world!");
+  ASSERT_EQ(elide(s, 10, ELLIPSIS, 0.51), "Hello\u2026rld!");
+  ASSERT_EQ(elide(s, 10, ELLIPSIS, 0.8 ), "Hello, \u2026d!");
+}

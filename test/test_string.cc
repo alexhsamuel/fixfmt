@@ -8,7 +8,7 @@ TEST(String, basic) {
   ASSERT_EQ(10, fmt.get_width());
 
   ASSERT_EQ("Hello.    ", fmt("Hello."));
-  ASSERT_EQ("Hello, ...", fmt("Hello, world!"));
+  ASSERT_EQ("Hello, wo\u2026", fmt("Hello, world!"));
 }
 
 // FIXME: More tests.
