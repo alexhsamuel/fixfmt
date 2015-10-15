@@ -4,6 +4,7 @@
 #include <limits>
 #include <memory>
 #include <numeric>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -13,6 +14,7 @@
 namespace fixfmt {
 
 using std::string;
+using std::stringstream;
 using std::unique_ptr;
 
 static constexpr auto MAX_INDEX = std::numeric_limits<long>::max();
@@ -34,13 +36,9 @@ public:
   virtual long get_length() const = 0;
 
   /**
-   * Formats entry 'index' of the column into 'buf'.  
-   *
-   * 'index' must be at least zero and less than 'get_length()'.  'buf' must
-   * accommodate 'get_width()' characters.  The formatted entry is not
-   * NUL-terminated.
+   * Formats entry 'index'.
    */
-  virtual void format(long index, char* buf) const = 0;
+  virtual string operator()(long index) const = 0;
 
 };
 
@@ -64,9 +62,9 @@ public:
 
   virtual long get_length() const override { return length_; }
 
-  virtual void format(long const index, char* const buf) const override
+  virtual string operator()(long const index) const override
   {
-    format_.format(values_[index], buf);
+    return format_(values_[index]);
   };
 
 
@@ -93,9 +91,9 @@ public:
 
   virtual long get_length() const override { return MAX_INDEX; }
 
-  virtual void format(long const /* index */, char* const buf) const override
+  virtual string operator()(long const /* index */) const override
   {
-    str_.copy(buf, str_.length());
+    return str_;
   }
 
 private:
@@ -128,14 +126,12 @@ public:
 
   virtual long get_length() const override { return length_; }
 
-  virtual void format(long const index, char* const buf) const override
+  virtual string operator()(long const index) const override
   {
-    char* p = buf;
-    for (auto i = columns_.begin(); i != columns_.end(); ++i) {
-      Column const& col = **i;
-      col.format(index, p);
-      p += col.get_width();
-    }
+    stringstream result;
+    for (auto i = columns_.begin(); i != columns_.end(); ++i)
+      result << (**i)(index);
+    return result.str();
   }
 
 private:

@@ -30,7 +30,6 @@ public:
   double        get_position()  const { return position_; }
   bool          get_pad_left()  const { return pad_left_; }
 
-  void format(string const& str, char* buf) const;
   string operator()(string const& str) const;
 
 private:
@@ -59,12 +58,6 @@ inline String::String(
 {
   assert(ellipsis_.length() <= size_);
   assert(0 <= position_ && position_ <= 1);
-}
-
-
-inline void String::format(string const& str, char* const buf) const
-{
-  (*this)(str).copy(buf, size_);
 }
 
 

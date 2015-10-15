@@ -36,10 +36,7 @@ ref<Object> tp_call(Table* self, Tuple* args, Dict* kw_args)
   if (index >= self->table_->get_length())
     throw Exception(PyExc_IndexError, "index larger than length");
 
-  long const width = self->table_->get_width();
-  char buf[width];
-  self->table_->format(index, buf);
-  return Unicode::FromStringAndSize(buf, width);
+  return Unicode::from((*self->table_)(index));
 }
 
 
@@ -123,12 +120,12 @@ public:
 
   virtual long get_length() const override { return length_; }
 
-  virtual void format(long const index, char* const buf) const override
+  virtual std::string operator()(long const index) const override
   {
     // Convert (or cast) to string.
     auto str = values_[index]->Str();
     // Format the string.
-    format_.format(str->as_utf8_string(), buf);
+    return format_(str->as_utf8_string());
   }
 
 private:

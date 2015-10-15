@@ -41,9 +41,7 @@ static PyObject* tp_call(Number* self, PyObject* args, PyObject* kw_args)
   if (PyArg_ParseTupleAndKeywords(
       args, kw_args, "d", (char**) arg_names, &val)) {
     fixfmt::Number& fmt = *self->fmt_;
-    char buf[fmt.get_width()];
-    fmt.format(val, buf);
-    return Unicode::FromStringAndSize(buf, fmt.get_width()).release();
+    return Unicode::from(fmt(val));
   }
   else
     return nullptr;

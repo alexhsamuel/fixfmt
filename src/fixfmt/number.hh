@@ -66,8 +66,6 @@ public:
   void format(unsigned char  val, char* const buf) const
     { format((long) val, buf); }
 
-  void format(double const val, char* const buf) const;
-
   template<typename T>
   string operator()(T val) const
   {
@@ -101,6 +99,8 @@ private:
     // Truncate if necessary.
     return result.substr(0, width_);
   }
+
+  void format(double const val, char* const buf) const;
 
   /**
    * Formats 'width' digits of 'val' into 'buf', filling on the left with

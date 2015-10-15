@@ -20,7 +20,7 @@ t.add_float32(x2, f2)
 t.add_string(" | ")
 t.add_bool(x3, fixfmt.Bool("yes", "no"))
 t.add_string(" | ")
-t.add_str_object(x4, fixfmt.String(5, ellipsis="/", position=0))
+t.add_str_object(x4, fixfmt.String(5, ellipsis="\u2026", position=0))
 
 print("=" * t.width)
 for i in range(len(t)):

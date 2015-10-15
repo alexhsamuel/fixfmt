@@ -1,6 +1,5 @@
 Things to do:
 
-- proper Unicode support in formatters
 - rename Number -> PyNumber, etc.
 - category types
 - datetime types
@@ -18,4 +17,6 @@ Fancy features:
 - rule-based coloring
 
 Internal:
-- use char* more? or some kind of string builder?
+- Format into buffers of preallocated length (which must accommodate multibyte
+  characters).
+
