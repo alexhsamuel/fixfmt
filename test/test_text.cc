@@ -18,9 +18,13 @@ TEST(pad, basic) {
   ASSERT_EQ(pad(s, 13), s);
   ASSERT_EQ(pad(s, 14), "Hello, world! ");
   ASSERT_EQ(pad(s, 20), "Hello, world!       ");
-  ASSERT_EQ(pad(s, 14, '~'), "Hello, world!~");
-  ASSERT_EQ(pad(s, 20, '~'), "Hello, world!~~~~~~~");
-  ASSERT_EQ(pad(s, 20, ' ', true), "       Hello, world!");
-  ASSERT_EQ(pad(s, 20, '-', true), "-------Hello, world!");
+  ASSERT_EQ(pad(s, 14, "~"), "Hello, world!~");
+  ASSERT_EQ(pad(s, 20, "~"), "Hello, world!~~~~~~~");
+  ASSERT_EQ(pad(s, 20, " ", true), "       Hello, world!");
+  ASSERT_EQ(pad(s, 20, "-", true), "-------Hello, world!");
+  ASSERT_EQ(pad(s, 20, "-|"), "Hello, world!-|-|-|-");
+  ASSERT_EQ(pad(s, 20, "<->", true), "<-><-><Hello, world!");
+  ASSERT_EQ(pad(s, 20, "\u2026.", true),
+            "\u2026.\u2026.\u2026.\u2026Hello, world!");
 }
 

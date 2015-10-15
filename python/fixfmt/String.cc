@@ -19,15 +19,20 @@ int tp_init(String* self, PyObject* args, PyObject* kw_args)
 
   int         size;
   char const* ellipsis = "...";
-  char        pad = ' ';
+  char const* pad = " ";
   double      position = 1.0;
   bool        pad_left = false;
   if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "i|sCdb", (char**) arg_names,
+      args, kw_args, "i|ssdb", (char**) arg_names,
       &size, &ellipsis, &pad, &position, &pad_left)) 
     return -1;
 
   // FIXME: Validate args.
+  if (strlen(pad) == 0) {
+    PyErr_SetString(PyExc_ValueError, "empty pad");
+    return 1;
+  }
+
   self->fmt_ = unique_ptr<fixfmt::String>(
       new fixfmt::String(size, ellipsis, pad, position, pad_left));
   return 0;

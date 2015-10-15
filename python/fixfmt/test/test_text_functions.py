@@ -23,6 +23,8 @@ def test_pad_pad():
     assert pad("hello", 8, "o") == "helloooo"
     assert pad("hello", 8, "-") == "hello---"
     assert pad("hello", pad="-", length=8) == "hello---"
+    assert pad("hello", 8, "-=") == "hello-=-"
+    assert pad("hello", 12, ".!.") == "hello.!..!.."
 
 
 def test_pad_left():

@@ -18,3 +18,6 @@ Fancy features:
 - ANSI escapes
 - truncate dataframe output to screen
 - rule-based coloring
+
+Internal:
+- use char* more? or some kind of string builder?

@@ -27,8 +27,8 @@ public:
       size_t size,
       bool pad_left)
   : size_(size),
-    true_(palide(true_str, size, "", ' ', 1.0, pad_left)),
-    false_(palide(false_str, size, "", ' ', 1.0, pad_left))
+    true_(palide(true_str, size, "", " ", 1.0, pad_left)),
+    false_(palide(false_str, size, "", " ", 1.0, pad_left))
   {
     assert(true_.size() == size_);
     assert(false_.size() == size_);

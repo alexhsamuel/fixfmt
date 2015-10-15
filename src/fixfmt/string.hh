@@ -18,7 +18,7 @@ public:
   String(
     int     size,
     string  ellipsis="...",
-    char    pad=' ',
+    string  pad=" ",
     double  position=1.0,
     bool    pad_left=false);
 
@@ -26,7 +26,7 @@ public:
 
   int           get_size()      const { return size_; }
   string const& get_ellipsis()  const { return ellipsis_; }
-  char          get_pad()       const { return pad_; }
+  string const& get_pad()       const { return pad_; }
   double        get_position()  const { return position_; }
   bool          get_pad_left()  const { return pad_left_; }
 
@@ -37,7 +37,7 @@ private:
 
   int       const size_;
   string    const ellipsis_;
-  char      const pad_;
+  string    const pad_;
   double    const position_;
   bool      const pad_left_;
 
@@ -47,7 +47,7 @@ private:
 inline String::String(
   int     const size,
   string  const ellipsis,
-  char    const pad,
+  string  const pad,
   double  const position,
   bool    const pad_left)
 :

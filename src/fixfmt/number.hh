@@ -86,7 +86,7 @@ private:
 
   std::string format_nan(string const& nan) const
   {
-    string result = pad(nan, width_, ' ', true);
+    string result = pad(nan, width_, " ", true);
     // Truncate if necessary.
     return result.substr(0, width_);
   }
