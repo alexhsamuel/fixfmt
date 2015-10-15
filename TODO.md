@@ -2,7 +2,6 @@ Things to do:
 
 - proper Unicode support in formatters
 - rename Number -> PyNumber, etc.
-- support UTF-8 ellipsis etc. (get strlen right)
 - category types
 - datetime types
 - np Array formatter
