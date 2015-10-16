@@ -20,3 +20,7 @@ Internal:
 - Format into buffers of preallocated length (which must accommodate multibyte
   characters).
 
+Cleanup:
+- check up on FIXMEs
+- banners
+
