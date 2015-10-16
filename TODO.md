@@ -9,6 +9,7 @@ Things to do:
 - unsigned columns
 - add % / scale to Number formatter
 - add exponential E+ formatter
+- add accessors to formatters, C++ and Python
 
 Fancy features:
 - use more fancy Unicode characters
