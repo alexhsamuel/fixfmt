@@ -11,6 +11,7 @@
 
 namespace py {
 
+class Long;
 class Object;
 class Unicode;
 
@@ -186,6 +187,10 @@ public:
   auto Str()
     { return ref<Unicode>::take(PyObject_Str(this)); }
 
+  ref<py::Long> Long();
+
+  long long_value();
+
 };
 
 
@@ -325,6 +330,23 @@ inline std::ostream& operator<<(std::ostream& os, ref<Unicode>& ref)
 {
   os << ref->as_utf8();
   return os;
+}
+
+
+//==============================================================================
+
+inline ref<Long>
+Object::Long()
+{
+  // FIXME: Check errors.
+  return ref<py::Long>::take(PyNumber_Long(this));
+}
+
+
+inline long
+Object::long_value()
+{
+  return (long) *Long();
 }
 
 

@@ -85,7 +85,7 @@ clean-python:
 	rm -rf python/build python/*.so
 
 .PHONY: test-python
-test-python:
+test-python: 
 	$(PYTEST) python
 
 .PHONY: testclean-python

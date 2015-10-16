@@ -15,17 +15,26 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
   };
 
   int            size;
-  int            precision   = fixfmt::Number::PRECISION_NONE;
-  int            pad         = fixfmt::Number::PAD_SPACE;
-  int            sign        = fixfmt::Number::SIGN_NEGATIVE;
-  char const*    nan         = "NaN";
-  char const*    inf         = "inf";
-  int            point       = '.';
-  int            bad         = '#';
+  Object*        precision_arg   = (Object*) Py_None;
+  int            pad             = fixfmt::Number::PAD_SPACE;
+  int            sign            = fixfmt::Number::SIGN_NEGATIVE;
+  char const*    nan             = "NaN";
+  char const*    inf             = "inf";
+  int            point           = '.';
+  int            bad             = '#';
   if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "i|i$CCssCC", (char**) arg_names,
-      &size, &precision, &pad, &sign, &nan, &inf, &point, &bad)) 
+      args, kw_args, "i|O$CCssCC", (char**) arg_names,
+      &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad)) 
     return -1;
+
+  int precision;
+  if (precision_arg == Py_None)
+    precision = fixfmt::Number::PRECISION_NONE;
+  else {
+    precision = precision_arg->long_value();
+    if (precision < 0)
+      precision = fixfmt::Number::PRECISION_NONE;
+  }
 
   self->fmt_ = unique_ptr<fixfmt::Number>(
       new fixfmt::Number(
@@ -34,17 +43,14 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
   return 0;
 }
 
-static PyObject* tp_call(Number* self, PyObject* args, PyObject* kw_args)
+
+ref<Object> tp_call(Number* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"value", nullptr};
   double val;
-  if (PyArg_ParseTupleAndKeywords(
-      args, kw_args, "d", (char**) arg_names, &val)) {
-    fixfmt::Number& fmt = *self->fmt_;
-    return Unicode::from(fmt(val));
-  }
-  else
-    return nullptr;
+  Arg::ParseTupleAndKeywords(args, kw_args, "d", arg_names, &val);
+
+  return Unicode::from((*self->fmt_)(val));
 }
 
 
@@ -88,7 +94,7 @@ Type Number::type_ = PyTypeObject{
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping
   (hashfunc)            nullptr,                            // tp_hash
-  (ternaryfunc)         tp_call,                            // tp_call
+  (ternaryfunc)         wrap<Number, tp_call>,              // tp_call
   (reprfunc)            nullptr,                            // tp_str
   (getattrofunc)        nullptr,                            // tp_getattro
   (setattrofunc)        nullptr,                            // tp_setattro
