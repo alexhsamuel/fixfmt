@@ -13,18 +13,18 @@ from   . import *
 
 # FIXME: We need a proper cascading configuration system.
 
+# FIXME: Make hierarchical.
 DEFAULT_CFG = {
-    # "formatters": {},
-    # "separators": {
-    #     "start"     : None,
-    #     "end"       : None,
-    #     "between"   : " ",
-    #     "index"     : " | ",
-    # },
+    "float.min_precision"       : 1,
+    "float.max_precision"       : 8,
 
-    # FIXME: Make hierarchical.
-    "float.min_precision": 1,
-    "float.max_precision": 8,
+    "formatters"                : {},
+
+    "separator.between"         : " ",
+    "separator.end"             : None,
+    "separator.index"           : " | ",
+    "separator.start"           : None,
+
 }
 
 def _add_array_to_table(table, arr, fmt):
@@ -100,7 +100,7 @@ def _choose_formatter_float(values, cfg):
     return Number(size, precision, sign=sign)
 
 
-def _get_default_formatter(arr, cfg=DEFAULT_CFG):
+def _get_default_formatter(arr, cfg):
     # FIXME: Choose sizes better.
     dtype = arr.dtype
     if dtype.kind == "i":
@@ -115,7 +115,7 @@ def _get_default_formatter(arr, cfg=DEFAULT_CFG):
         raise TypeError("no default formatter for {}".format(dtype))
 
 
-def _get_formatter(formatters, name, arr):
+def _get_formatter(formatters, name, arr, cfg):
     fmt = None
     for regex, value in formatters.items():
         if isinstance(regex, str) and re.match(regex, name) is not None:
@@ -123,7 +123,7 @@ def _get_formatter(formatters, name, arr):
     if fmt is None:
         fmt = formatters.get(arr.dtype, None)
     if fmt is None:
-        fmt = _get_default_formatter(arr)
+        fmt = _get_default_formatter(arr, cfg=cfg)
     assert fmt is not None
     return fmt
 
@@ -131,11 +131,10 @@ def _get_formatter(formatters, name, arr):
 def _table_for_dataframe(df, names, cfg={}):
     table = Table()
 
-    formatters  = cfg.get("formatters", {})
-    separators  = cfg.get("separators", {})
-    begin_sep   = separators.get("begin", "") or ""
-    sep         = separators.get("between", " ") or ""
-    end_sep     = separators.get("end", "") or "" 
+    formatters  = cfg["formatters"]
+    begin_sep   = cfg["separator.start"] or ""
+    sep         = cfg["separator.between"] or ""
+    end_sep     = cfg["separator.end"] or "" 
 
     if begin_sep:
         table.add_string(begin_sep)
@@ -143,7 +142,7 @@ def _table_for_dataframe(df, names, cfg={}):
     fmts = []
     for name in names:
         arr = df[name].values
-        fmt = _get_formatter(formatters, name, arr)
+        fmt = _get_formatter(formatters, name, arr, cfg)
         # FIXME: Add accessor to table.
         fmts.append(fmt)
         _add_array_to_table(table, arr, fmt)
@@ -163,13 +162,14 @@ def _table_for_dataframe(df, names, cfg={}):
 
 # FIXME: Do what when it's too wide???
 
-def _print_dataframe(df, cfg={}):
+def _print_dataframe(df, cfg):
     # Slog through configuration.
-    separators  = cfg.get("separators", {})
-    begin_sep   = separators.get("begin", "") or ""
-    sep         = separators.get("between", " ") or ""
-    end_sep     = separators.get("end", "") or "" 
-    max_rows    = cfg.get("max_rows", "terminal")
+    formatters  = cfg["formatters"]
+    begin_sep   = cfg["separator.start"] or ""
+    sep         = cfg["separator.between"] or ""
+    end_sep     = cfg["separator.end"] or "" 
+    max_rows    = cfg.get("max_rows", "terminal")  # FIXME
+
     if max_rows == "terminal":
         # FIXME
         max_rows = shutil.get_terminal_size().lines - 1
@@ -224,7 +224,9 @@ def _print_dataframe(df, cfg={}):
             builtins.print(table(i))
 
 
-def print(df, **cfg):
+def print(df, **kw_args):
+    cfg = dict(DEFAULT_CFG)
+    cfg.update(kw_args)
     _print_dataframe(df, cfg)
 
 
