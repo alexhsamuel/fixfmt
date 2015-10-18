@@ -22,6 +22,7 @@ DEFAULT_CFG = {
     #     "index"     : " | ",
     # },
 
+    # FIXME: Make hierarchical.
     "float.min_precision": 1,
     "float.max_precision": 8,
 }
