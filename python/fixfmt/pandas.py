@@ -1,4 +1,5 @@
 import builtins
+from   math import floor, log10
 import re
 import shutil
 
@@ -12,15 +13,18 @@ from   . import *
 
 # FIXME: We need a proper cascading configuration system.
 
-# DEFAULT_CFG = {
-#     "formatters": {},
-#     "separators": {
-#         "start"     : None,
-#         "end"       : None,
-#         "between"   : " ",
-#         "index"     : " | ",
-#     },
-# }
+DEFAULT_CFG = {
+    # "formatters": {},
+    # "separators": {
+    #     "start"     : None,
+    #     "end"       : None,
+    #     "between"   : " ",
+    #     "index"     : " | ",
+    # },
+
+    "float.min_precision": 1,
+    "float.max_precision": 8,
+}
 
 def _add_array_to_table(table, arr, fmt):
     dtype = arr.dtype
@@ -44,13 +48,64 @@ def _add_array_to_table(table, arr, fmt):
         raise TypeError("unsupported dtype: {}".format(dtype))
 
 
-def _get_default_formatter(arr):
+def _get_num_digits(value):
+    """
+    Returns the number of digits required to represent a value.
+    """
+    return 1 if value == 0 else max(int(floor(log10(abs(value)) + 1)), 1)
+
+
+def _choose_formatter_int(values, cfg):
+    if len(values) == 0:
+        return Number(1, None, sign=" ")
+
+    min_val = values.min()
+    max_val = values.max()
+    size    = _get_num_digits(max(abs(min_val), abs(max_val)))
+    sign    = " " if min_val >= 0 else "-"
+    return Number(size, sign=sign)
+
+
+def _choose_formatter_float(values, cfg):
+    # FIXME: Consider width of NaN and infinite strings.
+    # FIXME: This could be done with a single pass more efficiently.
+
+    # Remove NaN and infinite values.
+    is_nan  = np.isnan(values)
+    has_nan = is_nan.any()
+    is_inf  = np.isinf(values)
+    has_inf = is_inf.any()
+    vals    = values[~(is_nan | is_inf)]
+    
+    if len(vals) == 0:
+        # No values left.
+        return Float(1, 1)
+
+    # Determine the scale.
+    min_val = vals.min()
+    max_val = vals.max()
+    sign    = " " if min_val >= 0 else "-"
+    size    = _get_num_digits(max(abs(min_val), abs(max_val)))
+
+    # Try progressively higher precision until rounding won't leave any
+    # residuals larger the maximum pecision.
+    precision_min   = cfg["float.min_precision"]
+    precision_max   = cfg["float.max_precision"]
+    tolerance       = (10 ** -precision_max) / 2
+    for precision in range(precision_min, precision_max + 1):
+        if (abs(np.round(vals, precision) - vals) < tolerance).all():
+            break
+
+    return Number(size, precision, sign=sign)
+
+
+def _get_default_formatter(arr, cfg=DEFAULT_CFG):
     # FIXME: Choose sizes better.
     dtype = arr.dtype
     if dtype.kind == "i":
-        return Number(6)
+        return _choose_formatter_int(arr, cfg=cfg)
     elif dtype.kind == "f":
-        return Number(6, 6)
+        return _choose_formatter_float(arr, cfg=cfg)
     elif dtype.kind == "b":
         return Bool()
     elif dtype.kind == "O":
@@ -58,6 +113,72 @@ def _get_default_formatter(arr):
     else:
         raise TypeError("no default formatter for {}".format(dtype))
 
+
+def get_default_formatter(type, values, cfg={}):
+    """
+    Chooses a default formatter based on type and values.
+
+    @param values
+      A sequence or `ndarray` of values.
+    """
+    values = np.array(values)
+
+    if type is int:
+        # Int types.
+        size = get_size(abs(values).max())
+        return formatters.IntFormatter(size)
+
+    elif type is float:
+        # Float types.  
+        vals = values[~(np.isnan(values) | np.isinf(values))]
+        if len(vals) == 0:
+            # No normal values.
+            return formatters.FloatFormatter(1, 1)
+        # First determine the scale.
+        neg = (vals < 0).any()
+        abs_vals = abs(vals)
+        max_val = abs_vals.max()
+        if (max_val == 0 
+            or float(cfg["scientific_max"]) < max_val 
+                 < float(cfg["scientific_min"])):
+            fmt = formatters.FloatFormatter
+            size = 1 if len(vals) == 0 else get_size(max_val)
+        else:
+            # Use scientific notation for very small or very large.
+            fmt = formatters.EFloatFormatter
+            # Find the number of digits in the exponent.
+            size = max(1, int(ceil(log10(floor(abs(log10(max_val)))))))
+        # Guess precision.  Try progressively higher precision until we find
+        # one where rounding there won't leave any residuals larger than
+        # we are willing to represent at all.
+        precision_min = int(cfg["precision_min"])
+        precision_max = int(cfg["precision_max"])
+        tol = (10 ** -precision_max) / 2
+        for precision in range(precision_min, precision_max + 1):
+            if (abs(np.round(vals, precision) - vals) < tol).all():
+                break
+        return fmt(
+            size, precision, 
+            sign="-" if neg else None,
+            nan_str=cfg["nan_string"],
+            inf_str=cfg["inf_string"])
+
+    elif type is str:
+        width = np.vectorize(len)(np.vectorize(str)(values)).max()
+        str_width_min = int(cfg["str_width_min"])
+        str_width_max = int(cfg["str_width_max"])
+        width = clip(str_width_min, width, str_width_max)
+        return formatters.StrFormatter(width, ellipsis=cfg["ellipsis"])
+
+    elif type is bool:
+        return formatters.BoolFormatter("TRUE", "FALSE", size=1, pad_left=True)
+
+    elif type is datetime:
+        return formatters.DatetimeFormatter("ISO 8601 extended")
+
+    else:
+        raise NotImplementedError("type: {}".format(type))
+        
 
 def _get_formatter(formatters, name, arr):
     fmt = None
