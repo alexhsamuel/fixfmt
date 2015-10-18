@@ -7,6 +7,8 @@ using std::unique_ptr;
 
 namespace {
 
+// FIXME: Wrap for exceptions.
+// FIXME: Accept sign=None.
 static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {
@@ -34,6 +36,13 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
     precision = precision_arg->long_value();
     if (precision < 0)
       precision = fixfmt::Number::PRECISION_NONE;
+  }
+  if (   sign != fixfmt::Number::SIGN_NONE
+      && sign != fixfmt::Number::SIGN_NEGATIVE
+      && sign != fixfmt::Number::SIGN_ALWAYS) {
+    // FIXME
+    PyErr_SetString(PyExc_ValueError, "invalid sign");
+    return 1;
   }
 
   self->fmt_ = unique_ptr<fixfmt::Number>(
