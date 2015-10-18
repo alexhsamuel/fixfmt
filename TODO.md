@@ -11,6 +11,10 @@ Things to do:
 - add exponential E+ formatter
 - add accessors to formatters, C++ and Python
 
+Dataframe features:
+- print index
+- print row numbers
+
 Fancy features:
 - use more fancy Unicode characters
 - ANSI escapes
