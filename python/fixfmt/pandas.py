@@ -2,6 +2,7 @@ import builtins
 from   math import floor, log10
 import re
 import shutil
+import sys
 
 import numpy as np
 import pandas as pd
@@ -25,6 +26,8 @@ DEFAULT_CFG = {
     "separator.index"           : " | ",
     "separator.start"           : None,
 
+    "str.min_size"              :  1,
+    "str.max_size"              : 32,
 }
 
 def _add_array_to_table(table, arr, fmt):
@@ -100,6 +103,13 @@ def _choose_formatter_float(values, cfg):
     return Number(size, precision, sign=sign)
 
 
+def _choose_formatter_str(values, cfg):
+    size = np.vectorize(len)(values).max()
+    size = max(size, cfg["str.min_size"])
+    size = min(size, cfg["str.max_size"])
+    return String(size)
+
+
 def _get_default_formatter(arr, cfg):
     # FIXME: Choose sizes better.
     dtype = arr.dtype
@@ -110,7 +120,7 @@ def _get_default_formatter(arr, cfg):
     elif dtype.kind == "b":
         return Bool()
     elif dtype.kind == "O":
-        return String(16)
+        return _choose_formatter_str(arr, cfg=cfg)
     else:
         raise TypeError("no default formatter for {}".format(dtype))
 
@@ -142,6 +152,11 @@ def _table_for_dataframe(df, names, cfg={}):
     fmts = []
     for name in names:
         arr = df[name].values
+
+        if arr.dtype.kind == "O":
+            # Objects are stringified.  Do this now.
+            arr = np.vectorize(str, [object])(arr)
+
         fmt = _get_formatter(formatters, name, arr, cfg)
         # FIXME: Add accessor to table.
         fmts.append(fmt)
@@ -228,5 +243,27 @@ def print(df, **kw_args):
     cfg = dict(DEFAULT_CFG)
     cfg.update(kw_args)
     _print_dataframe(df, cfg)
+
+
+#-------------------------------------------------------------------------------
+
+def main():
+    from   argparse import ArgumentParser
+    from   pln.io import load_pickle
+
+    parser = ArgumentParser()
+    parser.add_argument(
+        "filename", metavar="FILENAME", 
+        help="read from FILENAME")
+    args = parser.parse_args()
+    
+    # FIXME: Support "-".
+    df = load_pickle(args.filename)
+    builtins.print(df.dtypes)
+    print(df)
+
+
+if __name__ == "__main__":
+    main()
 
 
