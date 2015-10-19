@@ -1,6 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstring>
 #include <string>
 
@@ -269,6 +271,34 @@ inline void Number::format(
       }
     }
   }
+}
+
+
+inline int
+get_num_digits(double value)
+{
+  return value == 0 ? 1 : std::max(int(floor(log10(abs(value)) + 1)), 1);
+}
+
+
+template<typename T>
+Number guess_type_int(T const* const arr, size_t length)
+{
+  if (length == 0)
+    return Number(1, Number::PRECISION_NONE, ' ', Number::SIGN_NONE);
+
+  T min = arr[0];
+  T max = arr[0];
+  for (size_t i = 1; i < length; ++i) {
+    T const val = arr[i];
+    if (val < min)
+      min = val;
+    if (val > max)
+      max = val;
+  }
+  int const size = get_num_digits(std::max(abs(min), abs(max)));
+  char sign = min < 0 ? Number::SIGN_NEGATIVE : Number::SIGN_NONE;
+  return Number(size, Number::PRECISION_NONE, ' ', sign);
 }
 
 
