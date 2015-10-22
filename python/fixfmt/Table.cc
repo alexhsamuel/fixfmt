@@ -14,12 +14,20 @@ using std::unique_ptr;
 
 namespace {
 
+void tp_dealloc(Table* self)
+{
+  self->~Table();
+  self->ob_type->tp_free(self);
+}
+
+
 int tp_init(Table* self, Tuple* args, Dict* kw_args)
 {
   // No arguments.
   static char const* arg_names[] = {nullptr};
   Arg::ParseTupleAndKeywords(args, kw_args, "", (char**) arg_names);
 
+  new(self) Table();
   self->table_ = unique_ptr<fixfmt::Table>(new fixfmt::Table());
   return 0;
 }
@@ -82,18 +90,24 @@ template<typename TYPE, typename PYFMT>
 ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"buf", "format", nullptr};
-  TYPE const* buf;
-  int buf_len;
+  Py_buffer buffer;
   PYFMT* format;
   Arg::ParseTupleAndKeywords(
-      args, kw_args, "y#O!", arg_names, 
-      &buf, &buf_len, &PYFMT::type_, &format);
+      args, kw_args, "y*O!", arg_names, 
+      &buffer, &PYFMT::type_, &format);
+
+  if (buffer.ndim != 0)
+    throw Exception(PyExc_TypeError, "not a one-dimensional array");
+  if (buffer.itemsize != sizeof(TYPE))
+    throw Exception(PyExc_TypeError, "wrong itemsize");
 
   using ColumnUptr = unique_ptr<fixfmt::Column>;
   using Column = fixfmt::ColumnImpl<TYPE, typename PYFMT::Formatter>;
 
-  long const len = buf_len / sizeof(TYPE);
-  self->table_->add_column(ColumnUptr(new Column(buf, len, *format->fmt_)));
+  long const len = buffer.len / buffer.itemsize;
+  self->table_->add_column(
+    ColumnUptr(new Column((TYPE*) buffer.buf, len, *format->fmt_)));
+  self->hold_buffer(std::move(buffer));
   return none_ref();
 }
 
@@ -140,18 +154,23 @@ private:
 ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"buf", "format", nullptr};
-  Object** buf;
-  int buf_len;
+  Py_buffer buffer;
   String* format;
   Arg::ParseTupleAndKeywords(
-      args, kw_args, "y#O!", arg_names,
-      &buf, &buf_len, &String::type_, &format);
+      args, kw_args, "y*O!", arg_names,
+      &buffer, &String::type_, &format);
   
+  if (buffer.ndim != 0)
+    throw Exception(PyExc_TypeError, "not a one-dimensional array");
+  if (buffer.itemsize != sizeof(Object*))
+    throw Exception(PyExc_TypeError, "wrong itemsize");
+
   using ColumnUptr = unique_ptr<fixfmt::Column>;
 
-  long const len = buf_len / sizeof(Object*);
-  self->table_->add_column(
-      ColumnUptr(new StrObjectColumn(buf, len, *format->fmt_)));
+  long const len = buffer.len / buffer.itemsize;
+  self->table_->add_column(ColumnUptr(
+    new StrObjectColumn((Object**) buffer.buf, len, *format->fmt_)));
+  self->hold_buffer(std::move(buffer));
   return none_ref();
 }
 
@@ -208,7 +227,7 @@ Type Table::type_ = PyTypeObject{
   (char const*)         "fixfmt.Table",                     // tp_name
   (Py_ssize_t)          sizeof(Table),                      // tp_basicsize
   (Py_ssize_t)          0,                                  // tp_itemsize
-  (destructor)          nullptr,                            // tp_dealloc
+  (destructor)          tp_dealloc,                         // tp_dealloc
   (printfunc)           nullptr,                            // tp_print
   (getattrfunc)         nullptr,                            // tp_getattr
   (setattrfunc)         nullptr,                            // tp_setattr

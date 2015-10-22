@@ -150,8 +150,10 @@ def _table_for_dataframe(df, names, cfg={}):
         table.add_string(begin_sep)
 
     fmts = []
+    arrs = []
     for name in names:
         arr = df[name].values
+        arrs.append(arr)
 
         if arr.dtype.kind == "O":
             # Objects are stringified.  Do this now.
@@ -167,7 +169,7 @@ def _table_for_dataframe(df, names, cfg={}):
     if end_sep:
         table.add_string(end_sep)
             
-    return table, fmts
+    return table, fmts, arrs
 
 
 # FIXME: By screen (repeating header?)
@@ -202,7 +204,7 @@ def _print_dataframe(df, cfg):
 
     names = pln.ctr.select_ordered(df.columns, names)
     # FIXME: Get formats from table columns.
-    table, fmts = _table_for_dataframe(df, names, cfg)
+    table, fmts, arrs = _table_for_dataframe(df, names, cfg)
 
     if show_header:
         header = []
@@ -259,6 +261,7 @@ def main():
     
     # FIXME: Support "-".
     df = load_pickle(args.filename)
+    # df = df[["i", "x", "y", "s", "b", ]]
     builtins.print(df.dtypes)
     print(df)
 

@@ -177,9 +177,6 @@ public:
   static bool Check(PyObject* obj)
     { return true; }
 
-  Object() = delete;
-  ~Object() = delete;
-
   auto Length()
     { return PyObject_Length(this); }
   auto Repr()
