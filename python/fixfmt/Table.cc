@@ -89,6 +89,7 @@ ref<Object> add_string(Table* self, Tuple* args, Dict* kw_args)
 template<typename TYPE, typename PYFMT>
 ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
 {
+  std::cerr << "add_column\n";
   static char const* arg_names[] = {"buf", "format", nullptr};
   Py_buffer buffer;
   PYFMT* format;
@@ -107,7 +108,8 @@ ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
   long const len = buffer.len / buffer.itemsize;
   self->table_->add_column(
     ColumnUptr(new Column((TYPE*) buffer.buf, len, *format->fmt_)));
-  self->hold_buffer(std::move(buffer));
+  self->buffers_.push_back(std::move(buffer));
+  std::cerr << "add_column done\n";
   return none_ref();
 }
 
@@ -170,7 +172,7 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
   long const len = buffer.len / buffer.itemsize;
   self->table_->add_column(ColumnUptr(
     new StrObjectColumn((Object**) buffer.buf, len, *format->fmt_)));
-  self->hold_buffer(std::move(buffer));
+  self->buffers_.push_back(std::move(buffer));
   return none_ref();
 }
 
