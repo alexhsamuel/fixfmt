@@ -281,8 +281,8 @@ get_num_digits(double value)
 }
 
 
-template<typename T>
-Number guess_type_int(T const* const arr, size_t length)
+template<typename T> Number
+guess_type_int(T const* const arr, size_t length)
 {
   if (length == 0)
     return Number(1, Number::PRECISION_NONE, ' ', Number::SIGN_NONE);
