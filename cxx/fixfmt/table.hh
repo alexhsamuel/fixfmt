@@ -14,7 +14,6 @@
 namespace fixfmt {
 
 using std::string;
-using std::stringstream;
 using std::unique_ptr;
 
 static constexpr auto MAX_INDEX = std::numeric_limits<long>::max();
@@ -128,7 +127,7 @@ public:
 
   virtual string operator()(long const index) const override
   {
-    stringstream result;
+    std::stringstream result;
     for (auto i = columns_.begin(); i != columns_.end(); ++i)
       result << (**i)(index);
     return result.str();
