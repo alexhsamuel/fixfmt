@@ -45,6 +45,7 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
     return 1;
   }
 
+  new(self) Number;
   self->fmt_ = unique_ptr<fixfmt::Number>(
       new fixfmt::Number(
           size, precision, (char) pad, (char) sign, std::string(nan),

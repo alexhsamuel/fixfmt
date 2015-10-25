@@ -33,6 +33,7 @@ int tp_init(String* self, PyObject* args, PyObject* kw_args)
     return 1;
   }
 
+  new(self) String;
   self->fmt_ = unique_ptr<fixfmt::String>(
       new fixfmt::String(size, ellipsis, pad, position, pad_left));
   return 0;

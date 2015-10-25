@@ -20,7 +20,8 @@ namespace {
 
 int tp_init(Bool* self, PyObject* args, PyObject* kw_args)
 {
-  static char const* arg_names[] = {"true", "false", "size", "pad_left", nullptr};
+  static char const* arg_names[] = {
+    "true", "false", "size", "pad_left", nullptr };
   char const*    true_str    = "true";
   char const*    false_str   = "false";
   int            size        = -1;
@@ -32,6 +33,8 @@ int tp_init(Bool* self, PyObject* args, PyObject* kw_args)
 
   if (size < 0)
     size = std::max(strlen(true_str), strlen(false_str));
+
+  new(self) Bool;
   self->fmt_ = unique_ptr<fixfmt::Bool>(
       new fixfmt::Bool(string(true_str), string(false_str), size, pad_left));
   return 0;
