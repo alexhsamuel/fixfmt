@@ -30,6 +30,7 @@ Internal:
   characters).
 
 Cleanup:
+- Use wrapped methods consistently.
 - check up on FIXMEs
 - banners
 
