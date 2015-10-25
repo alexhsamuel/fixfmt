@@ -26,7 +26,7 @@ ref<Object> pad(Module* module, Tuple* args, Dict* kw_args)
 
   // FIXME: Validate args.
   if (strlen(pad) == 0)
-    throw Exception(PyExc_ValueError, "empty pad");
+    throw ValueError("empty pad");
 
   string r = fixfmt::pad(string(str), length, pad, (bool) left);
   return Unicode::from(r);
@@ -65,7 +65,7 @@ ref<Object> palide(Module* module, Tuple* args, Dict* kw_args)
 
   // FIXME: Validate args.
   if (strlen(pad) == 0)
-    throw Exception(PyExc_ValueError, "empty pad");
+    throw ValueError("empty pad");
 
   string r = fixfmt::palide(
     string(str), length, string(ellipsis), pad, position, (bool) left);

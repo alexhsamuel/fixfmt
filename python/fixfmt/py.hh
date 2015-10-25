@@ -26,11 +26,15 @@ public:
 
   Exception() {}
   
+  Exception(PyObject* exception, char const* message)
+  {
+    PyErr_SetString(exception, message);
+  }
+
   template<typename A>
   Exception(PyObject* exception, A&& message)
   {
-    std::string msg(std::forward<A>(message));
-    PyErr_SetString(exception, msg.c_str());
+    PyErr_SetString(exception, std::string(std::forward<A>(message)).c_str());
   }
 
   /**
@@ -39,6 +43,49 @@ public:
   static void Clear() { PyErr_Clear(); }
 
 };
+
+
+/**
+ * Template wrapper for a specific Python exception type.
+ */
+template<PyObject** EXC>
+class ExceptionWrapper
+  : public Exception
+{
+public:
+
+  template<typename A>
+  ExceptionWrapper(A&& message)
+    : Exception(*EXC, std::forward<A>(message))
+  {}
+
+};
+
+
+using ArithmeticError       = ExceptionWrapper<&PyExc_ArithmeticError>;
+using AttributeError        = ExceptionWrapper<&PyExc_AttributeError>;
+using EnvironmentError      = ExceptionWrapper<&PyExc_EnvironmentError>;
+using FileExistsError       = ExceptionWrapper<&PyExc_FileExistsError>;
+using FileNotFoundError     = ExceptionWrapper<&PyExc_FileNotFoundError>;
+using IOError               = ExceptionWrapper<&PyExc_IOError>;
+using IndexError            = ExceptionWrapper<&PyExc_IndexError>;
+using InterruptedError      = ExceptionWrapper<&PyExc_InterruptedError>;
+using IsADirectoryError     = ExceptionWrapper<&PyExc_IsADirectoryError>;
+using KeyError              = ExceptionWrapper<&PyExc_KeyError>;
+using LookupError           = ExceptionWrapper<&PyExc_LookupError>;
+using NameError             = ExceptionWrapper<&PyExc_NameError>;
+using NotADirectoryError    = ExceptionWrapper<&PyExc_NotADirectoryError>;
+using NotImplementedError   = ExceptionWrapper<&PyExc_NotImplementedError>;
+using OverflowError         = ExceptionWrapper<&PyExc_OverflowError>;
+using PermissionError       = ExceptionWrapper<&PyExc_PermissionError>;
+using ReferenceError        = ExceptionWrapper<&PyExc_ReferenceError>;
+using RuntimeError          = ExceptionWrapper<&PyExc_RuntimeError>;
+using StopIteration         = ExceptionWrapper<&PyExc_StopIteration>;
+using SystemExit            = ExceptionWrapper<&PyExc_SystemExit>;
+using TimeoutError          = ExceptionWrapper<&PyExc_TimeoutError>;
+using TypeError             = ExceptionWrapper<&PyExc_TypeError>;
+using ValueError            = ExceptionWrapper<&PyExc_ValueError>;
+using ZeroDivisionError     = ExceptionWrapper<&PyExc_ZeroDivisionError>;
 
 
 /**

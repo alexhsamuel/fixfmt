@@ -40,9 +40,9 @@ ref<Object> tp_call(Table* self, Tuple* args, Dict* kw_args)
   Arg::ParseTupleAndKeywords(args, kw_args, "l", arg_names, &index);
 
   if (index < 0)
-    throw Exception(PyExc_IndexError, "negative index");
+    throw IndexError("negative index");
   if (index >= self->table_->get_length())
-    throw Exception(PyExc_IndexError, "index larger than length");
+    throw IndexError("index larger than length");
 
   return Unicode::from((*self->table_)(index));
 }
@@ -100,9 +100,9 @@ ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
   // Validate args.
   BufferRef buffer(array, PyBUF_ND);
   if (buffer->ndim != 1)
-    throw Exception(PyExc_TypeError, "not a one-dimensional array");
+    throw TypeError("not a one-dimensional array");
   if (buffer->itemsize != sizeof(TYPE))
-    throw Exception(PyExc_TypeError, "wrong itemsize");
+    throw TypeError("wrong itemsize");
 
   // Add the column.
   using Column = fixfmt::ColumnImpl<TYPE, typename PYFMT::Formatter>;
@@ -169,9 +169,9 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
   // Validate args.
   BufferRef buffer(array, PyBUF_ND);
   if (buffer->ndim != 1)
-    throw Exception(PyExc_TypeError, "not a one-dimensional array");
+    throw TypeError("not a one-dimensional array");
   if (buffer->itemsize != sizeof(Object*))
-    throw Exception(PyExc_TypeError, "wrong itemsize");
+    throw TypeError("wrong itemsize");
 
   // Add the column.
   self->table_->add_column(std::make_unique<StrObjectColumn>(
