@@ -27,7 +27,7 @@ int tp_init(Table* self, Tuple* args, Dict* kw_args)
   static char const* arg_names[] = {nullptr};
   Arg::ParseTupleAndKeywords(args, kw_args, "", (char**) arg_names);
 
-  new(self) Table();
+  new(self) Table;
   self->table_ = unique_ptr<fixfmt::Table>(new fixfmt::Table());
   return 0;
 }
