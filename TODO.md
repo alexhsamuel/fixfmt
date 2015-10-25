@@ -1,5 +1,7 @@
 Things to do:
 
+- Use cfg in fixfmt.pandas.
+
 - rename Number -> PyNumber, etc.
 - category types
 - datetime types
@@ -22,6 +24,7 @@ Fancy features:
 - rule-based coloring
 
 Internal:
+- Speed up _choose_formatter_* with extension code.  See branch guess_types_cxx.
 - Add wrap<> for Python functions other than Method.
 - Format into buffers of preallocated length (which must accommodate multibyte
   characters).
