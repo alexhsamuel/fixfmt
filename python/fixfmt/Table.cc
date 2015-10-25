@@ -83,12 +83,13 @@ ref<Object> add_string(Table* self, Tuple* args, Dict* kw_args)
  * Template method for adding a column to the table.
  *
  * 'buf' is a 'bytes' object containing contiguous values of type 'TYPE', e.g.
- * 'int' or 'double'.  'PYFMT" is a Python object that wraps a formatter for
+ * 'int' or 'double'.  'PYFMT' is a Python object that wraps a formatter for
  * 'TYPE' values.
  */
 template<typename TYPE, typename PYFMT>
 ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
 {
+  // Parse args.
   static char const* arg_names[] = {"buf", "format", nullptr};
   PyObject* array;
   PYFMT* format;
@@ -96,19 +97,22 @@ ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
       args, kw_args, "OO!", arg_names, 
       &array, &PYFMT::type_, &format);
 
-  BufferRef buffer(array, PyBUF_CONTIG_RO);
+  // Validate args.
+  BufferRef buffer(array, PyBUF_ND);
   if (buffer->ndim != 1)
     throw Exception(PyExc_TypeError, "not a one-dimensional array");
   if (buffer->itemsize != sizeof(TYPE))
     throw Exception(PyExc_TypeError, "wrong itemsize");
 
-  using ColumnUptr = unique_ptr<fixfmt::Column>;
+  // Add the column.
   using Column = fixfmt::ColumnImpl<TYPE, typename PYFMT::Formatter>;
+  self->table_->add_column(std::make_unique<Column>(
+    reinterpret_cast<TYPE*>(buffer->buf), 
+    buffer->shape[0], 
+    *format->fmt_));
+  // Hold on to the buffer ref.
+  self->buffers_.push_back(std::move(buffer));
 
-  long const len = buffer->len / buffer->itemsize;
-  self->table_->add_column(
-    ColumnUptr(new Column((TYPE*) buffer->buf, len, *format->fmt_)));
-  self->buffers_.emplace_back(std::move(buffer));
   return none_ref();
 }
 
@@ -154,6 +158,7 @@ private:
 
 ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
 {
+  // Parse args.
   static char const* arg_names[] = {"buf", "format", nullptr};
   PyObject* array;
   String* format;
@@ -161,18 +166,21 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
       args, kw_args, "OO!", arg_names,
       &array, &String::type_, &format);
   
-  BufferRef buffer(array, PyBUF_CONTIG_RO);
+  // Validate args.
+  BufferRef buffer(array, PyBUF_ND);
   if (buffer->ndim != 1)
     throw Exception(PyExc_TypeError, "not a one-dimensional array");
   if (buffer->itemsize != sizeof(Object*))
     throw Exception(PyExc_TypeError, "wrong itemsize");
 
-  using ColumnUptr = unique_ptr<fixfmt::Column>;
-
-  long const len = buffer->len / buffer->itemsize;
-  self->table_->add_column(ColumnUptr(
-    new StrObjectColumn((Object**) buffer->buf, len, *format->fmt_)));
+  // Add the column.
+  self->table_->add_column(std::make_unique<StrObjectColumn>(
+    reinterpret_cast<Object**>(buffer->buf),
+    buffer->shape[0], 
+    *format->fmt_));
+  // Hold on to the buffer ref.
   self->buffers_.emplace_back(std::move(buffer));
+
   return none_ref();
 }
 
