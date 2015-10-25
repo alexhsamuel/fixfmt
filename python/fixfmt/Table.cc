@@ -89,15 +89,17 @@ ref<Object> add_string(Table* self, Tuple* args, Dict* kw_args)
 template<typename TYPE, typename PYFMT>
 ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
 {
-  std::cerr << "add_column\n";
   static char const* arg_names[] = {"buf", "format", nullptr};
-  Py_buffer buffer;
+  PyObject* array;
   PYFMT* format;
   Arg::ParseTupleAndKeywords(
-      args, kw_args, "y*O!", arg_names, 
-      &buffer, &PYFMT::type_, &format);
+      args, kw_args, "OO!", arg_names, 
+      &array, &PYFMT::type_, &format);
 
-  if (buffer.ndim != 0)
+  Py_buffer buffer;
+  if (PyObject_GetBuffer(array, &buffer, PyBUF_CONTIG_RO) != 0)
+    throw Exception();
+  if (buffer.ndim != 1)
     throw Exception(PyExc_TypeError, "not a one-dimensional array");
   if (buffer.itemsize != sizeof(TYPE))
     throw Exception(PyExc_TypeError, "wrong itemsize");
@@ -108,8 +110,7 @@ ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
   long const len = buffer.len / buffer.itemsize;
   self->table_->add_column(
     ColumnUptr(new Column((TYPE*) buffer.buf, len, *format->fmt_)));
-  self->buffers_.push_back(std::move(buffer));
-  std::cerr << "add_column done\n";
+  self->buffers_.emplace_back(std::move(buffer));
   return none_ref();
 }
 
@@ -156,13 +157,16 @@ private:
 ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"buf", "format", nullptr};
-  Py_buffer buffer;
+  PyObject* array;
   String* format;
   Arg::ParseTupleAndKeywords(
-      args, kw_args, "y*O!", arg_names,
-      &buffer, &String::type_, &format);
+      args, kw_args, "OO!", arg_names,
+      &array, &String::type_, &format);
   
-  if (buffer.ndim != 0)
+  Py_buffer buffer;
+  if (PyObject_GetBuffer(array, &buffer, PyBUF_CONTIG_RO) != 0)
+    throw Exception();
+  if (buffer.ndim != 1)
     throw Exception(PyExc_TypeError, "not a one-dimensional array");
   if (buffer.itemsize != sizeof(Object*))
     throw Exception(PyExc_TypeError, "wrong itemsize");
@@ -172,7 +176,7 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
   long const len = buffer.len / buffer.itemsize;
   self->table_->add_column(ColumnUptr(
     new StrObjectColumn((Object**) buffer.buf, len, *format->fmt_)));
-  self->buffers_.push_back(std::move(buffer));
+  self->buffers_.emplace_back(std::move(buffer));
   return none_ref();
 }
 

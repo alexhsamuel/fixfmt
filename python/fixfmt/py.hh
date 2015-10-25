@@ -380,6 +380,47 @@ public:
 
 //==============================================================================
 
+// Buffer objects
+// See https://docs.python.org/3/c-api/buffer.html.
+
+/**
+ * A unique reference to a buffer object.
+ *
+ * Supports move semantics only; no copy.
+ */
+class BufferRef
+{
+public:
+
+  BufferRef(Py_buffer&& buffer)
+    : buffer_(buffer)
+  {}
+
+  BufferRef(BufferRef&& ref)
+    : buffer_(ref.buffer_)
+  {
+    ref.buffer_.obj = nullptr;
+  }
+
+  ~BufferRef()
+  {
+    // Only releases if buffer_.obj is not null.
+    PyBuffer_Release(&buffer_);
+    assert(buffer_.obj == nullptr);
+  }
+
+  BufferRef(BufferRef const&) = delete;
+  void operator=(BufferRef const&) = delete;
+
+private:
+
+  Py_buffer buffer_;
+
+};
+
+
+//==============================================================================
+
 template<typename CLASS>
 using MethodPtr = ref<Object> (*)(CLASS* self, Tuple* args, Dict* kw_args);
 
