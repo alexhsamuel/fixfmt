@@ -96,20 +96,18 @@ ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
       args, kw_args, "OO!", arg_names, 
       &array, &PYFMT::type_, &format);
 
-  Py_buffer buffer;
-  if (PyObject_GetBuffer(array, &buffer, PyBUF_CONTIG_RO) != 0)
-    throw Exception();
-  if (buffer.ndim != 1)
+  BufferRef buffer(array, PyBUF_CONTIG_RO);
+  if (buffer->ndim != 1)
     throw Exception(PyExc_TypeError, "not a one-dimensional array");
-  if (buffer.itemsize != sizeof(TYPE))
+  if (buffer->itemsize != sizeof(TYPE))
     throw Exception(PyExc_TypeError, "wrong itemsize");
 
   using ColumnUptr = unique_ptr<fixfmt::Column>;
   using Column = fixfmt::ColumnImpl<TYPE, typename PYFMT::Formatter>;
 
-  long const len = buffer.len / buffer.itemsize;
+  long const len = buffer->len / buffer->itemsize;
   self->table_->add_column(
-    ColumnUptr(new Column((TYPE*) buffer.buf, len, *format->fmt_)));
+    ColumnUptr(new Column((TYPE*) buffer->buf, len, *format->fmt_)));
   self->buffers_.emplace_back(std::move(buffer));
   return none_ref();
 }
@@ -163,19 +161,17 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
       args, kw_args, "OO!", arg_names,
       &array, &String::type_, &format);
   
-  Py_buffer buffer;
-  if (PyObject_GetBuffer(array, &buffer, PyBUF_CONTIG_RO) != 0)
-    throw Exception();
-  if (buffer.ndim != 1)
+  BufferRef buffer(array, PyBUF_CONTIG_RO);
+  if (buffer->ndim != 1)
     throw Exception(PyExc_TypeError, "not a one-dimensional array");
-  if (buffer.itemsize != sizeof(Object*))
+  if (buffer->itemsize != sizeof(Object*))
     throw Exception(PyExc_TypeError, "wrong itemsize");
 
   using ColumnUptr = unique_ptr<fixfmt::Column>;
 
-  long const len = buffer.len / buffer.itemsize;
+  long const len = buffer->len / buffer->itemsize;
   self->table_->add_column(ColumnUptr(
-    new StrObjectColumn((Object**) buffer.buf, len, *format->fmt_)));
+    new StrObjectColumn((Object**) buffer->buf, len, *format->fmt_)));
   self->buffers_.emplace_back(std::move(buffer));
   return none_ref();
 }

@@ -384,13 +384,24 @@ public:
 // See https://docs.python.org/3/c-api/buffer.html.
 
 /**
- * A unique reference to a buffer object.
+ * A unique reference view to a buffer object.
  *
  * Supports move semantics only; no copy.
  */
 class BufferRef
 {
 public:
+
+  /**
+   * Creates a buffer view of an object.  The ref holds a reference to the
+   * object.
+   */
+  BufferRef(PyObject* obj, int flags)
+  {
+    if (PyObject_GetBuffer(obj, &buffer_, flags) != 0)
+      throw Exception();
+    assert(buffer_.obj != nullptr);
+  }
 
   BufferRef(Py_buffer&& buffer)
     : buffer_(buffer)
@@ -411,6 +422,8 @@ public:
 
   BufferRef(BufferRef const&) = delete;
   void operator=(BufferRef const&) = delete;
+
+  Py_buffer* operator->() { return &buffer_; }
 
 private:
 
