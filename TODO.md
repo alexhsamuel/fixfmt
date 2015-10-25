@@ -22,6 +22,7 @@ Fancy features:
 - rule-based coloring
 
 Internal:
+- Add wrap<> for Python functions other than Method.
 - Format into buffers of preallocated length (which must accommodate multibyte
   characters).
 
