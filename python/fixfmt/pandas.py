@@ -59,15 +59,9 @@ def _get_num_digits(value):
     return 1 if value == 0 else max(int(floor(log10(abs(value)) + 1)), 1)
 
 
-def _choose_formatter_int(values, cfg):
-    if len(values) == 0:
-        return Number(1, None, sign=" ")
-
-    min_val = values.min()
-    max_val = values.max()
-    size    = _get_num_digits(max(abs(min_val), abs(max_val)))
-    sign    = " " if min_val >= 0 else "-"
-    return Number(size, sign=sign)
+def _choose_formatter_bool(values, cfg):
+    # Not much to do.
+    return Bool()
 
 
 def _choose_formatter_float(values, cfg):
@@ -103,6 +97,17 @@ def _choose_formatter_float(values, cfg):
     return Number(size, precision, sign=sign)
 
 
+def _choose_formatter_int(values, cfg):
+    if len(values) == 0:
+        return Number(1, None, sign=" ")
+
+    min_val = values.min()
+    max_val = values.max()
+    size    = _get_num_digits(max(abs(min_val), abs(max_val)))
+    sign    = " " if min_val >= 0 else "-"
+    return Number(size, sign=sign)
+
+
 def _choose_formatter_str(values, cfg):
     size = np.vectorize(len)(values).max()
     size = max(size, cfg["str.min_size"])
@@ -111,14 +116,13 @@ def _choose_formatter_str(values, cfg):
 
 
 def _get_default_formatter(arr, cfg):
-    # FIXME: Choose sizes better.
     dtype = arr.dtype
-    if dtype.kind == "i":
-        return _choose_formatter_int(arr, cfg=cfg)
+    if dtype.kind == "b":
+        return _choose_formatter_bool(arr, cfg=cfg)
     elif dtype.kind == "f":
         return _choose_formatter_float(arr, cfg=cfg)
-    elif dtype.kind == "b":
-        return Bool()
+    elif dtype.kind == "i":
+        return _choose_formatter_int(arr, cfg=cfg)
     elif dtype.kind == "O":
         return _choose_formatter_str(arr, cfg=cfg)
     else:
