@@ -39,9 +39,7 @@ def _add_array_to_table(table, arr, fmt):
     elif dtype == np.dtype("int32"):
         table.add_int32(arr, fmt)
     elif dtype == np.dtype("int64"):
-        builtins.print("adding int64")
         table.add_int64(arr, fmt)
-        builtins.print("added int64")
     elif dtype == np.dtype("float32"):
         table.add_float32(arr, fmt)
     elif dtype == np.dtype("float64"):
@@ -263,8 +261,6 @@ def main():
     
     # FIXME: Support "-".
     df = load_pickle(args.filename)
-    # df = df[["i", "x", "y", "s", "b", ]]
-    builtins.print(df.dtypes)
     print(df)
 
 
