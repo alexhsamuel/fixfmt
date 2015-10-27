@@ -16,18 +16,43 @@ from   . import *
 
 # FIXME: Make hierarchical.
 DEFAULT_CFG = {
-    "float.min_precision"       : 1,
-    "float.max_precision"       : 8,
+    "float.min_precision"           : 1,
+    "float.max_precision"           : 8,
 
-    "formatters"                : {},
+    "formatters"                    : {},
 
-    "separator.between"         : " ",
-    "separator.end"             : None,
-    "separator.index"           : " | ",
-    "separator.start"           : None,
+    "header.separator.between"      : None,
+    "header.separator.end"          : None,
+    "header.separator.index"        : None,
+    "header.separator.start"        : None,
+    "header.show"                   : True,
 
-    "str.min_size"              :  1,
-    "str.max_size"              : 32,
+    "separator.between"             : " ",
+    "separator.end"                 : "",
+    "separator.index"               : " | ",
+    "separator.start"               : "",
+
+    "str.min_size"                  :  1,
+    "str.max_size"                  : 32,
+
+    "underline.line"                : "=",
+    "underline.separator.between"   : None,
+    "underline.separator.end"       : None,
+    "underline.separator.index"     : None,
+    "underline.separator.start"     : None,
+    "underline.show"                : True,
+}
+
+UNICODE_BOX_CFG = {
+    "separator.between"             : " \u2502 ",
+    "separator.end"                 : " \u2502",
+    "separator.index"               : " \u2551 ",
+    "separator.start"               : "\u2502 ",
+    "underline.line"                : "\u2500",
+    "underline.separator.between"   : "\u2500\u253c\u2500",
+    "underline.separator.end"       : "\u2500\u2524",
+    "underline.separator.index"     : " \u253c ",
+    "underline.separator.start"     : "\u251c\u2500",
 }
 
 def _add_array_to_table(table, arr, fmt):
@@ -146,16 +171,16 @@ def _table_for_dataframe(df, names, cfg={}):
     table = Table()
 
     formatters  = cfg["formatters"]
-    begin_sep   = cfg["separator.start"] or ""
-    sep         = cfg["separator.between"] or ""
-    end_sep     = cfg["separator.end"] or "" 
+    begin_sep   = cfg["separator.start"]
+    sep         = cfg["separator.between"]
+    end_sep     = cfg["separator.end"]
 
     if begin_sep:
         table.add_string(begin_sep)
 
     fmts = []
     arrs = []
-    for name in names:
+    for i, name in enumerate(names):
         arr = df[name].values
         arrs.append(arr)
 
@@ -167,11 +192,13 @@ def _table_for_dataframe(df, names, cfg={}):
         # FIXME: Add accessor to table.
         fmts.append(fmt)
         _add_array_to_table(table, arr, fmt)
-        if sep:
-            table.add_string(sep)
+        if i == len(names) - 1:
+            if end_sep:
+                table.add_string(end_sep)
+        else:
+            if sep:
+                table.add_string(sep)
 
-    if end_sep:
-        table.add_string(end_sep)
             
     return table, fmts, arrs
 
@@ -181,14 +208,56 @@ def _table_for_dataframe(df, names, cfg={}):
 # FIXME: Special sep after index.
 # FIXME: Justify header columns.
 
+def _print_header(names, fmts, cfg):
+    if cfg["header.show"]:
+        begin_sep   = cfg["header.separator.start"]
+        if begin_sep is None:
+            begin_sep = cfg["separator.start"]
+        sep         = cfg["header.separator.between"]
+        if sep is None:
+            sep     = cfg["separator.between"]
+        end_sep     = cfg["header.separator.end"]
+        if end_sep is None:
+            end_sep = cfg["separator.end"]
+
+        header = [
+            # FIXME: Palide.
+            # FIXME: Choose just.
+            n[: f.width].rjust(f.width)
+            for n, f in zip(names, fmts)
+        ]
+        builtins.print(begin_sep + sep.join(header) + end_sep)
+
+
+def _print_underline(names, fmts, cfg):
+    if cfg["underline.show"]:
+        begin_sep   = cfg["underline.separator.start"]
+        if begin_sep is None:
+            begin_sep = cfg["separator.start"]
+        sep         = cfg["underline.separator.between"]
+        if sep is None:
+            sep     = cfg["separator.between"]
+        end_sep     = cfg["underline.separator.end"]
+        if end_sep is None:
+            end_sep = cfg["separator.end"]
+        underline = cfg["underline.line"]
+
+        # FIXME: Relax this.
+        if len(underline) != 1:
+            raise ValueError("underline must be one character")
+
+        builtins.print(
+              begin_sep
+            + sep.join( underline * f.width for f in fmts )
+            + end_sep
+        )
+
+
 # FIXME: Do what when it's too wide???
 
 def _print_dataframe(df, cfg):
     # Slog through configuration.
     formatters  = cfg["formatters"]
-    begin_sep   = cfg["separator.start"] or ""
-    sep         = cfg["separator.between"] or ""
-    end_sep     = cfg["separator.end"] or "" 
     max_rows    = cfg.get("max_rows", "terminal")  # FIXME
 
     if max_rows == "terminal":
@@ -200,43 +269,26 @@ def _print_dataframe(df, cfg):
     if not callable(row_ellipsis):
         row_ellipsis = lambda nr: row_ellipsis
     row_fraction = cfg.get("row_fraction", 0.85)
-    show_header = cfg.get("header", True)
-    underline = str(cfg.get("underline", "-"))
-    if len(underline) != 1:
-        raise ValueError("unerline must be one character")
     names = cfg.get("names", pln.ctr.ALL)
 
     names = pln.ctr.select_ordered(df.columns, names)
     # FIXME: Get formats from table columns.
     table, fmts, arrs = _table_for_dataframe(df, names, cfg)
 
-    if show_header:
-        header = []
-        for name, fmt in zip(names, fmts):
-            # FIXME: Palide.
-            width = fmt.width
-            # FIXME: Choose just.
-            header.append(name[: width].rjust(width))
-        # FIXME: Is it right to use spaces?
-        builtins.print(
-              " " * len(begin_sep)
-            + (" " * len(sep)).join(header)
-            + " " * len(end_sep)
-        )
-        builtins.print(
-              " " * len(begin_sep)
-            + (" " * len(sep)).join( underline * len(h) for h in header )
-            + " " * len(end_sep)
-        )
+    _print_header(names, fmts, cfg)
+    _print_underline(names, fmts, cfg)
 
     num_rows = len(table)
     if num_rows <= max_rows:
         for i in range(len(table)):
             builtins.print(table(i))
     else:
-        extra_rows          = 1 + (2 if show_header else 0)
+        extra_rows          = sum([
+            cfg["header.show"],
+            cfg["underline.show"],
+        ])
         num_rows_top        = int(row_fraction * max_rows)
-        num_rows_bottom     = max_rows - extra_rows - num_rows_top
+        num_rows_bottom     = max_rows - 1 - extra_rows - num_rows_top
         num_rows_skipped    = num_rows - num_rows_top - num_rows_bottom
         for i in range(num_rows_top):
             builtins.print(table(i))
@@ -245,9 +297,7 @@ def _print_dataframe(df, cfg):
             builtins.print(table(i))
 
 
-def print(df, **kw_args):
-    cfg = dict(DEFAULT_CFG)
-    cfg.update(kw_args)
+def print(df, *, cfg=DEFAULT_CFG):
     _print_dataframe(df, cfg)
 
 
@@ -263,9 +313,13 @@ def main():
         help="read from FILENAME")
     args = parser.parse_args()
     
+    # FIXME
+    cfg = DEFAULT_CFG.copy()
+    cfg.update(UNICODE_BOX_CFG)
+
     # FIXME: Support "-".
     df = load_pickle(args.filename)
-    print(df)
+    print(df, cfg=cfg)
 
 
 if __name__ == "__main__":
