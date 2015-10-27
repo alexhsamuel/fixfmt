@@ -15,7 +15,15 @@ from   . import *
 # FIXME: We need a proper cascading configuration system.
 
 # FIXME: Make hierarchical.
+# FIXME: Don't support None; it's silly.
 DEFAULT_CFG = {
+    "bottom.line"                   : "-",
+    "bottom.separator.between"      : " ",
+    "bottom.separator.end"          : "",
+    "bottom.separator.index"        : "  ",
+    "bottom.separator.start"        : "",
+    "bottom.show"                   : False,
+
     "float.min_precision"           : 1,
     "float.max_precision"           : 8,
 
@@ -35,6 +43,13 @@ DEFAULT_CFG = {
     "str.min_size"                  :  1,
     "str.max_size"                  : 32,
 
+    "top.line"                      : "-",
+    "top.separator.between"         : " ",
+    "top.separator.end"             : "",
+    "top.separator.index"           : "  ",
+    "top.separator.start"           : "",
+    "top.show"                      : False,
+
     "underline.line"                : "=",
     "underline.separator.between"   : None,
     "underline.separator.end"       : None,
@@ -44,10 +59,22 @@ DEFAULT_CFG = {
 }
 
 UNICODE_BOX_CFG = {
+    "bottom.line"                   : "\u2500",
+    "bottom.separator.between"      : "\u2500\u2534\u2500",
+    "bottom.separator.end"          : "\u2500\u2518",
+    "bottom.separator.index"        : "\u2500\u2534\u2500",
+    "bottom.separator.start"        : "\u2514\u2500",
+    "bottom.show"                   : True,
     "separator.between"             : " \u2502 ",
     "separator.end"                 : " \u2502",
     "separator.index"               : " \u2551 ",
     "separator.start"               : "\u2502 ",
+    "top.line"                      : "\u2500",
+    "top.separator.between"         : "\u2500\u252c\u2500",
+    "top.separator.end"             : "\u2500\u2510",
+    "top.separator.index"           : "\u2500\u252c\u2500",
+    "top.separator.start"           : "\u250c\u2500",
+    "top.show"                      : True,
     "underline.line"                : "\u2500",
     "underline.separator.between"   : "\u2500\u253c\u2500",
     "underline.separator.end"       : "\u2500\u2524",
@@ -229,26 +256,21 @@ def _print_header(names, fmts, cfg):
         builtins.print(begin_sep + sep.join(header) + end_sep)
 
 
-def _print_underline(names, fmts, cfg):
-    if cfg["underline.show"]:
-        begin_sep   = cfg["underline.separator.start"]
-        if begin_sep is None:
-            begin_sep = cfg["separator.start"]
-        sep         = cfg["underline.separator.between"]
-        if sep is None:
-            sep     = cfg["separator.between"]
-        end_sep     = cfg["underline.separator.end"]
-        if end_sep is None:
-            end_sep = cfg["separator.end"]
-        underline = cfg["underline.line"]
+# FIXME: Support subconfigs.
+def _print_line(names, fmts, prefix, cfg):
+    if cfg[prefix + ".show"]:
+        begin_sep   = cfg[prefix + ".separator.start"]
+        sep         = cfg[prefix + ".separator.between"]
+        end_sep     = cfg[prefix + ".separator.end"]
+        line        = cfg[prefix + ".line"]
 
         # FIXME: Relax this.
-        if len(underline) != 1:
-            raise ValueError("underline must be one character")
+        if len(line) != 1:
+            raise ValueError("{}.line must be one character".format(prefix))
 
         builtins.print(
               begin_sep
-            + sep.join( underline * f.width for f in fmts )
+            + sep.join( line * f.width for f in fmts )
             + end_sep
         )
 
@@ -275,8 +297,9 @@ def _print_dataframe(df, cfg):
     # FIXME: Get formats from table columns.
     table, fmts, arrs = _table_for_dataframe(df, names, cfg)
 
+    _print_line(names, fmts, "top", cfg)
     _print_header(names, fmts, cfg)
-    _print_underline(names, fmts, cfg)
+    _print_line(names, fmts, "underline", cfg)
 
     num_rows = len(table)
     if num_rows <= max_rows:
@@ -284,17 +307,21 @@ def _print_dataframe(df, cfg):
             builtins.print(table(i))
     else:
         extra_rows          = sum([
+            1,
+            cfg["top.show"],
             cfg["header.show"],
             cfg["underline.show"],
+            cfg["bottom.show"],
         ])
         num_rows_top        = int(row_fraction * max_rows)
-        num_rows_bottom     = max_rows - 1 - extra_rows - num_rows_top
+        num_rows_bottom     = max_rows - extra_rows - num_rows_top
         num_rows_skipped    = num_rows - num_rows_top - num_rows_bottom
         for i in range(num_rows_top):
             builtins.print(table(i))
         builtins.print(row_ellipsis(num_rows_skipped).center(table.width))
         for i in range(num_rows - num_rows_bottom, num_rows):
             builtins.print(table(i))
+    _print_line(names, fmts, "bottom", cfg)
 
 
 def print(df, *, cfg=DEFAULT_CFG):
