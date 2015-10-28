@@ -285,6 +285,7 @@ def _print_dataframe(df, cfg):
     if max_rows == "terminal":
         # FIXME
         max_rows = shutil.get_terminal_size().lines - 1
+    # FIXME: Configuration and line drawing!
     row_ellipsis = cfg.get(
         "row_ellipsis", 
         lambda nr: "... skipping {} rows ...".format(nr))
