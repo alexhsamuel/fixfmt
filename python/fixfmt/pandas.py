@@ -29,16 +29,21 @@ DEFAULT_CFG = {
 
     "formatters"                    : {},
 
-    "header.separator.between"      : None,
-    "header.separator.end"          : None,
-    "header.separator.index"        : None,
-    "header.separator.start"        : None,
+    "header.separator.between"      : " ",
+    "header.separator.end"          : "",
+    "header.separator.index"        : " ",
+    "header.separator.start"        : "",
     "header.show"                   : True,
 
     "separator.between"             : " ",
     "separator.end"                 : "",
     "separator.index"               : " | ",
     "separator.start"               : "",
+
+    "row_ellipsis.separator.end"    : "",
+    "row_ellipsis.separator.start"  : "",
+    "row_ellipsis.pad"              : " ",
+    "row_ellipsis.format"           : "... skipping {skipped} rows ...",
 
     "str.min_size"                  :  1,
     "str.max_size"                  : 32,
@@ -51,10 +56,10 @@ DEFAULT_CFG = {
     "top.show"                      : False,
 
     "underline.line"                : "=",
-    "underline.separator.between"   : None,
-    "underline.separator.end"       : None,
-    "underline.separator.index"     : None,
-    "underline.separator.start"     : None,
+    "underline.separator.between"   : " ",
+    "underline.separator.end"       : "",
+    "underline.separator.index"     : " ",
+    "underline.separator.start"     : "",
     "underline.show"                : True,
 }
 
@@ -65,6 +70,16 @@ UNICODE_BOX_CFG = {
     "bottom.separator.index"        : "\u2500\u2534\u2500",
     "bottom.separator.start"        : "\u2514\u2500",
     "bottom.show"                   : True,
+    "header.separator.between"      : " \u2502 ",
+    "header.separator.end"          : " \u2502",
+    "header.separator.index"        : " \u2551 ",
+    "header.separator.start"        : "\u2502 ",
+    # "row_ellipsis.separator.end"    : "\u2506",
+    # "row_ellipsis.separator.start"  : "\u2506",
+    "row_ellipsis.separator.end"    : "\u2561",
+    "row_ellipsis.separator.start"  : "\u255e",
+    "row_ellipsis.pad"              : "\u2550",
+    "row_ellipsis.format"           : " (skipped {skipped} rows) ",
     "separator.between"             : " \u2502 ",
     "separator.end"                 : " \u2502",
     "separator.index"               : " \u2551 ",
@@ -238,14 +253,8 @@ def _table_for_dataframe(df, names, cfg={}):
 def _print_header(names, fmts, cfg):
     if cfg["header.show"]:
         begin_sep   = cfg["header.separator.start"]
-        if begin_sep is None:
-            begin_sep = cfg["separator.start"]
         sep         = cfg["header.separator.between"]
-        if sep is None:
-            sep     = cfg["separator.between"]
         end_sep     = cfg["header.separator.end"]
-        if end_sep is None:
-            end_sep = cfg["separator.end"]
 
         header = [
             # FIXME: Palide.
@@ -285,12 +294,6 @@ def _print_dataframe(df, cfg):
     if max_rows == "terminal":
         # FIXME
         max_rows = shutil.get_terminal_size().lines - 1
-    # FIXME: Configuration and line drawing!
-    row_ellipsis = cfg.get(
-        "row_ellipsis", 
-        lambda nr: "... skipping {} rows ...".format(nr))
-    if not callable(row_ellipsis):
-        row_ellipsis = lambda nr: row_ellipsis
     row_fraction = cfg.get("row_fraction", 0.85)
     names = cfg.get("names", pln.ctr.ALL)
 
@@ -317,11 +320,29 @@ def _print_dataframe(df, cfg):
         num_rows_top        = int(row_fraction * max_rows)
         num_rows_bottom     = max_rows - extra_rows - num_rows_top
         num_rows_skipped    = num_rows - num_rows_top - num_rows_bottom
+        
+        # Print rows from the top.
         for i in range(num_rows_top):
             builtins.print(table(i))
-        builtins.print(row_ellipsis(num_rows_skipped).center(table.width))
+
+        # Print the row ellipsis.
+        ell = cfg["row_ellipsis.format"].format(
+            bottom  =num_rows_bottom,
+            rows    =num_rows,
+            skipped =num_rows_skipped,
+            top     =num_rows_top,
+        )
+        ell_start   = cfg["row_ellipsis.separator.start"]
+        ell_end     = cfg["row_ellipsis.separator.end"]
+        ell_pad     = cfg["row_ellipsis.pad"]
+        ell_width   = table.width - len(ell_start) - len(ell_end)
+        ell         = ell.center(ell_width, ell_pad)
+        builtins.print(ell_start + ell + ell_end)
+
+        # Print rows from the bottom.
         for i in range(num_rows - num_rows_bottom, num_rows):
             builtins.print(table(i))
+
     _print_line(names, fmts, "bottom", cfg)
 
 
