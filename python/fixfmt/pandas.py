@@ -74,8 +74,6 @@ UNICODE_BOX_CFG = {
     "header.separator.end"          : " \u2502",
     "header.separator.index"        : " \u2551 ",
     "header.separator.start"        : "\u2502 ",
-    # "row_ellipsis.separator.end"    : "\u2506",
-    # "row_ellipsis.separator.start"  : "\u2506",
     "row_ellipsis.separator.end"    : "\u2561",
     "row_ellipsis.separator.start"  : "\u255e",
     "row_ellipsis.pad"              : "\u2550",
