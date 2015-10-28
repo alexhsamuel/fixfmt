@@ -8,11 +8,26 @@
 
 //------------------------------------------------------------------------------
 
+namespace {
+
+inline bool
+within(unsigned char min, unsigned char val, unsigned char max)
+{
+  return min <= val && val <= max;
+}
+
+
+}  // anonymous namespace
+
+//------------------------------------------------------------------------------
+
 namespace fixfmt {
 
 using std::string;
 
 constexpr char const* ELLIPSIS = "\u2026";
+
+constexpr char ANSI_ESCAPE = '\x1b';
 
 /**
  * Advances an iterator on a UTF-8 string by one code point.
@@ -53,17 +68,6 @@ utf8_length(string const& str)
   for (auto i = str.begin(); i != str.end(); next_utf8(i))
     ++length;
   return length;
-}
-
-
-// FIXME: Elsewhere.
-
-constexpr char ANSI_ESCAPE = '\x1b';
-
-inline bool
-within(unsigned char min, unsigned char val, unsigned char max)
-{
-  return min <= val && val <= max;
 }
 
 
