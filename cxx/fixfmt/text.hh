@@ -17,6 +17,7 @@ constexpr char const* ELLIPSIS = "\u2026";
 /**
  * Advances an iterator on a UTF-8 string by one code point.
  */
+// FIXME: Take an end parameter.
 inline void
 next_utf8(string::const_iterator& i)
 {
@@ -54,6 +55,8 @@ utf8_length(string const& str)
   return length;
 }
 
+
+// FIXME: Elsewhere.
 
 constexpr char ANSI_ESCAPE = '\x1b';
 
@@ -98,17 +101,14 @@ string_length(string const& str)
   size_t length = 0;
   auto const& end = str.end();
   // FIXME: Problem if the last code point is malformed.
-
-  auto i = str.begin();
   // Count characters.
-  while (i != end) {
+  for (auto i = str.begin(); i != end; ) 
     if (skip_ansi_escape(i, end))
       ;
     else {
       ++length;
       next_utf8(i);
     }
-  }
   return length;
 }
 
