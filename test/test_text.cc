@@ -12,6 +12,21 @@ TEST(utf8_length, basic) {
   ASSERT_EQ(utf8_length("\u2026...\u2026\u2026"), 6);
 }
 
+TEST(string_length, basic) {
+  ASSERT_EQ(string_length(""), 0);
+  ASSERT_EQ(string_length("x"), 1);
+  ASSERT_EQ(string_length("xxx"), 3);
+  ASSERT_EQ(string_length("-x-x-x-x-x-"), 11);
+  ASSERT_EQ(string_length("\u2026"), 1);
+  ASSERT_EQ(string_length("x\u2026x"), 3);
+  ASSERT_EQ(string_length("\u2026...\u2026\u2026"), 6);
+  ASSERT_EQ(string_length("\x1b[m"), 0);
+  ASSERT_EQ(string_length("\x1b[32m\u2502"), 1);
+  ASSERT_EQ(string_length("\u2502\x1b[m"), 1);
+  ASSERT_EQ(string_length("\x1b[32m\u2502\x1b[m"), 1);
+  ASSERT_EQ(string_length(" \x1b[32m\u2502\x1b[m "), 3);
+}
+
 TEST(pad, basic) {
   string const s = "Hello, world!";
   ASSERT_EQ(pad(s, 10), s);
@@ -38,3 +53,4 @@ TEST(elide, basic) {
   ASSERT_EQ(elide(s, 10, ELLIPSIS, 0.51), "Hello\u2026rld!");
   ASSERT_EQ(elide(s, 10, ELLIPSIS, 0.8 ), "Hello, \u2026d!");
 }
+

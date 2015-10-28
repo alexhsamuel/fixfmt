@@ -86,7 +86,7 @@ public:
   {
   }
 
-  virtual int get_width() const override { return utf8_length(str_); }
+  virtual int get_width() const override { return string_length(str_); }
 
   virtual long get_length() const override { return MAX_INDEX; }
 

@@ -55,6 +55,64 @@ utf8_length(string const& str)
 }
 
 
+constexpr char ANSI_ESCAPE = '\x1b';
+
+inline bool
+within(unsigned char min, unsigned char val, unsigned char max)
+{
+  return min <= val && val <= max;
+}
+
+
+/**
+ * Advances an iterator past an ANSI escape sequence, if it is positioned at
+ * one.
+ */
+inline bool
+skip_ansi_escape(string::const_iterator& i, string::const_iterator const& end)
+{
+  assert(i != end);
+  if (*i == ANSI_ESCAPE) {
+    ++i;
+    if (i != end && *i++ == '[') 
+      // Got CSI.  Read until we pass a final byte.
+      while (i != end && !within(64, *i++, 126))
+        ;
+    else
+      // Assume single-character escape.
+      ;
+    return true;
+  }
+  else
+    return false;
+}
+
+
+/**
+ * Returns the number of code points in a UTF-8-encoded string, skipping
+ * escape sequences.
+ */
+inline size_t
+string_length(string const& str)
+{
+  size_t length = 0;
+  auto const& end = str.end();
+  // FIXME: Problem if the last code point is malformed.
+
+  auto i = str.begin();
+  // Count characters.
+  while (i != end) {
+    if (skip_ansi_escape(i, end))
+      ;
+    else {
+      ++length;
+      next_utf8(i);
+    }
+  }
+  return length;
+}
+
+
 /**
  * Concatenates copies of `str` up to `length`.  If `length` is not divisible
  * by the length of `str`, the last copy is partial.
@@ -64,7 +122,7 @@ fill(
   string const& str,
   size_t const length)
 {
-  size_t const str_len = utf8_length(str);
+  size_t const str_len = string_length(str);
   assert(str_len > 0);
   if (str.length() == 1)
     return string(length, str[0]);
@@ -84,7 +142,7 @@ fill(
         next_utf8(i);
       result.append(str.begin(), i);
     }
-    assert(utf8_length(result) == length);
+    assert(string_length(result) == length);
     return result;
   }
 }
@@ -97,11 +155,11 @@ pad(
   string const& pad=" ",
   bool const left=false)
 {
-  size_t const str_len = utf8_length(str);
+  size_t const str_len = string_length(str);
   if (str_len < length) {
     string const padding = fill(pad, length - str_len);
     string const result = left ? padding + str : str + padding;
-    assert(utf8_length(result) == length);
+    assert(string_length(result) == length);
     return result;
   }
   else
@@ -116,12 +174,12 @@ elide(
   string const& ellipsis=ELLIPSIS,
   float const position=1.0)
 {
-  size_t const ellipsis_len = utf8_length(ellipsis);
+  size_t const ellipsis_len = string_length(ellipsis);
   assert(max_length >= ellipsis_len);
   assert(0 <= position);
   assert(position <= 1);
 
-  size_t const length = utf8_length(str);
+  size_t const length = string_length(str);
   if (length <= max_length)
     return str;
   else {
@@ -134,7 +192,7 @@ elide(
     elided += ellipsis;
     if (nright > 0)
       elided += str.substr(length - nright);
-    assert(utf8_length(elided) == max_length);
+    assert(string_length(elided) == max_length);
     return elided;
   }
 }
