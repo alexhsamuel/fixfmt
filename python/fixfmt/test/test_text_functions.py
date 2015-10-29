@@ -34,6 +34,8 @@ def test_pad_left():
     assert pad("hello", 10, left=True, pad="/") == "/////hello"
 
 
+// FIXME: Test center().
+
 def test_elide_default():
     assert elide("I am a duck.",  8) == "I am a \u2026"
     assert elide("I am a duck.", 14) == "I am a duck."

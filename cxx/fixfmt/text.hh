@@ -152,6 +152,8 @@ fill(
 }
 
 
+// FIXME: Do we need both pad() and center()?
+
 /**
  * Left- or right-justifies a string to fixed length by padding.
  */
@@ -166,6 +168,33 @@ pad(
   if (str_len < length) {
     string const padding = fill(pad, length - str_len);
     string const result = left ? padding + str : str + padding;
+    assert(string_length(result) == length);
+    return result;
+  }
+  else
+    return str;
+}
+
+
+/**
+ * Centers a string in to fixed length by padding both sides.
+ */
+inline string
+center(
+  string const& str,
+  size_t const length,
+  string const& pad=" ",
+  float position=0.5)
+{
+  assert(string_length(pad) > 0);
+  assert(0 <= position);
+  assert(position <= 1);
+  size_t const str_len = string_length(str);
+  if (str_len < length) {
+    size_t const pad_len = length - str_len;
+    size_t const left_len = (size_t) round(position * pad_len);
+    string const result = 
+      fill(pad, left_len) + str + fill(pad, pad_len - left_len);
     assert(string_length(result) == length);
     return result;
   }

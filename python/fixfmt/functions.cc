@@ -13,6 +13,27 @@ using std::string;
 
 namespace {
 
+ref<Object> center(Module* module, Tuple* args, Dict* kw_args)
+{
+  static char const* arg_names[] = {
+    "string", "length", "pad", "position", nullptr};
+  char const* str;
+  int length;
+  char const* pad = " ";
+  float position = 0.5;
+  Arg::ParseTupleAndKeywords(
+      args, kw_args, "sI|sd", arg_names, &str, &length, &pad, &position);
+
+  // FIXME: Validate args.
+  if (strlen(pad) == 0)
+    throw ValueError("empty pad");
+  if (position < 0 or position > 1)
+    throw ValueError("position out of range");
+
+  return Unicode::from(fixfmt::center(string(str), length, pad, position));
+}
+
+
 ref<Object> pad(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
@@ -28,8 +49,7 @@ ref<Object> pad(Module* module, Tuple* args, Dict* kw_args)
   if (strlen(pad) == 0)
     throw ValueError("empty pad");
 
-  string r = fixfmt::pad(string(str), length, pad, (bool) left);
-  return Unicode::from(r);
+  return Unicode::from(fixfmt::pad(string(str), length, pad, (bool) left));
 }
 
 
@@ -90,6 +110,7 @@ ref<Object> string_length(Module* module, Tuple* args, Dict* kw_args)
 Methods<Module>& add_functions(Methods<Module>& methods)
 {
   methods
+    .add<center>            ("center")
     .add<elide>             ("elide")
     .add<pad>               ("pad")
     .add<palide>            ("palide")

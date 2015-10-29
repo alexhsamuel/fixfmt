@@ -372,8 +372,7 @@ def _print_dataframe(df, cfg):
         ell_pad     = cfg["row_ellipsis.pad"]
         ell_width   = (
             table.width - string_length(ell_start) - string_length(ell_end))
-        # FIXME: ANSI-aware center.
-        ell         = ell.center(ell_width, ell_pad)
+        ell         = center(ell, ell_width, ell_pad)
         builtins.print(ell_start + ell + ell_end)
 
         # Print rows from the bottom.
