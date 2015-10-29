@@ -8,7 +8,6 @@ Things to do:
 - add iterable to Table
 - fixed-length string columns
 - unsigned columns
-- add % / scale to Number formatter
 - add exponential E+ formatter
 
 Dataframe features:
@@ -19,6 +18,10 @@ Dataframe features:
 Fancy features:
 - truncate dataframe output to screen
 - rule-based coloring
+- add % / scale to Number formatter
+- add () for negative numbers to Number formatter
+- add currency to Number formatter
+- show summary statistics
 
 Internal:
 - Speed up _choose_formatter_* with extension code.  See branch guess_types_cxx.
