@@ -7,7 +7,7 @@
 
 //------------------------------------------------------------------------------
 
-class Bool
+class PyBool
   : public py::ExtensionType
 {
 public:

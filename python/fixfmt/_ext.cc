@@ -1,6 +1,6 @@
 #include <Python.h>
 
-#include "Bool.hh"
+#include "PyBool.hh"
 #include "Number.hh"
 #include "py.hh"
 #include "String.hh"
@@ -34,8 +34,8 @@ PyInit__ext(void)
 {
   auto module = Module::Create(&testmod_module);
 
-  Bool::type_.Ready();
-  module->add(&Bool::type_);
+  PyBool::type_.Ready();
+  module->add(&PyBool::type_);
 
   Number::type_.Ready();
   module->add(&Number::type_);

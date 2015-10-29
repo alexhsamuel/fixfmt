@@ -56,13 +56,27 @@ auto methods = Methods<String>()
 ;
 
 
+Object* get_pad_left(String* const self, void* /* closure */)
+{
+  return Bool::from(self->fmt_->get_pad_left()).release();
+}
+
+
 Object* get_width(String* const self, void* /* closure */)
 {
   return Long::FromLong(self->fmt_->get_width()).release();
 }
 
 
+// FIXME: Other getters.
 PyGetSetDef const tp_getset[] = {
+  {
+    (char*)     "pad_left",                                 // name
+    (getter)    get_pad_left,                               // get
+    (setter)    nullptr,                                    // set
+    (char*)     nullptr,                                    // doc
+    (void*)     nullptr,                                    // closure
+  },
   {
     (char*)     "width",                                    // name
     (getter)    get_width,                                  // get

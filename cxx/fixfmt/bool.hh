@@ -16,6 +16,8 @@ class Bool
 private:
 
   size_t const size_;
+  bool const pad_left_;
+
   string const true_;
   string const false_;
 
@@ -27,6 +29,7 @@ public:
       size_t size,
       bool pad_left)
   : size_(size),
+    pad_left_(pad_left),
     true_(palide(true_str, size, "", " ", 1.0, pad_left)),
     false_(palide(false_str, size, "", " ", 1.0, pad_left))
   {
@@ -44,9 +47,10 @@ public:
   {
   }
 
-  size_t get_width() const { return size_; }
+  size_t        get_width()     const { return size_; }
 
-  size_t get_size() const { return size_; }
+  size_t        get_size()      const { return size_; }
+  bool          get_pad_left()  const { return pad_left_; }
 
   string operator()(bool val) const
   {

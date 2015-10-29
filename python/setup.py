@@ -16,7 +16,7 @@ setup(
       include_dirs=["../cxx", ],
       sources=[
         "fixfmt/Table.cc",
-        "fixfmt/Bool.cc",
+        "fixfmt/PyBool.cc",
         "fixfmt/_ext.cc",
         "fixfmt/functions.cc",
         "fixfmt/Number.cc",

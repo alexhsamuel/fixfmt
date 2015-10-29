@@ -6,7 +6,7 @@
 
 #include <Python.h>
 
-#include "Bool.hh"
+#include "PyBool.hh"
 #include "fixfmt.hh"
 #include "py.hh"
 
@@ -18,7 +18,7 @@ using std::unique_ptr;
 
 namespace {
 
-int tp_init(Bool* self, PyObject* args, PyObject* kw_args)
+int tp_init(PyBool* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {
     "true", "false", "size", "pad_left", nullptr };
@@ -34,14 +34,14 @@ int tp_init(Bool* self, PyObject* args, PyObject* kw_args)
   if (size < 0)
     size = std::max(strlen(true_str), strlen(false_str));
 
-  new(self) Bool;
+  new(self) PyBool;
   self->fmt_ = unique_ptr<fixfmt::Bool>(
       new fixfmt::Bool(string(true_str), string(false_str), size, pad_left));
   return 0;
 }
 
 
-PyObject* tp_call(Bool* self, PyObject* args, PyObject* kw_args)
+PyObject* tp_call(PyBool* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {"value", nullptr};
   bool val;
@@ -56,17 +56,30 @@ PyObject* tp_call(Bool* self, PyObject* args, PyObject* kw_args)
 }
 
 
-auto methods = Methods<Bool>()
+auto methods = Methods<PyBool>()
 ;
 
 
-Object* get_width(Bool* const self, void* /* closure */)
+Object* get_pad_left(PyBool* const self, void* /* closure */)
+{
+  return py::Bool::from(self->fmt_->get_pad_left()).release();
+}
+
+
+Object* get_width(PyBool* const self, void* /* closure */)
 {
   return Long::FromLong(self->fmt_->get_width()).release();
 }
 
 
 PyGetSetDef const tp_getset[] = {
+  {
+    (char*)     "pad_left",                                 // name
+    (getter)    get_pad_left,                               // get
+    (setter)    nullptr,                                    // set
+    (char*)     nullptr,                                    // doc
+    (void*)     nullptr,                                    // closure
+  },
   {
     (char*)     "width",                                    // name
     (getter)    get_width,                                  // get
@@ -81,10 +94,10 @@ PyGetSetDef const tp_getset[] = {
 }  // anonymous namespace
 
 
-Type Bool::type_ = PyTypeObject{
+Type PyBool::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
   (char const*)         "fixfmt.Bool",                      // tp_name
-  (Py_ssize_t)          sizeof(Bool),                       // tp_basicsize
+  (Py_ssize_t)          sizeof(PyBool),                     // tp_basicsize
   (Py_ssize_t)          0,                                  // tp_itemsize
   (destructor)          nullptr,                            // tp_dealloc
   (printfunc)           nullptr,                            // tp_print

@@ -152,6 +152,12 @@ public:
   /**
    * Creates a new reference.
    */
+  static ref<T> of(ref<T> obj_ref)
+    { return of(obj_ref.obj_); }
+
+  /**
+   * Creates a new reference.
+   */
   static ref<T> of(T* obj)
     { incref(obj); return ref{obj}; }
 
@@ -255,6 +261,27 @@ public:
 
   static bool Check(PyObject* obj)
     { return PyDict_Check(obj); }
+
+};
+
+
+//------------------------------------------------------------------------------
+
+class Bool
+  : public Object
+{
+public:
+
+  static ref<Bool> const TRUE;
+  static ref<Bool> const FALSE;
+
+  static bool Check(PyObject* obj)
+    { return PyBool_Check(obj); }
+  static auto from(bool value)
+    { return ref<Bool>::of(value ? Py_True : Py_False); }
+
+  operator bool()
+    { return this == Py_True; }
 
 };
 
