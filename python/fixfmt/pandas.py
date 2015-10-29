@@ -7,6 +7,7 @@ import sys
 import numpy as np
 import pandas as pd
 import pln.ctr
+from   pln.terminal import ansi
 
 from   . import *
 
@@ -29,11 +30,16 @@ DEFAULT_CFG = {
 
     "formatters"                    : {},
 
+    "header.elide.position"         : 0.7,
+    "header.prefix"                 : "",
     "header.separator.between"      : " ",
     "header.separator.end"          : "",
     "header.separator.index"        : " ",
     "header.separator.start"        : "",
     "header.show"                   : True,
+    "header.style.prefix"           : "",
+    "header.style.suffix"           : "",
+    "header.suffix"                 : "",
 
     "separator.between"             : " ",
     "separator.end"                 : "",
@@ -93,6 +99,15 @@ UNICODE_BOX_CFG = {
     "underline.separator.end"       : "\u2500\u2524",
     "underline.separator.index"     : " \u253c ",
     "underline.separator.start"     : "\u251c\u2500",
+}
+
+COLOR_CFG = {
+    "header.style.prefix"           : ansi.sgr(underline=True, bold=True),
+    "header.style.suffix"           : ansi.RESET,
+    "row_ellipsis.format"           :
+      ansi.style(color=ansi.BLACK, light=True)
+      ("... skipping {skipped} rows ..."),
+    "underline.show"                : False,
 }
 
 def _add_array_to_table(table, arr, fmt):
@@ -207,6 +222,21 @@ def _get_formatter(formatters, name, arr, cfg):
     return fmt
 
 
+def _get_header_justification(fmt):
+    """
+    Returns true if the format is right-justified.
+    """
+    if isinstance(fmt, Bool):
+        return fmt.pad_left
+    elif isinstance(fmt, Number):
+        return True
+    elif isinstance(fmt, String):
+        return fmt.pad_left
+    else:
+        raise TypeError("unrecognized formatter: {!r}".format(fmt))
+
+
+
 def _table_for_dataframe(df, names, cfg={}):
     table = Table()
 
@@ -246,21 +276,29 @@ def _table_for_dataframe(df, names, cfg={}):
 # FIXME: By screen (repeating header?)
 # FIXME: Index, with underlining.
 # FIXME: Special sep after index.
-# FIXME: Justify header columns.
 
 def _print_header(names, fmts, cfg):
     if cfg["header.show"]:
-        begin_sep   = cfg["header.separator.start"]
+        pfx         = cfg["header.prefix"]
+        start       = cfg["header.separator.start"]
         sep         = cfg["header.separator.between"]
-        end_sep     = cfg["header.separator.end"]
+        end         = cfg["header.separator.end"]
+        style_pfx   = cfg["header.style.prefix"]
+        style_sfx   = cfg["header.style.suffix"]
+        sfx         = cfg["header.suffix"]
+        position    = cfg["header.elide.position"]
 
-        header = [
-            # FIXME: Palide.
-            # FIXME: Choose just.
-            n[: f.width].rjust(f.width)
-            for n, f in zip(names, fmts)
-        ]
-        builtins.print(begin_sep + sep.join(header) + end_sep)
+        assert string_length(style_pfx) == 0
+        assert string_length(style_sfx) == 0
+
+        def format_name(name, fmt):
+            name = pfx + name + sfx
+            left = _get_header_justification(fmt)
+            name = palide(name, fmt.width, position=position, left=left)
+            return style_pfx + name + style_sfx
+
+        header = sep.join( format_name(n, f) for n, f in zip(names, fmts) )
+        builtins.print(start + header + end)
 
 
 # FIXME: Support subconfigs.
@@ -333,7 +371,9 @@ def _print_dataframe(df, cfg):
         ell_start   = cfg["row_ellipsis.separator.start"]
         ell_end     = cfg["row_ellipsis.separator.end"]
         ell_pad     = cfg["row_ellipsis.pad"]
-        ell_width   = table.width - len(ell_start) - len(ell_end)
+        ell_width   = (
+            table.width - string_length(ell_start) - string_length(ell_end))
+        # FIXME: ANSI-aware center.
         ell         = ell.center(ell_width, ell_pad)
         builtins.print(ell_start + ell + ell_end)
 
@@ -362,7 +402,8 @@ def main():
     
     # FIXME
     cfg = DEFAULT_CFG.copy()
-    cfg.update(UNICODE_BOX_CFG)
+    # cfg.update(UNICODE_BOX_CFG)
+    cfg.update(COLOR_CFG)
 
     # FIXME: Support "-".
     df = load_pickle(args.filename)
