@@ -152,6 +152,9 @@ fill(
 }
 
 
+/**
+ * Left- or right-justifies a string to fixed length by padding.
+ */
 inline string
 pad(
   string const& str,
@@ -171,6 +174,10 @@ pad(
 }
 
 
+/**
+ * Trims a string to a fixed length by eliding characters and replacing them
+ * with an ellipsis.
+ */
 inline string
 elide(
   string const& str,
@@ -202,6 +209,9 @@ elide(
 }
 
 
+/**
+ * Either pads or elides a string to achieve a fixed length.
+ */
 inline string
 palide(
   string const& str,
