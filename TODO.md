@@ -1,8 +1,7 @@
 Things to do:
 
+- format methods, not just print
 - Use cfg in fixfmt.pandas.
-
-- rename Number -> PyNumber, etc.
 - category types
 - datetime types
 - np Array formatter
@@ -11,15 +10,13 @@ Things to do:
 - unsigned columns
 - add % / scale to Number formatter
 - add exponential E+ formatter
-- add accessors to formatters, C++ and Python
 
 Dataframe features:
-- print index
+- show Pandas index
+- show Pandas multiindex
 - print row numbers
 
 Fancy features:
-- use more fancy Unicode characters
-- ANSI escapes
 - truncate dataframe output to screen
 - rule-based coloring
 
@@ -30,6 +27,8 @@ Internal:
   characters).
 
 Cleanup:
+- rename Number -> PyNumber, etc.
+- add accessors to formatters, C++ and Python
 - Use wrapped methods consistently.
 - check up on FIXMEs
 - banners
