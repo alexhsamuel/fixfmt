@@ -9,7 +9,7 @@ using std::string;
 
 //------------------------------------------------------------------------------
 
-// FIXME: Make these unicode-aware.
+// FIXME: Add docstrings.
 
 namespace {
 
