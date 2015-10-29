@@ -73,16 +73,27 @@ ref<Object> palide(Module* module, Tuple* args, Dict* kw_args)
 }
 
 
+ref<Object> string_length(Module* module, Tuple* args, Dict* kw_args)
+{
+  static char const* arg_names[] = { "string", nullptr };
+  char const* str;
+  Arg::ParseTupleAndKeywords(args, kw_args, "s", arg_names, &str);
+
+  return Long::FromLong(fixfmt::string_length(str));
 }
+
+
+}  // anonymous namespace
 
 //------------------------------------------------------------------------------
 
 Methods<Module>& add_functions(Methods<Module>& methods)
 {
   methods
-    .add<elide>("elide")
-    .add<pad>("pad")
-    .add<palide>("palide")
+    .add<elide>             ("elide")
+    .add<pad>               ("pad")
+    .add<palide>            ("palide")
+    .add<string_length>     ("string_length")
     ;
   return methods;
 }
