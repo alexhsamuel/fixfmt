@@ -49,7 +49,7 @@ DEFAULT_CFG = {
     "row_ellipsis.separator.end"    : "",
     "row_ellipsis.separator.start"  : "",
     "row_ellipsis.pad"              : " ",
-    "row_ellipsis.format"           : "... skipping {skipped} rows ...",
+    "row_ellipsis.format"           : "\u2026 skipping {skipped} rows \u2026",
 
     "str.min_size"                  :  1,
     "str.max_size"                  : 32,
@@ -106,7 +106,7 @@ COLOR_CFG = {
     "header.style.suffix"           : ansi.RESET,
     "row_ellipsis.format"           :
       ansi.style(color=ansi.BLACK, light=True)
-      ("... skipping {skipped} rows ..."),
+      ("\u2026 skipping {skipped} rows \u2026"),
     "underline.show"                : False,
 }
 
