@@ -236,7 +236,6 @@ def _get_header_justification(fmt):
         raise TypeError("unrecognized formatter: {!r}".format(fmt))
 
 
-
 def _table_for_dataframe(df, names, cfg={}):
     table = Table()
 
