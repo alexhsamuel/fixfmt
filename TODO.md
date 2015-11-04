@@ -1,8 +1,11 @@
 Things to do:
 
+- page at a time, with header
 - format methods, not just print
 - Use cfg in fixfmt.pandas.
 - category types
+  - pass through to category array
+  - pre-format categories (?)
 - datetime types
 - np Array formatter
 - add iterable to Table
@@ -11,6 +14,8 @@ Things to do:
 - add exponential E+ formatter
 
 Dataframe features:
+- show nullable columns (object for bool, object for str, etc.)
+- NaN treatment
 - show Pandas index
 - show Pandas multiindex
 - print row numbers
