@@ -161,7 +161,7 @@ def _choose_formatter_float(values, cfg):
     has_inf     = is_inf.any()
     has_neg_inf = (values[is_inf] < 0).any()
     vals        = values[~(is_nan | is_inf)]
-    
+
     special_width = max(
         string_length(nan) if has_nan else 0,
         string_length(inf) if has_inf else 0)
