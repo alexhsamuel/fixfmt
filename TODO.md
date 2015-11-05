@@ -1,5 +1,6 @@
 Things to do:
 
+- make number formatter Unicode/ANSI-aware.
 - page at a time, with header
 - format methods, not just print
 - Use cfg in fixfmt.pandas.

@@ -25,8 +25,12 @@ DEFAULT_CFG = {
     "bottom.separator.start"        : "",
     "bottom.show"                   : False,
 
-    "float.min_precision"           : 1,
+  # FIXME: Unicode doesn't work in number formatter.
+  # "float.inf"                     : "\u221e",
+    "float.inf"                     : "inf",
     "float.max_precision"           : 8,
+    "float.min_precision"           : 1,
+    "float.nan"                     : "NaN",
 
     "formatters"                    : {},
 
@@ -145,36 +149,44 @@ def _choose_formatter_bool(values, cfg):
 
 
 def _choose_formatter_float(values, cfg):
-    # FIXME: Consider width of NaN and infinite strings.
     # FIXME: This could be done with a single pass more efficiently.
 
+    inf         = cfg["float.inf"]
+    nan         = cfg["float.nan"]
+
     # Remove NaN and infinite values.
-    is_nan  = np.isnan(values)
-    has_nan = is_nan.any()
-    is_inf  = np.isinf(values)
-    has_inf = is_inf.any()
-    vals    = values[~(is_nan | is_inf)]
+    is_nan      = np.isnan(values)
+    has_nan     = is_nan.any()
+    is_inf      = np.isinf(values)
+    has_inf     = is_inf.any()
+    has_neg_inf = (values[is_inf] < 0).any()
+    vals        = values[~(is_nan | is_inf)]
     
+    special_width = max(
+        string_length(nan) if has_nan else 0,
+        string_length(inf) if has_inf else 0)
+
     if len(vals) == 0:
         # No values left.
-        return Float(1, 1)
+        return Float(max(1, special_width))
 
     # Determine the scale.
     min_val = vals.min()
     max_val = vals.max()
-    sign    = " " if min_val >= 0 else "-"
+    sign    = "-" if has_neg_inf or min_val < 0 else " "
     size    = _get_num_digits(max(abs(min_val), abs(max_val)))
 
     # Try progressively higher precision until rounding won't leave any
     # residuals larger the maximum pecision.
     precision_min   = cfg["float.min_precision"]
+    precision_min   = max(precision_min, special_width - size - 1)
     precision_max   = cfg["float.max_precision"]
     tolerance       = (10 ** -precision_max) / 2
     for precision in range(precision_min, precision_max + 1):
         if (abs(np.round(vals, precision) - vals) < tolerance).all():
             break
 
-    return Number(size, precision, sign=sign)
+    return Number(size, precision, sign=sign, nan=nan, inf=inf)
 
 
 def _choose_formatter_int(values, cfg):

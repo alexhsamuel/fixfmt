@@ -192,13 +192,13 @@ inline void Number::format(double const val, char* const buf) const
 {
   bool const nonneg = val >= 0;
   if (isnan(val))
-    nan_pad_.copy(buf, width_);
+    nan_pad_.copy(buf);
   else if (val < 0 && sign_ == SIGN_NONE)
     // With SIGN_NONE, we can't render negative numbers.
     set(buf, bad_, width_);
   else if (isinf(val))
     // Copy the appropriate infinity.
-    (val > 0 ? pos_inf_ : neg_inf_).copy(buf, width_);
+    (val > 0 ? pos_inf_ : neg_inf_).copy(buf);
   else {
     int    const precision = precision_ == PRECISION_NONE ? 0 : precision_;
     double const abs_val   = round(fabs(val), precision);
