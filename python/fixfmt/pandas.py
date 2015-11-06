@@ -53,6 +53,7 @@ DEFAULT_CFG = {
     "row_ellipsis.separator.end"    : "",
     "row_ellipsis.separator.start"  : "",
     "row_ellipsis.pad"              : " ",
+    "row_ellipsis.position"         : 0.85,
     "row_ellipsis.format"           : "\u2026 skipping {skipped} rows \u2026",
 
     "str.min_size"                  :  1,
@@ -338,10 +339,17 @@ def _print_dataframe(df, cfg):
     formatters  = cfg["formatters"]
     max_rows    = cfg.get("max_rows", "terminal")  # FIXME
 
+    extra_rows  = sum([
+        1,
+        cfg["top.show"],
+        cfg["header.show"],
+        cfg["underline.show"],
+        cfg["bottom.show"],
+    ])
+
     if max_rows == "terminal":
         # FIXME
         max_rows = shutil.get_terminal_size().lines - 1
-    row_fraction = cfg.get("row_fraction", 0.85)
     names = cfg.get("names", pln.ctr.ALL)
 
     names = pln.ctr.select_ordered(df.columns, names)
@@ -353,18 +361,11 @@ def _print_dataframe(df, cfg):
     _print_line(names, fmts, "underline", cfg)
 
     num_rows = len(table)
-    if num_rows <= max_rows:
+    if num_rows <= max_rows - extra_rows:
         for i in range(len(table)):
             builtins.print(table(i))
     else:
-        extra_rows          = sum([
-            1,
-            cfg["top.show"],
-            cfg["header.show"],
-            cfg["underline.show"],
-            cfg["bottom.show"],
-        ])
-        num_rows_top        = int(row_fraction * max_rows)
+        num_rows_top        = int(cfg["row_ellipsis.position"] * max_rows)
         num_rows_bottom     = max_rows - extra_rows - num_rows_top
         num_rows_skipped    = num_rows - num_rows_top - num_rows_bottom
         
