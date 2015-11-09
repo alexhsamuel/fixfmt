@@ -82,7 +82,7 @@ python:
 
 .PHONY: clean-python
 clean-python:
-	rm -rf python/build python/*.so
+	rm -rf python/build python/fixfmt/*.so
 
 .PHONY: test-python
 test-python: 

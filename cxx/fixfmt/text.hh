@@ -33,7 +33,7 @@ constexpr char ANSI_ESCAPE = '\x1b';
  * Advances an iterator on a UTF-8 string by one code point.
  */
 // FIXME: Take an end parameter.
-inline void
+inline bool
 next_utf8(string::const_iterator& i)
 {
   unsigned char c = *i++;
@@ -54,6 +54,7 @@ next_utf8(string::const_iterator& i)
       }
     }
   }
+  return true;
 }
 
 
@@ -114,6 +115,22 @@ string_length(string const& str)
       next_utf8(i);
     }
   return length;
+}
+
+
+/**
+ * Truncates a string to `length` code points, skipping escape sequences.
+ */
+inline void
+string_truncate(string& str, size_t length)
+{
+  auto const& begin = str.cbegin();
+  auto const& end = str.cend();
+  for (auto i = begin; i != end; ! skip_ansi_escape(i, end) && next_utf8(i))
+    if (i - begin == length) {
+      str.resize(i - begin);
+      break;
+    }
 }
 
 

@@ -48,31 +48,17 @@ public:
   string const&    get_inf()       const { return inf_; }
   char             get_bad()       const { return bad_; }
 
-  void format(long const val, char* const buf) const;
+  string operator()(long           val) const;
+  string operator()(double         val) const;
 
-  // Make sure we use the integer implementation for integer types.
-  void format(int            val, char* const buf) const
-    { format((long) val, buf); }
-  void format(short          val, char* const buf) const
-    { format((long) val, buf); }
-  void format(char           val, char* const buf) const
-    { format((long) val, buf); }
-  void format(unsigned long  val, char* const buf) const
-    { format((long) val, buf); }
-  void format(unsigned int   val, char* const buf) const
-    { format((long) val, buf); }
-  void format(unsigned short val, char* const buf) const
-    { format((long) val, buf); }
-  void format(unsigned char  val, char* const buf) const
-    { format((long) val, buf); }
-
-  template<typename T>
-  string operator()(T val) const
-  {
-    char buf[width_];
-    format(val, buf);
-    return string(buf, width_);
-  }
+  // Make sure we use the integer implementation for integral types.
+  string operator()(int            val) const { return operator()((long) val); }
+  string operator()(short          val) const { return operator()((long) val); }
+  string operator()(char           val) const { return operator()((long) val); }
+  string operator()(unsigned long  val) const { return operator()((long) val); }
+  string operator()(unsigned int   val) const { return operator()((long) val); }
+  string operator()(unsigned short val) const { return operator()((long) val); }
+  string operator()(unsigned char  val) const { return operator()((long) val); }
 
 private:
 
@@ -82,25 +68,24 @@ private:
     return nonneg ? (sign_ == SIGN_ALWAYS ? '+' : ' ') : '-';
   }
 
-  std::string format_nan(string const& nan) const
+  string format_nan() const
   {
-    string result = pad(nan, width_, " ", true);
+    string result = pad(nan_, width_, " ", true);
     // Truncate if necessary.
-    return result.substr(0, width_);
+    string_truncate(result, width_);
+    return result;
   }
 
-  std::string format_inf(string const& inf, bool const nonneg) const
+  string format_inf(bool const nonneg) const
   {
-    int const num_pad = width_ - inf.length() - (sign_ != SIGN_NONE);
+    int const num_pad = width_ - string_length(inf_) - (sign_ != SIGN_NONE);
     string result(num_pad < 0 ? 0 : num_pad, ' ');
     if (sign_ != SIGN_NONE)
       result += get_sign_char(nonneg);
-    result += inf;
-    // Truncate if necessary.
-    return result.substr(0, width_);
+    result += inf_;
+    string_truncate(result, width_);
+    return result;
   }
-
-  void format(double const val, char* const buf) const;
 
   /**
    * Formats 'width' digits of 'val' into 'buf', filling on the left with
@@ -109,9 +94,7 @@ private:
    */
   static int format_long(char* buf, int width, unsigned long val, char fill);
 
-  void format(
-      bool  const nonneg, long  const whole, long  const frac,
-      char* const buf) const;
+  string format(bool const nonneg, long  const whole, long const frac) const;
 
   int      const size_;
   int      const precision_;
@@ -122,9 +105,12 @@ private:
   string   const nan_;
   string   const inf_;
   char     const bad_;
-  string   const nan_pad_;
-  string   const pos_inf_;
-  string   const neg_inf_;
+
+  // Preformatted results.
+  string   const nan_result_;
+  string   const pos_inf_result_;
+  string   const neg_inf_result_;
+  string   const bad_result_;
 
 };
 
@@ -165,9 +151,10 @@ inline Number::Number(
   nan_{std::move(nan)},
   inf_{std::move(inf)},
   bad_{bad},
-  nan_pad_{format_nan(nan)},
-  pos_inf_{format_inf(inf, true)},
-  neg_inf_{format_inf(inf, false)}
+  nan_result_{format_nan()},
+  pos_inf_result_{format_inf(true)},
+  neg_inf_result_{format_inf(false)},
+  bad_result_(width_, bad)
 {
   assert(size_ >= 0);
   assert(precision_ == PRECISION_NONE || precision_ >= 0);
@@ -177,39 +164,38 @@ inline Number::Number(
 }
 
 
-inline void Number::format(long const val, char* const buf) const
+inline string Number::operator()(long const val) const
 {
   bool const nonneg = val >= 0;
-  if (! nonneg && sign_ == SIGN_NONE)
+  return
     // With SIGN_NONE, we can't render negative numbers.
-    set(buf, bad_, width_);
-  else
-    format(nonneg, labs(val), 0, buf);
+    (! nonneg && sign_ == SIGN_NONE) ? bad_result_
+    : format(nonneg, labs(val), 0);
 }
 
 
-inline void Number::format(double const val, char* const buf) const
+inline string Number::operator()(double const val) const
 {
   bool const nonneg = val >= 0;
   if (isnan(val))
-    nan_pad_.copy(buf);
+    return nan_result_;
   else if (val < 0 && sign_ == SIGN_NONE)
     // With SIGN_NONE, we can't render negative numbers.
-    set(buf, bad_, width_);
+    return bad_result_;
   else if (isinf(val))
-    // Copy the appropriate infinity.
-    (val > 0 ? pos_inf_ : neg_inf_).copy(buf);
+    // Return the appropriate infinity.
+    return val > 0 ? pos_inf_result_ : neg_inf_result_;
   else {
     int    const precision = precision_ == PRECISION_NONE ? 0 : precision_;
     double const abs_val   = round(fabs(val), precision);
     long   const whole     = abs_val;
     long   const frac      = round((abs_val - whole) * pow10(precision));
-    format(nonneg, whole, frac, buf);
+    return format(nonneg, whole, frac);
   }
 }
 
 
-inline int Number::format_long(char* buf, int width, unsigned long val,
+inline int Number::format_long(char* buf, int width, unsigned long val, 
                                char fill)
 {
   if (val == 0 && width > 0)
@@ -232,19 +218,22 @@ inline int Number::format_long(char* buf, int width, unsigned long val,
 }
 
 
-inline void Number::format(
+inline string Number::format(
     bool  const nonneg,
     long  const whole,
-    long  const frac,
-    char* const buf) const
+    long  const frac) const
 {
+  string result(width_, '?');
+  // Note: dangerous, but works.  We format directly into the string's buffer.
+  char* const buf = &result[0];
+
   int const sign_len = sign_ == SIGN_NONE ? 0 : 1;
 
   // Format the whole number part.
   int const whole_fill{format_long(buf + sign_len, size_, whole, pad_)};
   if (whole_fill < 0)
     // Didn't fit.
-    set(buf, bad_, width_);
+    return bad_result_;
   else {
     if (sign_ != SIGN_NONE) {
       // Add the sign.
@@ -269,6 +258,8 @@ inline void Number::format(
       }
     }
   }
+
+  return std::move(result);
 }
 
 
