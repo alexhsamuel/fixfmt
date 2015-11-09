@@ -1,25 +1,25 @@
-Things to do:
+Things to do:  (* for MVP)
 
-- make number formatter Unicode/ANSI-aware.
-- page at a time, with header
-- format methods, not just print
-- Use cfg in fixfmt.pandas.
-- category types
+* category types
   - pass through to category array
   - pre-format categories (?)
-- datetime types
+* Cascading cfg for formatters in fixfmt.pandas.
+* datetime types
+- format methods, not just print
 - np Array formatter
 - add iterable to Table
 - fixed-length string columns
 - unsigned columns
 - add exponential E+ formatter
+- support UTF-8/ANSI in decimal point, sign, etc.
 
 Dataframe features:
-- show nullable columns (object for bool, object for str, etc.)
-- NaN treatment
-- show Pandas index
-- show Pandas multiindex
-- print row numbers
+* show nullable columns (object for bool, object for str, etc.)
+* NaN treatment
+* show Pandas index
+* show Pandas multiindex
+* print row numbers
+- page at a time, with header
 
 Fancy features:
 - truncate dataframe output to screen
@@ -36,9 +36,9 @@ Internal:
   characters).
 
 Cleanup:
-- rename Number -> PyNumber, etc.
-- add accessors to formatters, C++ and Python
+* rename Number -> PyNumber, etc.
+* add accessors to formatters, C++ and Python
+* banners
 - Use wrapped methods consistently.
 - check up on FIXMEs
-- banners
 
