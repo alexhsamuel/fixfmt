@@ -198,6 +198,14 @@ TEST(Number, inf) {
     "############", Number(12, -1, ' ', ' ', "NaN", "infinity")(-INFINITY));
 }
 
+TEST(Number, inf_fmt) {
+  Number fmt{1, Number::PRECISION_NONE, ' ', Number::SIGN_NEGATIVE, "NaN", 
+      "\u221e"};
+  ASSERT_EQ(" 5",      fmt(5));
+  ASSERT_EQ(" \u221e", fmt( INFINITY));
+  ASSERT_EQ("-\u221e", fmt(-INFINITY));
+}
+
 TEST(Number, types) {
   Number fmt{2, 3};
   ASSERT_EQ("-42.000", fmt((char) -42));

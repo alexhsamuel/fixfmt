@@ -25,9 +25,7 @@ DEFAULT_CFG = {
     "bottom.separator.start"        : "",
     "bottom.show"                   : False,
 
-  # FIXME: Unicode doesn't work in number formatter.
-  # "float.inf"                     : "\u221e",
-    "float.inf"                     : "inf",
+    "float.inf"                     : "\u221e",
     "float.max_precision"           : 8,
     "float.min_precision"           : 1,
     "float.nan"                     : "NaN",
@@ -107,6 +105,10 @@ UNICODE_BOX_CFG = {
 }
 
 COLOR_CFG = {
+    "float.inf"                     : 
+      ansi.style(color=ansi.YELLOW, light=False)("\u221e"),
+    "float.nan"                     :
+      ansi.style(color=ansi.RED, light=False)("NaN"),
     "header.style.prefix"           : ansi.sgr(underline=True, bold=True),
     "header.style.suffix"           : ansi.RESET,
     "row_ellipsis.format"           :
