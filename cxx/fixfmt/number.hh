@@ -48,31 +48,24 @@ public:
   string const&    get_inf()       const { return inf_; }
   char             get_bad()       const { return bad_; }
 
-  void format(long const val, char* const buf) const;
+  string operator()(long val) const;
+  string operator()(double val) const;
 
   // Make sure we use the integer implementation for integer types.
-  void format(int            val, char* const buf) const
+  string operator()(int            val, char* const buf) const
     { format((long) val, buf); }
-  void format(short          val, char* const buf) const
+  string operator()(short          val, char* const buf) const
     { format((long) val, buf); }
-  void format(char           val, char* const buf) const
+  string operator()(char           val, char* const buf) const
     { format((long) val, buf); }
-  void format(unsigned long  val, char* const buf) const
+  string operator()(unsigned long  val, char* const buf) const
     { format((long) val, buf); }
-  void format(unsigned int   val, char* const buf) const
+  string operator()(unsigned int   val, char* const buf) const
     { format((long) val, buf); }
-  void format(unsigned short val, char* const buf) const
+  string operator()(unsigned short val, char* const buf) const
     { format((long) val, buf); }
-  void format(unsigned char  val, char* const buf) const
+  string operator()(unsigned char  val, char* const buf) const
     { format((long) val, buf); }
-
-  template<typename T>
-  string operator()(T val) const
-  {
-    char buf[width_];
-    format(val, buf);
-    return string(buf, width_);
-  }
 
 private:
 
@@ -177,39 +170,38 @@ inline Number::Number(
 }
 
 
-inline void Number::format(long const val, char* const buf) const
+inline string Number::operator()(long const val) const
 {
   bool const nonneg = val >= 0;
-  if (! nonneg && sign_ == SIGN_NONE)
+  return
     // With SIGN_NONE, we can't render negative numbers.
-    set(buf, bad_, width_);
-  else
-    format(nonneg, labs(val), 0, buf);
+    (! nonneg && sign_ == SIGN_NONE) ? string(width_, bad_)
+    : format(nonneg, labs(val), 0);
 }
 
 
-inline void Number::format(double const val, char* const buf) const
+inline string Number::operator()(double const val) const
 {
   bool const nonneg = val >= 0;
   if (isnan(val))
-    nan_pad_.copy(buf);
+    return nan_pad_;
   else if (val < 0 && sign_ == SIGN_NONE)
     // With SIGN_NONE, we can't render negative numbers.
-    set(buf, bad_, width_);
+    return string(width_, bad_);
   else if (isinf(val))
-    // Copy the appropriate infinity.
-    (val > 0 ? pos_inf_ : neg_inf_).copy(buf);
+    // Return the appropriate infinity.
+    return val > 0 ? pos_inf_ : neg_inf_;
   else {
     int    const precision = precision_ == PRECISION_NONE ? 0 : precision_;
     double const abs_val   = round(fabs(val), precision);
     long   const whole     = abs_val;
     long   const frac      = round((abs_val - whole) * pow10(precision));
-    format(nonneg, whole, frac, buf);
+    return format(nonneg, whole, frac);
   }
 }
 
 
-inline int Number::format_long(char* buf, int width, unsigned long val,
+inline string Number::format_long(char* buf, int width, unsigned long val,
                                char fill)
 {
   if (val == 0 && width > 0)
