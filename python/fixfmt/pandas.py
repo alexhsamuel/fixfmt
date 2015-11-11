@@ -6,116 +6,153 @@ import sys
 
 import numpy as np
 import pandas as pd
+from   pln.cfg import Group, Var, Cfg
 import pln.ctr
 from   pln.terminal import ansi
 
 from   . import *
 
 #-------------------------------------------------------------------------------
+# Configuration
 
-# FIXME: We need a proper cascading configuration system.
+SEPARATOR_CONFIGURATION = Group(
+    between                 = " ",
+    end                     = "",
+    start                   = "",
+)
 
-# FIXME: Make hierarchical.
-# FIXME: Don't support None; it's silly.
-DEFAULT_CFG = {
-    "bottom.line"                   : "-",
-    "bottom.separator.between"      : " ",
-    "bottom.separator.end"          : "",
-    "bottom.separator.index"        : "  ",
-    "bottom.separator.start"        : "",
-    "bottom.show"                   : False,
+CONFIGURATION = Group(
+    bottom = Group(
+        line                        = "-",
+        separator                   = SEPARATOR_CONFIGURATION,
+        show                        = False,
+    ),
+    columns = Group(
+        names                       = Var(default=pln.ctr.ALL),
+    ),
+    data = Group(
+        max_rows                    = Var(default="terminal"),
+    ),
+    float = Group(
+        inf                         = "\u221e",
+        max_precision               = 8,
+        min_precision               = 1,
+        nan                         = "NaN",
+    ),
+    formatters                      = {},
+    header = Group(
+        elide = Group(
+            position                = 0.7,
+        ),
+        prefix                      = "",
+        separator                   = SEPARATOR_CONFIGURATION,
+        show                        = True,
+        style = Group(
+            prefix                  = "",
+            suffix                  = "",
+        ),
+        suffix                      = "",
+    ),
+    row = Group(
+        separator                   = SEPARATOR_CONFIGURATION,
+    ),
+    row_ellipsis = Group(
+        separator                   = SEPARATOR_CONFIGURATION,
+        pad                         = " ",
+        position                    = 0.85,
+        format                      = "\u2026 skipping {skipped} rows \u2026",
+    ),
+    str = Group(
+        min_size                    =  1,
+        max_size                    = 32,
+    ),
+    top = Group(
+        line                        = "-",
+        separator                   = SEPARATOR_CONFIGURATION,
+        show                        = False,
+    ),
+    underline = Group(
+        line                        = "=",
+        separator                   = SEPARATOR_CONFIGURATION,
+        show                        = True,
+    ),
+)
 
-    "float.inf"                     : "\u221e",
-    "float.max_precision"           : 8,
-    "float.min_precision"           : 1,
-    "float.nan"                     : "NaN",
 
-    "formatters"                    : {},
 
-    "header.elide.position"         : 0.7,
-    "header.prefix"                 : "",
-    "header.separator.between"      : " ",
-    "header.separator.end"          : "",
-    "header.separator.index"        : " ",
-    "header.separator.start"        : "",
-    "header.show"                   : True,
-    "header.style.prefix"           : "",
-    "header.style.suffix"           : "",
-    "header.suffix"                 : "",
+DEFAULT_CFG = Cfg(CONFIGURATION)
 
-    "separator.between"             : " ",
-    "separator.end"                 : "",
-    "separator.index"               : " | ",
-    "separator.start"               : "",
+UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
+    bottom = dict(
+        line                        = "\u2500",
+        separator = dict(
+            between                 = "\u2500\u2534\u2500",
+            end                     = "\u2500\u2518",
+            start                   = "\u2514\u2500",
+        ),
+        show                        = True,
+    ),
+    header = dict(
+        separator = dict(
+            between             = " \u2502 ",
+            end                 = " \u2502",
+            start               = "\u2502 ",
+        ),
+    ),
+    row_ellipsis = dict(
+        separator = dict(
+            end                     = "\u2561",
+            start                   = "\u255e",
+        ),
+        pad                         = "\u2550",
+        format                      = " skipped {skipped} rows ",
+    ),
+    row = dict(
+        separator = dict(
+            between                 = " \u2502 ",
+            end                     = " \u2502",
+            start                   = "\u2502 ",
+        ),
+    ),
+    top = dict(
+        line                        = "\u2500",
+        separator = dict(
+            between                 = "\u2500\u252c\u2500",
+            end                     = "\u2500\u2510",
+            start                   = "\u250c\u2500",
+        ),
+        show                        = True,
+    ),
+    underline = dict(
+        line                        = "\u2500",
+        separator = dict(
+            between                 = "\u2500\u253c\u2500",
+            end                     = "\u2500\u2524",
+            start                   = "\u251c\u2500",
+        ),
+    ),
+)
 
-    "row_ellipsis.separator.end"    : "",
-    "row_ellipsis.separator.start"  : "",
-    "row_ellipsis.pad"              : " ",
-    "row_ellipsis.position"         : 0.85,
-    "row_ellipsis.format"           : "\u2026 skipping {skipped} rows \u2026",
 
-    "str.min_size"                  :  1,
-    "str.max_size"                  : 32,
+def _add_color(cfg):
+    """
+    ANSI-colorizes a configuration.
+    """
+    # Color Inf and Nan, for visibility.
+    cfg.float.inf = ansi.style(color=ansi.YELLOW, light=False)(cfg.float.inf)
+    cfg.float.nan = ansi.style(color=ansi.RED   , light=False)(cfg.float.nan)
 
-    "top.line"                      : "-",
-    "top.separator.between"         : " ",
-    "top.separator.end"             : "",
-    "top.separator.index"           : "  ",
-    "top.separator.start"           : "",
-    "top.show"                      : False,
+    # Use underlining instead of drawing an underline.
+    cfg.header.style.prefix = ansi.sgr(underline=True, bold=True)
+    cfg.header.style.suffix = ansi.RESET
+    cfg.underline.show = False
 
-    "underline.line"                : "=",
-    "underline.separator.between"   : " ",
-    "underline.separator.end"       : "",
-    "underline.separator.index"     : " ",
-    "underline.separator.start"     : "",
-    "underline.show"                : True,
-}
+    # Color the ellipsis row.
+    cfg.row_ellipsis.format = ansi.style(color=ansi.BLACK, light=True)(
+        cfg.row_ellipsis.format)
 
-UNICODE_BOX_CFG = {
-    "bottom.line"                   : "\u2500",
-    "bottom.separator.between"      : "\u2500\u2534\u2500",
-    "bottom.separator.end"          : "\u2500\u2518",
-    "bottom.separator.index"        : "\u2500\u2534\u2500",
-    "bottom.separator.start"        : "\u2514\u2500",
-    "bottom.show"                   : True,
-    "header.separator.between"      : " \u2502 ",
-    "header.separator.end"          : " \u2502",
-    "header.separator.index"        : " \u2551 ",
-    "header.separator.start"        : "\u2502 ",
-    "row_ellipsis.separator.end"    : "\u2561",
-    "row_ellipsis.separator.start"  : "\u255e",
-    "row_ellipsis.pad"              : "\u2550",
-    "row_ellipsis.format"           : " (skipped {skipped} rows) ",
-    "separator.between"             : " \u2502 ",
-    "separator.end"                 : " \u2502",
-    "separator.index"               : " \u2551 ",
-    "separator.start"               : "\u2502 ",
-    "top.line"                      : "\u2500",
-    "top.separator.between"         : "\u2500\u252c\u2500",
-    "top.separator.end"             : "\u2500\u2510",
-    "top.separator.index"           : "\u2500\u252c\u2500",
-    "top.separator.start"           : "\u250c\u2500",
-    "top.show"                      : True,
-    "underline.line"                : "\u2500",
-    "underline.separator.between"   : "\u2500\u253c\u2500",
-    "underline.separator.end"       : "\u2500\u2524",
-    "underline.separator.index"     : " \u253c ",
-    "underline.separator.start"     : "\u251c\u2500",
-}
 
-COLOR_CFG = {
-    "float.inf"                     : 
-      ansi.style(color=ansi.YELLOW, light=False)("\u221e"),
-    "float.nan"                     :
-      ansi.style(color=ansi.RED, light=False)("NaN"),
-    "header.style.prefix"           : ansi.sgr(underline=True, bold=True),
-    "header.style.suffix"           : ansi.RESET,
-    "row_ellipsis.format"           :
-      ansi.style(color=ansi.BLACK, light=True)
-      ("\u2026 skipping {skipped} rows \u2026"),
-    "underline.show"                : False,
-}
+#-------------------------------------------------------------------------------
 
 def _add_array_to_table(table, arr, fmt):
     dtype = arr.dtype
@@ -154,8 +191,8 @@ def _choose_formatter_bool(values, cfg):
 def _choose_formatter_float(values, cfg):
     # FIXME: This could be done with a single pass more efficiently.
 
-    inf         = cfg["float.inf"]
-    nan         = cfg["float.nan"]
+    inf         = cfg.float.inf
+    nan         = cfg.float.nan
 
     # Remove NaN and infinite values.
     is_nan      = np.isnan(values)
@@ -181,9 +218,9 @@ def _choose_formatter_float(values, cfg):
 
     # Try progressively higher precision until rounding won't leave any
     # residuals larger the maximum pecision.
-    precision_min   = cfg["float.min_precision"]
+    precision_min   = cfg.float.min_precision
     precision_min   = max(precision_min, special_width - size - 1)
-    precision_max   = cfg["float.max_precision"]
+    precision_max   = cfg.float.max_precision
     tolerance       = (10 ** -precision_max) / 2
     for precision in range(precision_min, precision_max + 1):
         if (abs(np.round(vals, precision) - vals) < tolerance).all():
@@ -205,8 +242,8 @@ def _choose_formatter_int(values, cfg):
 
 def _choose_formatter_str(values, cfg):
     size = np.vectorize(len)(values).max()
-    size = max(size, cfg["str.min_size"])
-    size = min(size, cfg["str.max_size"])
+    size = max(size, cfg.str.min_size)
+    size = min(size, cfg.str.max_size)
     return String(size)
 
 
@@ -254,10 +291,10 @@ def _get_header_justification(fmt):
 def _table_for_dataframe(df, names, cfg={}):
     table = Table()
 
-    formatters  = cfg["formatters"]
-    begin_sep   = cfg["separator.start"]
-    sep         = cfg["separator.between"]
-    end_sep     = cfg["separator.end"]
+    formatters  = cfg.formatters
+    begin_sep   = cfg.row.separator.start
+    sep         = cfg.row.separator.between
+    end_sep     = cfg.row.separator.end
 
     if begin_sep:
         table.add_string(begin_sep)
@@ -292,15 +329,15 @@ def _table_for_dataframe(df, names, cfg={}):
 # FIXME: Special sep after index.
 
 def _print_header(names, fmts, cfg):
-    if cfg["header.show"]:
-        pfx         = cfg["header.prefix"]
-        start       = cfg["header.separator.start"]
-        sep         = cfg["header.separator.between"]
-        end         = cfg["header.separator.end"]
-        style_pfx   = cfg["header.style.prefix"]
-        style_sfx   = cfg["header.style.suffix"]
-        sfx         = cfg["header.suffix"]
-        position    = cfg["header.elide.position"]
+    if cfg.header.show:
+        pfx         = cfg.header.prefix
+        start       = cfg.header.separator.start
+        sep         = cfg.header.separator.between
+        end         = cfg.header.separator.end
+        style_pfx   = cfg.header.style.prefix
+        style_sfx   = cfg.header.style.suffix
+        sfx         = cfg.header.suffix
+        position    = cfg.header.elide.position
 
         assert string_length(style_pfx) == 0
         assert string_length(style_sfx) == 0
@@ -316,16 +353,16 @@ def _print_header(names, fmts, cfg):
 
 
 # FIXME: Support subconfigs.
-def _print_line(names, fmts, prefix, cfg):
-    if cfg[prefix + ".show"]:
-        begin_sep   = cfg[prefix + ".separator.start"]
-        sep         = cfg[prefix + ".separator.between"]
-        end_sep     = cfg[prefix + ".separator.end"]
-        line        = cfg[prefix + ".line"]
+def _print_line(names, fmts, cfg):
+    if cfg.show:
+        begin_sep   = cfg.separator.start
+        sep         = cfg.separator.between
+        end_sep     = cfg.separator.end
+        line        = cfg.line
 
         # FIXME: Relax this.
         if len(line) != 1:
-            raise ValueError("{}.line must be one character".format(prefix))
+            raise ValueError("line must be one character")
 
         builtins.print(
               begin_sep
@@ -338,36 +375,36 @@ def _print_line(names, fmts, prefix, cfg):
 
 def _print_dataframe(df, cfg):
     # Slog through configuration.
-    formatters  = cfg["formatters"]
-    max_rows    = cfg.get("max_rows", "terminal")  # FIXME
+    formatters  = cfg.formatters
 
     extra_rows  = sum([
         1,
-        cfg["top.show"],
-        cfg["header.show"],
-        cfg["underline.show"],
-        cfg["bottom.show"],
+        cfg.top.show,
+        cfg.header.show,
+        cfg.underline.show,
+        cfg.bottom.show,
     ])
 
+    max_rows = cfg.data.max_rows
     if max_rows == "terminal":
         # FIXME
         max_rows = shutil.get_terminal_size().lines - 1
-    names = cfg.get("names", pln.ctr.ALL)
 
+    names = cfg.columns.names
     names = pln.ctr.select_ordered(df.columns, names)
     # FIXME: Get formats from table columns.
     table, fmts, arrs = _table_for_dataframe(df, names, cfg)
 
-    _print_line(names, fmts, "top", cfg)
+    _print_line(names, fmts, cfg.top)
     _print_header(names, fmts, cfg)
-    _print_line(names, fmts, "underline", cfg)
+    _print_line(names, fmts, cfg.underline)
 
     num_rows = len(table)
     if num_rows <= max_rows - extra_rows:
         for i in range(len(table)):
             builtins.print(table(i))
     else:
-        num_rows_top        = int(cfg["row_ellipsis.position"] * max_rows)
+        num_rows_top        = int(cfg.row_ellipsis.position * max_rows)
         num_rows_bottom     = max_rows - extra_rows - num_rows_top
         num_rows_skipped    = num_rows - num_rows_top - num_rows_bottom
         
@@ -376,15 +413,15 @@ def _print_dataframe(df, cfg):
             builtins.print(table(i))
 
         # Print the row ellipsis.
-        ell = cfg["row_ellipsis.format"].format(
+        ell = cfg.row_ellipsis.format.format(
             bottom  =num_rows_bottom,
             rows    =num_rows,
             skipped =num_rows_skipped,
             top     =num_rows_top,
         )
-        ell_start   = cfg["row_ellipsis.separator.start"]
-        ell_end     = cfg["row_ellipsis.separator.end"]
-        ell_pad     = cfg["row_ellipsis.pad"]
+        ell_start   = cfg.row_ellipsis.separator.start
+        ell_end     = cfg.row_ellipsis.separator.end
+        ell_pad     = cfg.row_ellipsis.pad
         ell_width   = (
             table.width - string_length(ell_start) - string_length(ell_end))
         ell         = center(ell, ell_width, ell_pad)
@@ -394,7 +431,7 @@ def _print_dataframe(df, cfg):
         for i in range(num_rows - num_rows_bottom, num_rows):
             builtins.print(table(i))
 
-    _print_line(names, fmts, "bottom", cfg)
+    _print_line(names, fmts, cfg.bottom)
 
 
 def print(df, *, cfg=DEFAULT_CFG):
@@ -414,9 +451,11 @@ def main():
     args = parser.parse_args()
     
     # FIXME
-    cfg = DEFAULT_CFG.copy()
-    # cfg.update(UNICODE_BOX_CFG)
-    cfg.update(COLOR_CFG)
+    cfg = DEFAULT_CFG
+    # cfg = UNICODE_BOX_CFG
+    _add_color(cfg)
+    # cfg.update(COLOR_CFG)
+    builtins.print(cfg)
 
     # FIXME: Support "-".
     df = load_pickle(args.filename)
