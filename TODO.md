@@ -35,7 +35,6 @@ Internal:
   characters).
 
 Cleanup:
-* rename Number -> PyNumber, etc.
 * add accessors to formatters, C++ and Python
 * banners
 - Use wrapped methods consistently.
