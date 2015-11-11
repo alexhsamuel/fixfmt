@@ -5,7 +5,7 @@
 #include "PyBool.hh"
 #include "PyNumber.hh"
 #include "PyString.hh"
-#include "Table.hh"
+#include "PyTable.hh"
 
 using namespace py;
 using std::unique_ptr;
@@ -14,26 +14,26 @@ using std::unique_ptr;
 
 namespace {
 
-void tp_dealloc(Table* self)
+void tp_dealloc(PyTable* self)
 {
-  self->~Table();
+  self->~PyTable();
   self->ob_type->tp_free(self);
 }
 
 
-int tp_init(Table* self, Tuple* args, Dict* kw_args)
+int tp_init(PyTable* self, Tuple* args, Dict* kw_args)
 {
   // No arguments.
   static char const* arg_names[] = {nullptr};
   Arg::ParseTupleAndKeywords(args, kw_args, "", (char**) arg_names);
 
-  new(self) Table;
+  new(self) PyTable;
   self->table_ = unique_ptr<fixfmt::Table>(new fixfmt::Table());
   return 0;
 }
 
 
-ref<Object> tp_call(Table* self, Tuple* args, Dict* kw_args)
+ref<Object> tp_call(PyTable* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"index", nullptr};
   long index;
@@ -48,7 +48,7 @@ ref<Object> tp_call(Table* self, Tuple* args, Dict* kw_args)
 }
 
 
-Py_ssize_t sq_length(Table* table)
+Py_ssize_t sq_length(PyTable* table)
 {
   return table->table_->get_length();
 }
@@ -68,7 +68,7 @@ PySequenceMethods const tp_as_sequence = {
 };
 
 
-ref<Object> add_string(Table* self, Tuple* args, Dict* kw_args)
+ref<Object> add_string(PyTable* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"str", nullptr};
   char* str;
@@ -87,7 +87,7 @@ ref<Object> add_string(Table* self, Tuple* args, Dict* kw_args)
  * 'TYPE' values.
  */
 template<typename TYPE, typename PYFMT>
-ref<Object> add_column(Table* self, Tuple* args, Dict* kw_args)
+ref<Object> add_column(PyTable* self, Tuple* args, Dict* kw_args)
 {
   // Parse args.
   static char const* arg_names[] = {"buf", "format", nullptr};
@@ -156,7 +156,7 @@ private:
 };
 
 
-ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
+ref<Object> add_str_object_column(PyTable* self, Tuple* args, Dict* kw_args)
 {
   // Parse args.
   static char const* arg_names[] = {"buf", "format", nullptr};
@@ -185,7 +185,7 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
 }
 
 
-auto methods = Methods<Table>()
+auto methods = Methods<PyTable>()
   .add<add_string>                      ("add_string")
   .add<add_column<bool,    PyBool>>     ("add_bool")
   .add<add_column<char,    PyNumber>>   ("add_int8")
@@ -198,13 +198,13 @@ auto methods = Methods<Table>()
 ;
 
 
-Object* get_length(Table* const self, void* /* closure */)
+Object* get_length(PyTable* const self, void* /* closure */)
 {
   return Long::FromLong(self->table_->get_length()).release();
 }
 
 
-Object* get_width(Table* const self, void* /* closure */)
+Object* get_width(PyTable* const self, void* /* closure */)
 {
   return Long::FromLong(self->table_->get_width()).release();
 }
@@ -232,10 +232,10 @@ PyGetSetDef const tp_getset[] = {
 }  // anonymous namespace
 
 
-Type Table::type_ = PyTypeObject{
+Type PyTable::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
   (char const*)         "fixfmt.Table",                     // tp_name
-  (Py_ssize_t)          sizeof(Table),                      // tp_basicsize
+  (Py_ssize_t)          sizeof(PyTable),                    // tp_basicsize
   (Py_ssize_t)          0,                                  // tp_itemsize
   (destructor)          tp_dealloc,                         // tp_dealloc
   (printfunc)           nullptr,                            // tp_print
@@ -247,7 +247,7 @@ Type Table::type_ = PyTypeObject{
   (PySequenceMethods*)  &tp_as_sequence,                    // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping
   (hashfunc)            nullptr,                            // tp_hash
-  (ternaryfunc)         wrap<Table, tp_call>,               // tp_call
+  (ternaryfunc)         wrap<PyTable, tp_call>,             // tp_call
   (reprfunc)            nullptr,                            // tp_str
   (getattrofunc)        nullptr,                            // tp_getattro
   (setattrofunc)        nullptr,                            // tp_setattro

@@ -3,7 +3,7 @@
 #include "PyBool.hh"
 #include "PyNumber.hh"
 #include "PyString.hh"
-#include "Table.hh"
+#include "PyTable.hh"
 #include "py.hh"
 
 using namespace py;
@@ -43,8 +43,8 @@ PyInit__ext(void)
   PyString::type_.Ready();
   module->add(&PyString::type_);
 
-  Table::type_.Ready();
-  module->add(&Table::type_);
+  PyTable::type_.Ready();
+  module->add(&PyTable::type_);
 
   return module.release();
 }

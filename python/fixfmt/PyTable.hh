@@ -11,7 +11,7 @@
 
 // FIXME: Columns should hold buffer refs, not the table.
 
-class Table
+class PyTable
   : public py::ExtensionType
 {
 public:

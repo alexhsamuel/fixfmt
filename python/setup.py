@@ -18,7 +18,7 @@ setup(
         "fixfmt/PyBool.cc",
         "fixfmt/PyNumber.cc",
         "fixfmt/PyString.cc",
-        "fixfmt/Table.cc",
+        "fixfmt/PyTable.cc",
         "fixfmt/_ext.cc",
         "fixfmt/functions.cc",
       ],
