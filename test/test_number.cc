@@ -97,10 +97,10 @@ TEST(Number, double) {
   ASSERT_EQ("#######", fmt(-100      ));
   ASSERT_EQ("#######", fmt( 999      ));
   ASSERT_EQ("#######", fmt(-999      ));
-  ASSERT_EQ("    NaN", fmt( NAN      ));
-  ASSERT_EQ("    NaN", fmt(-NAN      ));  // ain't no such thang
-  ASSERT_EQ("    inf", fmt( INFINITY ));
-  ASSERT_EQ("   -inf", fmt(-INFINITY ));
+  ASSERT_EQ("NaN    ", fmt( NAN      ));
+  ASSERT_EQ("NaN    ", fmt(-NAN      ));  // ain't no such thang
+  ASSERT_EQ(" inf   ", fmt( INFINITY ));
+  ASSERT_EQ("-inf   ", fmt(-INFINITY ));
 }
 
 // FIXME: Re-enable.
@@ -170,8 +170,8 @@ TEST(Number, nan) {
   ASSERT_EQ("N"     , Number(1, -1, ' ', ' ')(NAN));
   ASSERT_EQ("Na"    , Number(2, -1, ' ', ' ')(NAN));
   ASSERT_EQ("NaN"   , Number(3, -1, ' ', ' ')(NAN));
-  ASSERT_EQ("   NaN", Number(2,  2, ' ', '-', "NaN")(NAN));
-  ASSERT_EQ("   nan", Number(2,  2, ' ', '-', "nan")(NAN));
+  ASSERT_EQ("NaN   ", Number(2,  2, ' ', '-', "NaN")(NAN));
+  ASSERT_EQ("nan   ", Number(2,  2, ' ', '-', "nan")(NAN));
   ASSERT_EQ("NotANu", Number(2,  2, ' ', '-', "NotANumber")(NAN));
   ASSERT_EQ("  NotANumber", Number(12, -1, ' ', ' ', "NotANumber")(NAN));
 }
@@ -185,8 +185,8 @@ TEST(Number, inf) {
   ASSERT_EQ("-inf"  , Number(3, -1, ' ', '-')(-INFINITY));
   ASSERT_EQ("+inf"  , Number(3, -1, ' ', '+')( INFINITY));
   ASSERT_EQ("-inf"  , Number(3, -1, ' ', '+')(-INFINITY));
-  ASSERT_EQ("   inf", Number(2,  2, ' ', '-', "NaN", "inf")(INFINITY));
-  ASSERT_EQ("   INF", Number(2,  2, ' ', '-', "NaN", "INF")(INFINITY));
+  ASSERT_EQ(" inf  ", Number(2,  2, ' ', '-', "NaN", "inf")(INFINITY));
+  ASSERT_EQ(" INF  ", Number(2,  2, ' ', '-', "NaN", "INF")(INFINITY));
   ASSERT_EQ(" infin", Number(2,  2, ' ', '-', "NaN", "infinity")(INFINITY));
   ASSERT_EQ("+infin", Number(2,  2, ' ', '+', "NaN", "infinity")(INFINITY));
   ASSERT_EQ("-infin", Number(2,  2, ' ', '-', "NaN", "infinity")(-INFINITY));

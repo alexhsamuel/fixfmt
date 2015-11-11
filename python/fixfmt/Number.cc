@@ -29,6 +29,11 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
       &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad)) 
     return -1;
 
+  if (size < 0) {
+    // FIXME
+    PyErr_SetString(PyExc_ValueError, "negative size");
+    return 1;
+  }
   int precision;
   if (precision_arg == Py_None)
     precision = fixfmt::Number::PRECISION_NONE;
@@ -36,6 +41,11 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
     precision = precision_arg->long_value();
     if (precision < 0)
       precision = fixfmt::Number::PRECISION_NONE;
+  }
+  if (!(size > 0 || precision > 0)) {
+    // FIXME
+    PyErr_SetString(PyExc_ValueError, "no sign or precision");
+    return 1;
   }
   if (   sign != fixfmt::Number::SIGN_NONE
       && sign != fixfmt::Number::SIGN_NEGATIVE

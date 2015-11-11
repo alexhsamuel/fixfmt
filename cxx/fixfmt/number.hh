@@ -68,23 +68,24 @@ private:
     return nonneg ? (sign_ == SIGN_ALWAYS ? '+' : ' ') : '-';
   }
 
-  string format_nan() const
+  string format_inf_nan(string const& str, int const sign) const
   {
-    string result = pad(nan_, width_, " ", true);
-    // Truncate if necessary.
-    string_truncate(result, width_);
-    return result;
-  }
+    // Tack on the sign.
+    bool const has_sign = sign_ != SIGN_NONE;
+    string result = 
+      ! has_sign || sign == 0 ? str
+      : get_sign_char(sign > 0) + str;
+    int const len = string_length(result);
+    int const size = size_ + has_sign;
 
-  string format_inf(bool const nonneg) const
-  {
-    int const num_pad = width_ - string_length(inf_) - (sign_ != SIGN_NONE);
-    string result(num_pad < 0 ? 0 : num_pad, ' ');
-    if (sign_ != SIGN_NONE)
-      result += get_sign_char(nonneg);
-    result += inf_;
-    string_truncate(result, width_);
-    return result;
+    // Try to put it in the integer part.
+    if (len <= width_)
+      return pad(pad(result, size, " ", true), width_, " ", false);
+    else {
+      // Doesn't fit at all.
+      string_truncate(result, width_);
+      return result;
+    }
   }
 
   /**
@@ -151,13 +152,14 @@ inline Number::Number(
   nan_{std::move(nan)},
   inf_{std::move(inf)},
   bad_{bad},
-  nan_result_{format_nan()},
-  pos_inf_result_{format_inf(true)},
-  neg_inf_result_{format_inf(false)},
+  nan_result_{format_inf_nan(nan_, 0)},
+  pos_inf_result_{format_inf_nan(inf_,  1)},
+  neg_inf_result_{format_inf_nan(inf_, -1)},
   bad_result_(width_, bad)
 {
   assert(size_ >= 0);
   assert(precision_ == PRECISION_NONE || precision_ >= 0);
+  assert(size_ > 0 || precision_ > 0);
   assert(pad_ == PAD_SPACE || pad_ == PAD_ZERO);
   assert(
       sign_ == SIGN_NONE || sign_ == SIGN_NEGATIVE || sign_ == SIGN_ALWAYS);
