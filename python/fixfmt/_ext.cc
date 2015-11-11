@@ -1,7 +1,7 @@
 #include <Python.h>
 
 #include "PyBool.hh"
-#include "Number.hh"
+#include "PyNumber.hh"
 #include "py.hh"
 #include "String.hh"
 #include "Table.hh"
@@ -37,8 +37,8 @@ PyInit__ext(void)
   PyBool::type_.Ready();
   module->add(&PyBool::type_);
 
-  Number::type_.Ready();
-  module->add(&Number::type_);
+  PyNumber::type_.Ready();
+  module->add(&PyNumber::type_);
 
   String::type_.Ready();
   module->add(&String::type_);

@@ -3,7 +3,7 @@
 #include <utility>
 
 #include "PyBool.hh"
-#include "Number.hh"
+#include "PyNumber.hh"
 #include "String.hh"
 #include "Table.hh"
 
@@ -186,15 +186,15 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
 
 
 auto methods = Methods<Table>()
-  .add<add_string>                  ("add_string")
-  .add<add_column<bool,    PyBool>> ("add_bool")
-  .add<add_column<char,    Number>> ("add_int8")
-  .add<add_column<short,   Number>> ("add_int16")
-  .add<add_column<int,     Number>> ("add_int32")
-  .add<add_column<long,    Number>> ("add_int64")
-  .add<add_column<float,   Number>> ("add_float32")
-  .add<add_column<double,  Number>> ("add_float64")
-  .add<add_str_object_column>       ("add_str_object")
+  .add<add_string>                      ("add_string")
+  .add<add_column<bool,    PyBool>>     ("add_bool")
+  .add<add_column<char,    PyNumber>>   ("add_int8")
+  .add<add_column<short,   PyNumber>>   ("add_int16")
+  .add<add_column<int,     PyNumber>>   ("add_int32")
+  .add<add_column<long,    PyNumber>>   ("add_int64")
+  .add<add_column<float,   PyNumber>>   ("add_float32")
+  .add<add_column<double,  PyNumber>>   ("add_float64")
+  .add<add_str_object_column>           ("add_str_object")
 ;
 
 

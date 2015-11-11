@@ -9,7 +9,7 @@
 
 //------------------------------------------------------------------------------
 
-class Number
+class PyNumber
   : public py::ExtensionType
 {
 public:

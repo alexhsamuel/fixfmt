@@ -1,4 +1,4 @@
-#include "Number.hh"
+#include "PyNumber.hh"
 
 using namespace py;
 using std::unique_ptr;
@@ -9,7 +9,7 @@ namespace {
 
 // FIXME: Wrap for exceptions.
 // FIXME: Accept sign=None.
-static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
+static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {
       "size", "precision", "pad", "sign", "nan", "inf", "point", "bad",
@@ -55,7 +55,7 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
     return 1;
   }
 
-  new(self) Number;
+  new(self) PyNumber;
   self->fmt_ = unique_ptr<fixfmt::Number>(
       new fixfmt::Number(
           size, precision, (char) pad, (char) sign, std::string(nan),
@@ -64,7 +64,7 @@ static int tp_init(Number* self, PyObject* args, PyObject* kw_args)
 }
 
 
-ref<Object> tp_call(Number* self, Tuple* args, Dict* kw_args)
+ref<Object> tp_call(PyNumber* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"value", nullptr};
   double val;
@@ -74,11 +74,11 @@ ref<Object> tp_call(Number* self, Tuple* args, Dict* kw_args)
 }
 
 
-auto methods = Methods<Number>()
+auto methods = Methods<PyNumber>()
 ;
 
 
-Object* get_width(Number* const self, void* /* closure */)
+Object* get_width(PyNumber* const self, void* /* closure */)
 {
   return Long::FromLong(self->fmt_->get_width()).release();
 }
@@ -99,10 +99,10 @@ PyGetSetDef const tp_getset[] = {
 }  // anonymous namespace
 
 
-Type Number::type_ = PyTypeObject{
+Type PyNumber::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
   (char const*)         "fixfmt.Number",                    // tp_name
-  (Py_ssize_t)          sizeof(Number),                     // tp_basicsize
+  (Py_ssize_t)          sizeof(PyNumber),                   // tp_basicsize
   (Py_ssize_t)          0,                                  // tp_itemsize
   (destructor)          nullptr,                            // tp_dealloc
   (printfunc)           nullptr,                            // tp_print
@@ -114,7 +114,7 @@ Type Number::type_ = PyTypeObject{
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping
   (hashfunc)            nullptr,                            // tp_hash
-  (ternaryfunc)         wrap<Number, tp_call>,              // tp_call
+  (ternaryfunc)         wrap<PyNumber, tp_call>,            // tp_call
   (reprfunc)            nullptr,                            // tp_str
   (getattrofunc)        nullptr,                            // tp_getattro
   (setattrofunc)        nullptr,                            // tp_setattro

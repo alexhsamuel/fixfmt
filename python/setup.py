@@ -15,8 +15,8 @@ setup(
       extra_compile_args=["-std=c++14", ],
       include_dirs=["../cxx", ],
       sources=[
-        "fixfmt/Number.cc",
         "fixfmt/PyBool.cc",
+        "fixfmt/PyNumber.cc",
         "fixfmt/String.cc",
         "fixfmt/Table.cc",
         "fixfmt/_ext.cc",
