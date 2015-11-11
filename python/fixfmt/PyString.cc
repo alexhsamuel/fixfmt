@@ -3,7 +3,7 @@
 
 #include <Python.h>
 
-#include "String.hh"
+#include "PyString.hh"
 
 using namespace py;
 using std::unique_ptr;
@@ -12,7 +12,7 @@ using std::unique_ptr;
 
 namespace {
 
-int tp_init(String* self, PyObject* args, PyObject* kw_args)
+int tp_init(PyString* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] 
       = {"size", "ellipsis", "pad", "position", "pad_left", nullptr};
@@ -33,14 +33,14 @@ int tp_init(String* self, PyObject* args, PyObject* kw_args)
     return 1;
   }
 
-  new(self) String;
+  new(self) PyString;
   self->fmt_ = unique_ptr<fixfmt::String>(
       new fixfmt::String(size, ellipsis, pad, position, pad_left));
   return 0;
 }
 
 
-PyObject* tp_call(String* self, PyObject* args, PyObject* kw_args)
+PyObject* tp_call(PyString* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {"str", nullptr};
   char* val;
@@ -52,17 +52,17 @@ PyObject* tp_call(String* self, PyObject* args, PyObject* kw_args)
 }
 
 
-auto methods = Methods<String>()
+auto methods = Methods<PyString>()
 ;
 
 
-Object* get_pad_left(String* const self, void* /* closure */)
+Object* get_pad_left(PyString* const self, void* /* closure */)
 {
   return Bool::from(self->fmt_->get_pad_left()).release();
 }
 
 
-Object* get_width(String* const self, void* /* closure */)
+Object* get_width(PyString* const self, void* /* closure */)
 {
   return Long::FromLong(self->fmt_->get_width()).release();
 }
@@ -91,10 +91,10 @@ PyGetSetDef const tp_getset[] = {
 }  // anonymous namespace
 
 
-Type String::type_ = PyTypeObject{
+Type PyString::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
   (char const*)         "fixfmt.String",                    // tp_name
-  (Py_ssize_t)          sizeof(String),                     // tp_basicsize
+  (Py_ssize_t)          sizeof(PyString),                   // tp_basicsize
   (Py_ssize_t)          0,                                  // tp_itemsize
   (destructor)          nullptr,                            // tp_dealloc
   (printfunc)           nullptr,                            // tp_print

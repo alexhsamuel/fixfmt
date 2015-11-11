@@ -7,7 +7,7 @@
 
 //------------------------------------------------------------------------------
 
-class String
+class PyString
   : public py::ExtensionType
 {
 public:

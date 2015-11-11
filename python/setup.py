@@ -17,7 +17,7 @@ setup(
       sources=[
         "fixfmt/PyBool.cc",
         "fixfmt/PyNumber.cc",
-        "fixfmt/String.cc",
+        "fixfmt/PyString.cc",
         "fixfmt/Table.cc",
         "fixfmt/_ext.cc",
         "fixfmt/functions.cc",

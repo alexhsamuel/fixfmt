@@ -4,7 +4,7 @@
 
 #include "PyBool.hh"
 #include "PyNumber.hh"
-#include "String.hh"
+#include "PyString.hh"
 #include "Table.hh"
 
 using namespace py;
@@ -161,10 +161,10 @@ ref<Object> add_str_object_column(Table* self, Tuple* args, Dict* kw_args)
   // Parse args.
   static char const* arg_names[] = {"buf", "format", nullptr};
   PyObject* array;
-  String* format;
+  PyString* format;
   Arg::ParseTupleAndKeywords(
       args, kw_args, "OO!", arg_names,
-      &array, &String::type_, &format);
+      &array, &PyString::type_, &format);
   
   // Validate args.
   BufferRef buffer(array, PyBUF_ND);

@@ -2,9 +2,9 @@
 
 #include "PyBool.hh"
 #include "PyNumber.hh"
-#include "py.hh"
-#include "String.hh"
+#include "PyString.hh"
 #include "Table.hh"
+#include "py.hh"
 
 using namespace py;
 
@@ -40,8 +40,8 @@ PyInit__ext(void)
   PyNumber::type_.Ready();
   module->add(&PyNumber::type_);
 
-  String::type_.Ready();
-  module->add(&String::type_);
+  PyString::type_.Ready();
+  module->add(&PyString::type_);
 
   Table::type_.Ready();
   module->add(&Table::type_);
