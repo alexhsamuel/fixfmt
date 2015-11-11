@@ -9,6 +9,8 @@
 
 //------------------------------------------------------------------------------
 
+// FIXME: Columns should hold buffer refs, not the table.
+
 class Table
   : public py::ExtensionType
 {
