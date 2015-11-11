@@ -455,7 +455,8 @@ def main():
     # cfg = UNICODE_BOX_CFG
     _add_color(cfg)
     # cfg.update(COLOR_CFG)
-    builtins.print(cfg)
+
+    # builtins.print(cfg)
 
     # FIXME: Support "-".
     df = load_pickle(args.filename)
