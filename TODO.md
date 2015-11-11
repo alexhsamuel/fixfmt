@@ -3,7 +3,6 @@ Things to do:  (* for MVP)
 * category types
   - pass through to category array
   - pre-format categories (?)
-* Cascading cfg for formatters in fixfmt.pandas.
 * datetime types
 - format methods, not just print
 - np Array formatter
