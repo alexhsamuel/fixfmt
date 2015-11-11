@@ -305,10 +305,6 @@ def _table_for_dataframe(df, names, cfg={}):
         arr = df[name].values
         arrs.append(arr)
 
-        if arr.dtype.kind == "O":
-            # Objects are stringified.  Do this now.
-            arr = np.vectorize(str, [object])(arr)
-
         fmt = _get_formatter(formatters, name, arr, cfg)
         # FIXME: Add accessor to table.
         fmts.append(fmt)
