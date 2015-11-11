@@ -13,6 +13,7 @@ Things to do:  (* for MVP)
 - support UTF-8/ANSI in decimal point, sign, etc.
 
 Dataframe features:
+* cascading formatter config
 * show nullable columns (object for bool, object for str, etc.)
 * NaN treatment
 * show Pandas index
