@@ -292,12 +292,10 @@ def _table_for_dataframe(df, names, cfg={}):
     table = Table()
 
     formatters  = cfg.formatters
-    begin_sep   = cfg.row.separator.start
-    sep         = cfg.row.separator.between
-    end_sep     = cfg.row.separator.end
+    sep         = cfg.row.separator
 
-    if begin_sep:
-        table.add_string(begin_sep)
+    if sep.start:
+        table.add_string(sep.start)
 
     fmts = []
     arrs = []
@@ -310,12 +308,11 @@ def _table_for_dataframe(df, names, cfg={}):
         fmts.append(fmt)
         _add_array_to_table(table, arr, fmt)
         if i == len(names) - 1:
-            if end_sep:
-                table.add_string(end_sep)
+            if sep.end:
+                table.add_string(sep.end)
         else:
-            if sep:
-                table.add_string(sep)
-
+            if sep.between:
+                table.add_string(sep.between)
             
     return table, fmts, arrs
 
@@ -325,45 +322,35 @@ def _table_for_dataframe(df, names, cfg={}):
 # FIXME: Special sep after index.
 
 def _print_header(names, fmts, cfg):
-    if cfg.header.show:
-        pfx         = cfg.header.prefix
-        start       = cfg.header.separator.start
-        sep         = cfg.header.separator.between
-        end         = cfg.header.separator.end
-        style_pfx   = cfg.header.style.prefix
-        style_sfx   = cfg.header.style.suffix
-        sfx         = cfg.header.suffix
-        position    = cfg.header.elide.position
-
-        assert string_length(style_pfx) == 0
-        assert string_length(style_sfx) == 0
+    if cfg.show:
+        assert string_length(cfg.style.prefix) == 0
+        assert string_length(cfg.style.suffix) == 0
 
         def format_name(name, fmt):
-            name = pfx + name + sfx
+            name = cfg.prefix + name + cfg.suffix
             left = _get_header_justification(fmt)
-            name = palide(name, fmt.width, position=position, left=left)
-            return style_pfx + name + style_sfx
+            name = palide(
+                name, fmt.width, position=cfg.elide.position, left=left)
+            return cfg.style.prefix + name + cfg.style.suffix
 
-        header = sep.join( format_name(n, f) for n, f in zip(names, fmts) )
-        builtins.print(start + header + end)
+        sep = cfg.separator
+        header = sep.between.join(
+            format_name(n, f) for n, f in zip(names, fmts) )
+        builtins.print(sep.start + header + sep.end)
 
 
 # FIXME: Support subconfigs.
 def _print_line(names, fmts, cfg):
     if cfg.show:
-        begin_sep   = cfg.separator.start
-        sep         = cfg.separator.between
-        end_sep     = cfg.separator.end
-        line        = cfg.line
-
         # FIXME: Relax this.
-        if len(line) != 1:
+        if len(cfg.line) != 1:
             raise ValueError("line must be one character")
 
+        sep = cfg.separator
         builtins.print(
-              begin_sep
-            + sep.join( line * f.width for f in fmts )
-            + end_sep
+              sep.start
+            + sep.between.join( cfg.line * f.width for f in fmts )
+            + sep.end
         )
 
 
@@ -392,7 +379,7 @@ def _print_dataframe(df, cfg):
     table, fmts, arrs = _table_for_dataframe(df, names, cfg)
 
     _print_line(names, fmts, cfg.top)
-    _print_header(names, fmts, cfg)
+    _print_header(names, fmts, cfg.header)
     _print_line(names, fmts, cfg.underline)
 
     num_rows = len(table)
@@ -448,7 +435,7 @@ def main():
     
     # FIXME
     cfg = DEFAULT_CFG
-    # cfg = UNICODE_BOX_CFG
+    cfg = UNICODE_BOX_CFG
     _add_color(cfg)
     # cfg.update(COLOR_CFG)
 
