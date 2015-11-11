@@ -89,10 +89,10 @@ class IndexedColumn
 public:
 
   IndexedColumn(IDXTYPE const* index, long index_length, 
-                TYPE const* values, long length, FMT format)
+                ColumnImpl<TYPE, FMT> column)
     : index_(index),
       index_length_(index_length),
-      column_(values, length, format)
+      column_(std::move(column))
   {
   }
 
@@ -144,6 +144,8 @@ private:
 
 };
 
+
+//------------------------------------------------------------------------------
 
 class Table
   : public Column
