@@ -18,6 +18,7 @@ from   . import *
 SEPARATOR_CONFIGURATION = Group(
     between                 = " ",
     end                     = "",
+    index                   = " | ",
     start                   = "",
 )
 
@@ -52,6 +53,9 @@ CONFIGURATION = Group(
             suffix                  = "",
         ),
         suffix                      = "",
+    ),
+    index = Group(
+        show                        = True,
     ),
     row = Group(
         separator                   = SEPARATOR_CONFIGURATION,
@@ -88,15 +92,17 @@ UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
         separator = dict(
             between                 = "\u2500\u2534\u2500",
             end                     = "\u2500\u2518",
+            index                   = "\u2500\u2568\u2500",
             start                   = "\u2514\u2500",
         ),
         show                        = True,
     ),
     header = dict(
         separator = dict(
-            between             = " \u2502 ",
-            end                 = " \u2502",
-            start               = "\u2502 ",
+            between                 = " \u2502 ",
+            end                     = " \u2502",
+            index                   = " \u2551 ",
+            start                   = "\u2502 ",
         ),
     ),
     row_ellipsis = dict(
@@ -111,6 +117,7 @@ UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
         separator = dict(
             between                 = " \u2502 ",
             end                     = " \u2502",
+            index                   = " \u2551 ",
             start                   = "\u2502 ",
         ),
     ),
@@ -139,8 +146,9 @@ def _add_color(cfg):
     ANSI-colorizes a configuration.
     """
     # Color Inf and Nan, for visibility.
-    cfg.float.inf = ansi.style(color=ansi.YELLOW, light=False)(cfg.float.inf)
-    cfg.float.nan = ansi.style(color=ansi.RED   , light=False)(cfg.float.nan)
+    cfg.float.inf = ansi.style(color=ansi.BLUE, bold=True, light=False)(
+        cfg.float.inf)
+    cfg.float.nan = ansi.style(color=ansi.GRAY, light=False)(cfg.float.nan)
 
     # Use underlining instead of drawing an underline.
     cfg.header.style.prefix = ansi.sgr(underline=True, bold=True)
@@ -190,10 +198,8 @@ def _choose_formatter_bool(values, cfg):
 
 def _choose_formatter_float(values, cfg):
     # FIXME: This could be done with a single pass more efficiently.
-
     inf         = cfg.float.inf
     nan         = cfg.float.nan
-
     # Remove NaN and infinite values.
     is_nan      = np.isnan(values)
     has_nan     = is_nan.any()
@@ -261,7 +267,8 @@ def _get_default_formatter(arr, cfg):
         raise TypeError("no default formatter for {}".format(dtype))
 
 
-def _get_formatter(formatters, name, arr, cfg):
+def _get_formatter(name, arr, cfg):
+    formatters = cfg.formatters
     fmt = None
     for regex, value in formatters.items():
         if isinstance(regex, str) and re.match(regex, name) is not None:
@@ -288,33 +295,70 @@ def _get_header_justification(fmt):
         raise TypeError("unrecognized formatter: {!r}".format(fmt))
 
 
+# FIXME: Implementation detail.  Expose it?
+class _Table:
+
+    def __init__(self, cfg):
+        self.__cfg      = cfg
+        self.__cfg_sep  = cfg.row.separator
+        self.__arrs     = []
+        self.__fmts     = []
+        self.__table    = Table()
+
+        self.add_string(self.__cfg_sep.start)
+        self.__state    = "empty"
+
+
+    def add_string(self, string):
+        if string:
+            self.__table.add_string(string)
+
+
+    def __add(self, name, arr):
+        fmt = _get_formatter(name, arr, self.__cfg)
+        self.__arrs.append(arr)
+        self.__fmts.append(fmt)
+        _add_array_to_table(self.__table, arr, fmt)
+
+
+    def add_index(self, index):
+        # FIXME: Handle multi-index.
+        assert self.__state in ("empty", "index")
+
+        if self.__state == "index":
+            self.add_string(self.__cfg_sep.between)
+        self.__add(index.name, index.values)
+        self.__index = len(self.__arrs)
+        self.__state = "index"
+
+
+    def add_series(self, series):
+        # FIXME: Handle category series.
+        assert self.__state in ("empty", "index", "data")
+
+        if self.__state == "index":
+            self.add_string(self.__cfg_sep.index)
+        elif self.__state == "data":
+            self.add_string(self.__cfg_sep.between)
+        self.__add(series.name, series.values)
+        self.__state = "data"
+
+
+    def finish(self):
+        assert self.__state in ("empty", "index", "data")
+        self.add_string(self.__cfg_sep.end)
+        self.__state = "finished"
+        return self.__table, self.__fmts, self.__arrs
+
+
+
 def _table_for_dataframe(df, names, cfg={}):
-    table = Table()
-
-    formatters  = cfg.formatters
-    sep         = cfg.row.separator
-
-    if sep.start:
-        table.add_string(sep.start)
-
-    fmts = []
-    arrs = []
-    for i, name in enumerate(names):
-        arr = df[name].values
-        arrs.append(arr)
-
-        fmt = _get_formatter(formatters, name, arr, cfg)
-        # FIXME: Add accessor to table.
-        fmts.append(fmt)
-        _add_array_to_table(table, arr, fmt)
-        if i == len(names) - 1:
-            if sep.end:
-                table.add_string(sep.end)
-        else:
-            if sep.between:
-                table.add_string(sep.between)
-            
-    return table, fmts, arrs
+    tbl = _Table(cfg)
+    if cfg.index.show:
+        tbl.add_index(df.index)
+    for name in names:
+        tbl.add_series(df[name])
+    return tbl.finish()
 
 
 # FIXME: By screen (repeating header?)
@@ -322,10 +366,10 @@ def _table_for_dataframe(df, names, cfg={}):
 # FIXME: Special sep after index.
 
 def _print_header(names, fmts, cfg):
-    if cfg.show:
-        assert string_length(cfg.style.prefix) == 0
-        assert string_length(cfg.style.suffix) == 0
+    assert string_length(cfg.style.prefix) == 0
+    assert string_length(cfg.style.suffix) == 0
 
+    if cfg.show:
         def format_name(name, fmt):
             name = cfg.prefix + name + cfg.suffix
             left = _get_header_justification(fmt)
@@ -373,9 +417,7 @@ def _print_dataframe(df, cfg):
         # FIXME
         max_rows = shutil.get_terminal_size().lines - 1
 
-    names = cfg.columns.names
-    names = pln.ctr.select_ordered(df.columns, names)
-    # FIXME: Get formats from table columns.
+    names = tuple(pln.ctr.select_ordered(df.columns, cfg.columns.names))
     table, fmts, arrs = _table_for_dataframe(df, names, cfg)
 
     _print_line(names, fmts, cfg.top)
@@ -436,6 +478,7 @@ def main():
     # FIXME
     cfg = DEFAULT_CFG
     cfg = UNICODE_BOX_CFG
+    # cfg.index.show = False
     _add_color(cfg)
     # cfg.update(COLOR_CFG)
 
