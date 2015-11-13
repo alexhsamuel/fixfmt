@@ -71,10 +71,15 @@ PySequenceMethods const tp_as_sequence = {
 ref<Object> add_string(PyTable* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"str", nullptr};
-  char* str;
-  Arg::ParseTupleAndKeywords(args, kw_args, "s", arg_names, &str);
+  Object* str_arg;
+  Arg::ParseTupleAndKeywords(args, kw_args, "O", arg_names, &str_arg);
 
-  self->table_->add_string(std::string(str));
+  if (str_arg != Py_None) {
+    std::string const str{str_arg->Str()->as_utf8_string()};
+    if (str.length() > 0)
+      self->table_->add_string(std::move(str));
+  }
+
   return none_ref();
 }
 
