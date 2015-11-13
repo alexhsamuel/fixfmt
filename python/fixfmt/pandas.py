@@ -5,9 +5,6 @@ from   . import table
 
 #-------------------------------------------------------------------------------
 
-# FIXME: By screen (repeating header?)
-# FIXME: Do what when it's too wide???
-
 def from_dataframe(df, cfg, *, names=pln.ctr.ALL):
     tbl = table.Table(cfg)
 

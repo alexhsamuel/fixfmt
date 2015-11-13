@@ -157,28 +157,6 @@ def _add_color(cfg):
 
 #-------------------------------------------------------------------------------
 
-def _add_array_to_table(table, arr, fmt):
-    dtype = arr.dtype
-    if dtype == np.dtype("int8"):
-        table.add_int8(arr, fmt)
-    elif dtype == np.dtype("int16"):
-        table.add_int16(arr, fmt)
-    elif dtype == np.dtype("int32"):
-        table.add_int32(arr, fmt)
-    elif dtype == np.dtype("int64"):
-        table.add_int64(arr, fmt)
-    elif dtype == np.dtype("float32"):
-        table.add_float32(arr, fmt)
-    elif dtype == np.dtype("float64"):
-        table.add_float64(arr, fmt)
-    elif dtype == np.dtype("bool"):
-        table.add_bool(arr, fmt)
-    elif dtype == np.dtype("object"):
-        table.add_str_object(arr, fmt)
-    else:
-        raise TypeError("unsupported dtype: {}".format(dtype))
-
-
 def _get_num_digits(value):
     """
     Returns the number of digits required to represent a value.
@@ -290,6 +268,8 @@ def _get_header_justification(fmt):
         raise TypeError("unrecognized formatter: {!r}".format(fmt))
 
 
+#-------------------------------------------------------------------------------
+
 class Table:
 
     def __init__(self, cfg):
@@ -307,6 +287,21 @@ class Table:
         self.add_string(self.__cfg.row.separator.start)
 
 
+    def __add_array(self, arr, fmt):
+        table = self.__table
+
+        name = arr.dtype.name
+        if name in {
+            "int8", "int16", "int32", "int64", 
+            "float32", "float64", "bool"
+        }:
+            getattr(table, "add_" + name)(arr, fmt)
+        elif name == "object":
+            table.add_str_object(arr, fmt)
+        else:
+            raise TypeError("unsupported dtype: {}".format(dtype))
+
+
     def add_string(self, string):
         self.__table.add_string(string)
 
@@ -319,7 +314,7 @@ class Table:
             self.add_string(self.__cfg.row.separator.between)
 
         fmt = _get_formatter(name, arr, self.__cfg)
-        _add_array_to_table(self.__table, arr, fmt)
+        self.__add_array(arr, fmt)
         self.__names.append(name)
         self.__fmts.append(fmt)
         self.__num_idx += 1
@@ -332,7 +327,7 @@ class Table:
             self.add_string(self.__cfg.row.separator.between)
 
         fmt = _get_formatter(name, arr, self.__cfg)
-        _add_array_to_table(self.__table, arr, fmt)
+        self.__add_array(arr, fmt)
         self.__names.append(name)
         self.__fmts.append(fmt)
 
@@ -341,7 +336,7 @@ class Table:
         self.add_string(self.__cfg.row.separator.end)
 
 
-    def print_header(self):
+    def _print_header(self):
         cfg = self.__cfg.header
         assert string_length(cfg.style.prefix) == 0
         assert string_length(cfg.style.suffix) == 0
@@ -375,17 +370,20 @@ class Table:
             )
 
 
-    def print_top(self):
+    def _print_top(self):
         self._print_line(self.__cfg.top)
 
 
-    def print_underline(self):
+    def _print_underline(self):
         self._print_line(self.__cfg.underline)
 
 
-    def print_bottom(self):
+    def _print_bottom(self):
         self._print_line(self.__cfg.bottom)
 
+
+    # FIXME: By screen (repeating header?)
+    # FIXME: Do what when it's too wide???
 
     def print(self):
         cfg = self.__cfg
@@ -406,9 +404,9 @@ class Table:
             # FIXME
             max_rows = shutil.get_terminal_size().lines - 1
 
-        self.print_top()
-        self.print_header()
-        self.print_underline()
+        self._print_top()
+        self._print_header()
+        self._print_underline()
 
         num_rows = len(self.__table)
         if num_rows <= max_rows - extra_rows:
@@ -445,7 +443,7 @@ class Table:
             for i in range(num_rows - num_rows_bottom, num_rows):
                 print(self.__table(i))
 
-        self.print_bottom()
+        self._print_bottom()
 
 
 
