@@ -121,6 +121,7 @@ UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
         separator = dict(
             between                 = "\u2500\u252c\u2500",
             end                     = "\u2500\u2510",
+            index                   = "\u2500\u2565\u2500",
             start                   = "\u250c\u2500",
         ),
         show                        = True,
@@ -130,6 +131,7 @@ UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
         separator = dict(
             between                 = "\u2500\u253c\u2500",
             end                     = "\u2500\u2524",
+            index                   = "\u2500\u256b\u2500",
             start                   = "\u251c\u2500",
         ),
     ),
@@ -342,18 +344,26 @@ class Table:
         assert string_length(cfg.style.suffix) == 0
 
         if cfg.show:
-            def format_name(name, fmt):
+            sep = cfg.separator
+
+            def format_name(i, name, fmt):
                 name = name or ""
                 name = cfg.prefix + name + cfg.suffix
                 left = _get_header_justification(fmt)
                 name = palide(
                     name, fmt.width, position=cfg.elide.position, left=left)
-                return cfg.style.prefix + name + cfg.style.suffix
+                name = cfg.style.prefix + name + cfg.style.suffix
+                if i == self.__num_idx:
+                    name = sep.index + name
+                elif i > 0:
+                    name = sep.between + name
+                return name
 
-            sep = cfg.separator
-            header = sep.between.join(
-                format_name(n, f) for n, f in zip(self.__names, self.__fmts) )
-            print(sep.start + header + sep.end)
+            header = sep.start + "".join(
+                format_name(i, n, f) 
+                for i, (n, f) in enumerate(zip(self.__names, self.__fmts))
+            ) + sep.end
+            print(header)
 
 
     def _print_line(self, cfg):
@@ -365,7 +375,13 @@ class Table:
             sep = cfg.separator
             print(
                   sep.start
-                + sep.between.join( cfg.line * f.width for f in self.__fmts )
+                + "".join( 
+                      (sep.index if i == self.__num_idx
+                       else sep.between if i > 0
+                       else "")
+                    + cfg.line * f.width 
+                    for i, f in enumerate(self.__fmts)
+                )
                 + sep.end
             )
 
@@ -391,8 +407,7 @@ class Table:
         # Slog through configuration.
         formatters  = cfg.formatters
 
-        extra_rows  = sum([
-            1,
+        num_extra_rows  = sum([
             cfg.top.show,
             cfg.header.show,
             cfg.underline.show,
@@ -409,13 +424,13 @@ class Table:
         self._print_underline()
 
         num_rows = len(self.__table)
-        if num_rows <= max_rows - extra_rows:
+        if num_rows <= max_rows - num_extra_rows:
             for i in range(len(table)):
                 print(table(i))
         else:
-            cfg_ell = cfg.row_ellipsis
+            cfg_ell             = cfg.row_ellipsis
             num_rows_top        = int(cfg_ell.position * max_rows)
-            num_rows_bottom     = max_rows - extra_rows - num_rows_top
+            num_rows_bottom     = max_rows - num_extra_rows - num_rows_top - 1
             num_rows_skipped    = num_rows - num_rows_top - num_rows_bottom
 
             # Print rows from the top.
