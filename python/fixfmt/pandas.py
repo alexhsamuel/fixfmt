@@ -38,8 +38,7 @@ def main():
     cfg = table.DEFAULT_CFG
     cfg = table.UNICODE_BOX_CFG
     # cfg.index.show = False
-    table._add_color(cfg)
-    # cfg.update(COLOR_CFG)
+    table._colorize(cfg)
 
     # builtins.print(cfg)
 

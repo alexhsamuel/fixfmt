@@ -136,7 +136,7 @@ UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
 )
 
 
-def _add_color(cfg):
+def _colorize(cfg):
     """
     ANSI-colorizes a configuration.
     """
