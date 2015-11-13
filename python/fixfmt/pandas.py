@@ -299,13 +299,13 @@ def _get_header_justification(fmt):
 class _Table:
 
     def __init__(self, cfg):
+        # The configuration.
         self.__cfg      = cfg
-        self.__cfg_sep  = cfg.row.separator
-        self.__arrs     = []
+        # Arrays we've added to the table.  We need to 
         self.__fmts     = []
         self.__table    = Table()
 
-        self.add_string(self.__cfg_sep.start)
+        self.add_string(self.__cfg.row.separator.start)
         self.__state    = "empty"
 
 
@@ -316,7 +316,6 @@ class _Table:
 
     def __add(self, name, arr):
         fmt = _get_formatter(name, arr, self.__cfg)
-        self.__arrs.append(arr)
         self.__fmts.append(fmt)
         _add_array_to_table(self.__table, arr, fmt)
 
@@ -325,10 +324,10 @@ class _Table:
         # FIXME: Handle multi-index.
         assert self.__state in ("empty", "index")
 
+        sep = self.__cfg.row.separator
         if self.__state == "index":
-            self.add_string(self.__cfg_sep.between)
+            self.add_string(sep.between)
         self.__add(index.name, index.values)
-        self.__index = len(self.__arrs)
         self.__state = "index"
 
 
@@ -336,19 +335,22 @@ class _Table:
         # FIXME: Handle category series.
         assert self.__state in ("empty", "index", "data")
 
+        sep = self.__cfg.row.separator
         if self.__state == "index":
-            self.add_string(self.__cfg_sep.index)
+            self.add_string(sep.index)
         elif self.__state == "data":
-            self.add_string(self.__cfg_sep.between)
+            self.add_string(sep.between)
         self.__add(series.name, series.values)
         self.__state = "data"
 
 
     def finish(self):
         assert self.__state in ("empty", "index", "data")
-        self.add_string(self.__cfg_sep.end)
+        sep = self.__cfg.row.separator
+
+        self.add_string(sep.end)
         self.__state = "finished"
-        return self.__table, self.__fmts, self.__arrs
+        return self.__table, self.__fmts
 
 
 
@@ -383,7 +385,6 @@ def _print_header(names, fmts, cfg):
         builtins.print(sep.start + header + sep.end)
 
 
-# FIXME: Support subconfigs.
 def _print_line(names, fmts, cfg):
     if cfg.show:
         # FIXME: Relax this.
@@ -418,7 +419,7 @@ def _print_dataframe(df, cfg):
         max_rows = shutil.get_terminal_size().lines - 1
 
     names = tuple(pln.ctr.select_ordered(df.columns, cfg.columns.names))
-    table, fmts, arrs = _table_for_dataframe(df, names, cfg)
+    table, fmts = _table_for_dataframe(df, names, cfg)
 
     _print_line(names, fmts, cfg.top)
     _print_header(names, fmts, cfg.header)
