@@ -14,11 +14,8 @@ Things to do:  (* for MVP)
 
 Dataframe features:
 * cascading formatter config
-* show nullable columns (object for bool, object for str, etc.)
-* NaN treatment
-* show Pandas index
 * show Pandas multiindex
-* print row numbers
+- show nullable columns (object for bool, object for str, etc.)
 - page at a time, with header
 
 Fancy features:
@@ -30,6 +27,7 @@ Fancy features:
 - show summary statistics
 
 Internal:
+* Use iostream formatting for floats. (or implement properly!)
 - Speed up _choose_formatter_* with extension code.  See branch guess_types_cxx.
 - Add wrap<> for Python functions other than Method.
 - Format into buffers of preallocated length (which must accommodate multibyte
