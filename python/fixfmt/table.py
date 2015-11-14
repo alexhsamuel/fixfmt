@@ -1,3 +1,4 @@
+from   contextlib import suppress
 from   math import floor, log10
 import re
 import shutil
@@ -35,7 +36,10 @@ CONFIGURATION = Group(
         min_precision               = None,
         nan                         = "NaN",
     ),
-    formatters                      = {},
+    formatters = Group(
+        by_name                     = {},
+        by_dtype                    = {},
+    ),
     header = Group(
         elide = Group(
             position                = 0.7,
@@ -248,17 +252,19 @@ def _get_default_formatter(arr, cfg):
 
 
 def _get_formatter(name, arr, cfg):
-    formatters = cfg.formatters
-    fmt = None
-    for regex, value in formatters.items():
-        if isinstance(regex, str) and re.match(regex, name) is not None:
-            fmt = value
-    if fmt is None:
-        fmt = formatters.get(arr.dtype, None)
-    if fmt is None:
-        fmt = _get_default_formatter(arr, cfg=cfg)
-    assert fmt is not None
-    return fmt
+    if name is not None:
+        for key, fmt in cfg.formatters.by_name.items():
+            # Check for a container match to the name.
+            if name in key:
+                return fmt
+
+    # Check for the dtype name and kind.
+    with suppress(KeyError):
+        return cfg.formatters.by_dtype[arr.dtype.name]
+    with suppress(KeyError):
+        return cfg.formatters.by_dtype[arr.dtype.kind]
+
+    return _get_default_formatter(arr, cfg=cfg)
 
 
 def _get_header_justification(fmt):
@@ -408,9 +414,6 @@ class Table:
 
     def print(self):
         cfg = self.__cfg
-
-        # Slog through configuration.
-        formatters  = cfg.formatters
 
         num_extra_rows  = sum([
             cfg.top.show,

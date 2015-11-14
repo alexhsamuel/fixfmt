@@ -1,7 +1,7 @@
 import pandas as pd
 import pln.ctr
 
-from   . import table
+from   . import table, Bool, Number, String
 
 #-------------------------------------------------------------------------------
 
@@ -28,6 +28,8 @@ def main():
     from   argparse import ArgumentParser
     from   pln.io import load_pickle
 
+    # FIXME: Add format arguments.
+
     parser = ArgumentParser()
     parser.add_argument(
         "filename", metavar="FILENAME", 
@@ -37,10 +39,10 @@ def main():
     # FIXME
     cfg = table.DEFAULT_CFG
     cfg = table.UNICODE_BOX_CFG
-    # cfg.index.show = False
     # table._colorize(cfg)
 
-    # builtins.print(cfg)
+    cfg.formatters.by_name["bool"] = Bool("T", "F")
+    cfg.formatters.by_name[pln.ctr.regex(".*32")] = Number(8, None)
 
     # FIXME: Support "-".
     df = load_pickle(args.filename)
