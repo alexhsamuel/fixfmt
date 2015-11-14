@@ -22,7 +22,7 @@ inline double pow10(int n)
 }
 
 
-/** Rounds 'val' to the nearest integer using banker's roudning.  */
+/** Rounds 'val' to the nearest integer using banker's rounding.  */
 inline long round(double val)
 {
   long const i = (long) val;
