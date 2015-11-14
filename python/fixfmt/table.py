@@ -32,7 +32,7 @@ CONFIGURATION = Group(
     float = Group(
         inf                         = "\u221e",
         max_precision               = 8,
-        min_precision               = 1,
+        min_precision               = None,
         nan                         = "NaN",
     ),
     formatters                      = {},
@@ -200,12 +200,15 @@ def _choose_formatter_float(values, cfg):
     # Try progressively higher precision until rounding won't leave any
     # residuals larger the maximum pecision.
     precision_min   = cfg.float.min_precision
+    precision_min   = 0 if precision_min is None else precision_min
     precision_min   = max(precision_min, special_width - size - 1)
     precision_max   = cfg.float.max_precision
     tolerance       = (10 ** -precision_max) / 2
     for precision in range(precision_min, precision_max + 1):
         if (abs(np.round(vals, precision) - vals) < tolerance).all():
             break
+    if cfg.float.min_precision is None and precision == 0:
+        precision = None
 
     return Number(size, precision, sign=sign, nan=nan, inf=inf)
 
@@ -423,7 +426,8 @@ class Table:
         self._print_header()
         self._print_underline()
 
-        num_rows = len(self.__table)
+        table = self.__table
+        num_rows = len(table)
         if num_rows <= max_rows - num_extra_rows:
             for i in range(len(table)):
                 print(table(i))
@@ -435,7 +439,7 @@ class Table:
 
             # Print rows from the top.
             for i in range(num_rows_top):
-                print(self.__table(i))
+                print(table(i))
 
             # Print the row ellipsis.
             ell = cfg_ell.format.format(
@@ -448,7 +452,7 @@ class Table:
             ell_end     = cfg_ell.separator.end
             ell_pad     = cfg_ell.pad
             ell_width   = (
-                  self.__table.width 
+                  table.width 
                 - string_length(ell_start) 
                 - string_length(ell_end))
             ell         = center(ell, ell_width, ell_pad)
@@ -456,7 +460,7 @@ class Table:
 
             # Print rows from the bottom.
             for i in range(num_rows - num_rows_bottom, num_rows):
-                print(self.__table(i))
+                print(table(i))
 
         self._print_bottom()
 
