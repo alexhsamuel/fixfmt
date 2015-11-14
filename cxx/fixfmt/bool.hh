@@ -42,7 +42,7 @@ public:
     string const& false_str="False")
     : Bool(
         true_str, false_str,
-        std::max(true_str.size(), false_str.size()),
+        std::max(string_length(true_str), string_length(false_str)),
         false)
   {
   }
