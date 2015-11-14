@@ -25,6 +25,7 @@ inline double pow10(int n)
 /** Rounds 'val' to the nearest integer using banker's rounding.  */
 inline long round(double val)
 {
+  // FIXME: Broken for val > MAX_LONG.
   long const i = (long) val;
   double const r = val - i;
   return i + (val > 0
@@ -35,6 +36,7 @@ inline long round(double val)
 /** Rounds 'val' to 'num_digits' of precision using banker's rounding.  */
 inline double round(double val, int num_digits)
 {
+  // FIXME: Broken for val > MAX_LONG.
   double const mult = pow10(num_digits);
   return round(val * mult) / mult;
 }

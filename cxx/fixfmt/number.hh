@@ -188,6 +188,10 @@ inline string Number::operator()(double const val) const
     // Return the appropriate infinity.
     return val > 0 ? pos_inf_result_ : neg_inf_result_;
   else {
+    if (   val < std::numeric_limits<long>::min()
+        || val > std::numeric_limits<long>::max())
+      // FIXME: Handle large values.
+      return bad_result_;
     int    const precision = precision_ == PRECISION_NONE ? 0 : precision_;
     double const abs_val   = round(fabs(val), precision);
     long   const whole     = abs_val;
