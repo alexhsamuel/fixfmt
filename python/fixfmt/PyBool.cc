@@ -32,7 +32,8 @@ int tp_init(PyBool* self, PyObject* args, PyObject* kw_args)
     return -1;
 
   if (size < 0)
-    size = std::max(strlen(true_str), strlen(false_str));
+    size = std::max(
+      fixfmt::string_length(true_str), fixfmt::string_length(false_str));
 
   new(self) PyBool;
   self->fmt_ = unique_ptr<fixfmt::Bool>(
