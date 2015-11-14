@@ -39,9 +39,8 @@ def main():
     # FIXME
     cfg = table.DEFAULT_CFG
     cfg = table.UNICODE_BOX_CFG
-    # table._colorize(cfg)
+    table._colorize(cfg)
 
-    cfg.formatters.by_name["bool"] = Bool("T", "F")
     cfg.formatters.by_name[pln.ctr.regex(".*32")] = Number(8, None)
 
     # FIXME: Support "-".

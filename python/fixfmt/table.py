@@ -30,15 +30,23 @@ CONFIGURATION = Group(
     data = Group(
         max_rows                    = Var(default="terminal"),
     ),
-    float = Group(
-        inf                         = "\u221e",
-        max_precision               = 8,
-        min_precision               = None,
-        nan                         = "NaN",
-    ),
     formatters = Group(
         by_name                     = {},
         by_dtype                    = {},
+        bool = Group(
+            true                    = "True",
+            false                   = "False",
+        ),
+        float = Group(
+            inf                     = "\u221e",
+            max_precision           = 8,
+            min_precision           = None,
+            nan                     = "NaN",
+        ),
+        str = Group(
+            min_size                =  1,
+            max_size                = 32,
+        ),
     ),
     header = Group(
         elide = Group(
@@ -64,10 +72,6 @@ CONFIGURATION = Group(
         pad                         = " ",
         position                    = 0.85,
         format                      = "\u2026 skipping {skipped} rows \u2026",
-    ),
-    str = Group(
-        min_size                    =  1,
-        max_size                    = 32,
     ),
     top = Group(
         line                        = "-",
@@ -95,6 +99,12 @@ UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
             start                   = "\u2514\u2500",
         ),
         show                        = True,
+    ),
+    formatters = dict(
+        bool = dict(
+            true                    = "\u2714",
+            false                   = "\u00b7",
+        ),
     ),
     header = dict(
         separator = dict(
@@ -146,15 +156,23 @@ def _colorize(cfg):
     """
     ANSI-colorizes a configuration.
     """
+    # Color true and false.
+    cfg.formatters.bool.true = ansi.style(
+        color=ansi.GREEN, bold=True, light=False)(cfg.formatters.bool.true)
+    cfg.formatters.bool.false = ansi.style(
+        color=ansi.RED, bold=False, light=False)(cfg.formatters.bool.false)
+
     # Color Inf and Nan, for visibility.
-    cfg.float.inf = ansi.style(color=ansi.BLUE, bold=True, light=False)(
-        cfg.float.inf)
-    cfg.float.nan = ansi.style(color=ansi.GRAY, light=False)(cfg.float.nan)
+    cfg.formatters.float.inf = ansi.style(
+        color=ansi.BLUE, bold=True, light=False)(cfg.formatters.float.inf)
+    cfg.formatters.float.nan = ansi.style(
+        color=ansi.GRAY, light=False)(cfg.formatters.float.nan)
 
     # Use underlining instead of drawing an underline.
-    cfg.header.style.prefix = ansi.sgr(underline=True, bold=True)
-    cfg.header.style.suffix = ansi.RESET
-    cfg.underline.show = False
+    # FIXME: Hacky.
+    if not cfg.underline.show:
+        cfg.header.style.prefix = ansi.sgr(underline=True, bold=True)
+        cfg.header.style.suffix = ansi.RESET
 
     # Color the ellipsis row.
     cfg.row_ellipsis.format = ansi.style(color=ansi.BLACK, light=True)(
@@ -172,13 +190,13 @@ def _get_num_digits(value):
 
 def _choose_formatter_bool(values, cfg):
     # Not much to do.
-    return Bool()
+    return Bool(cfg.formatters.bool.true, cfg.formatters.bool.false)
 
 
 def _choose_formatter_float(values, cfg):
     # FIXME: This could be done with a single pass more efficiently.
-    inf         = cfg.float.inf
-    nan         = cfg.float.nan
+    inf         = cfg.formatters.float.inf
+    nan         = cfg.formatters.float.nan
     # Remove NaN and infinite values.
     is_nan      = np.isnan(values)
     has_nan     = is_nan.any()
@@ -205,15 +223,15 @@ def _choose_formatter_float(values, cfg):
 
     # Try progressively higher precision until rounding won't leave any
     # residuals larger the maximum pecision.
-    precision_min   = cfg.float.min_precision
+    precision_min   = cfg.formatters.float.min_precision
     precision_min   = 0 if precision_min is None else precision_min
     precision_min   = max(precision_min, special_width - size - 1)
-    precision_max   = cfg.float.max_precision
+    precision_max   = cfg.formatters.float.max_precision
     tolerance       = (10 ** -precision_max) / 2
     for precision in range(precision_min, precision_max + 1):
         if (abs(np.round(vals, precision) - vals) < tolerance).all():
             break
-    if cfg.float.min_precision is None and precision == 0:
+    if cfg.formatters.float.min_precision is None and precision == 0:
         precision = None
 
     return Number(size, precision, sign=sign, nan=nan, inf=inf)
@@ -232,8 +250,8 @@ def _choose_formatter_int(values, cfg):
 
 def _choose_formatter_str(values, cfg):
     size = np.vectorize(len)(values).max()
-    size = max(size, cfg.str.min_size)
-    size = min(size, cfg.str.max_size)
+    size = max(size, cfg.formatters.str.min_size)
+    size = min(size, cfg.formatters.str.max_size)
     return String(size)
 
 
