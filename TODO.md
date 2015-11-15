@@ -16,6 +16,7 @@ Dataframe features:
 - page at a time, with header
 
 Fancy features:
+- monkey-patch DataFrame.print()
 - truncate dataframe output to screen
 - rule-based coloring
 - add % / scale to Number formatter
