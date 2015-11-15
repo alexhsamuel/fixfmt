@@ -1,10 +1,10 @@
 Things to do:  (* for MVP)
 
-* _cascading_ config for formatters
 * category types
   - pass through to category array
   - pre-format categories (?)
 * datetime types
+- _cascading_ config for formatters
 - format methods, not just print
 - np Array formatter
 - add iterable to Table
