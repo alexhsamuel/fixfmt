@@ -13,7 +13,6 @@ Things to do:  (* for MVP)
 - support UTF-8/ANSI in decimal point, sign, etc.
 
 Dataframe features:
-* cascading formatter config
 * show Pandas multiindex
 - show nullable columns (object for bool, object for str, etc.)
 - page at a time, with header
@@ -25,6 +24,7 @@ Fancy features:
 - add () for negative numbers to Number formatter
 - add currency to Number formatter
 - show summary statistics
+- hex or other bases for Number formatter
 
 Internal:
 * Use iostream formatting for floats. (or implement properly!)
