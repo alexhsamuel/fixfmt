@@ -43,7 +43,7 @@ CONFIGURATION = Group(
             min_precision           = None,
             nan                     = "NaN",
         ),
-        min_width                   = 7,
+        min_width                   = 4,
         str = Group(
             min_size                =  1,
             max_size                = 32,
