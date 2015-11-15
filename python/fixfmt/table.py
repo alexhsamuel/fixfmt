@@ -233,7 +233,7 @@ def _choose_formatter_float(values, cfg):
 
     if len(vals) == 0:
         # No values left.
-        return Float(max(1, special_width))
+        return Number(max(1, special_width))
 
     # Determine the scale.
     min_val = vals.min()
