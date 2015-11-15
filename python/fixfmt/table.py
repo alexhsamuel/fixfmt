@@ -360,7 +360,7 @@ class Table:
         elif name == "object":
             table.add_str_object(arr, fmt)
         else:
-            raise TypeError("unsupported dtype: {}".format(dtype))
+            raise TypeError("unsupported dtype: {}".format(arr.dtype))
 
 
     def add_string(self, string):
