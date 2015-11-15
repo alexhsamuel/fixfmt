@@ -159,15 +159,28 @@ def _colorize(cfg):
     """
     # Color true and false.
     cfg.formatters.bool.true = ansi.style(
-        color=ansi.GREEN, bold=True, light=False)(cfg.formatters.bool.true)
+        color=ansi.BLACK, bold=False, light=False)(cfg.formatters.bool.true)
     cfg.formatters.bool.false = ansi.style(
-        color=ansi.RED, bold=False, light=False)(cfg.formatters.bool.false)
+        color=ansi.BLACK, bold=False, light=True)(cfg.formatters.bool.false)
 
     # Color Inf and Nan, for visibility.
     cfg.formatters.float.inf = ansi.style(
         color=ansi.BLUE, bold=True, light=False)(cfg.formatters.float.inf)
     cfg.formatters.float.nan = ansi.style(
         color=ansi.GRAY, light=False)(cfg.formatters.float.nan)
+
+    # Color lines gray.
+    line_style = ansi.style(color=ansi.BLACK, light=True)
+    style_line = lambda s: s if s is None else line_style(s)
+    for c in (cfg.bottom, cfg.header, cfg.row, cfg.row_ellipsis, cfg.top, 
+              cfg.underline, ):
+        c = c.separator
+        c.between   = style_line(c.between)
+        c.end       = style_line(c.end)
+        c.index     = style_line(c.index)
+        c.start     = style_line(c.start)
+    for c in cfg.bottom, cfg.top, cfg.underline:
+        c.line      = style_line(c.line)
 
     # Use underlining instead of drawing an underline.
     # FIXME: Hacky.
@@ -415,7 +428,7 @@ class Table:
     def _print_line(self, cfg):
         if cfg.show:
             # FIXME: Relax this.
-            if len(cfg.line) != 1:
+            if string_length(cfg.line) != 1:
                 raise ValueError("line must be one character")
 
             sep = cfg.separator
