@@ -43,6 +43,7 @@ CONFIGURATION = Group(
             min_precision           = None,
             nan                     = "NaN",
         ),
+        min_width                   = 7,
         str = Group(
             min_size                =  1,
             max_size                = 32,
@@ -189,8 +190,14 @@ def _get_num_digits(value):
 
 
 def _choose_formatter_bool(values, cfg):
-    # Not much to do.
-    return Bool(cfg.formatters.bool.true, cfg.formatters.bool.false)
+    true    = cfg.formatters.bool.true
+    false   = cfg.formatters.bool.false
+    size    = max(
+        cfg.formatters.min_width,
+        string_length(true),
+        string_length(false),
+    )
+    return Bool(true, false, size=size)
 
 
 def _choose_formatter_float(values, cfg):
@@ -234,7 +241,15 @@ def _choose_formatter_float(values, cfg):
     if cfg.formatters.float.min_precision is None and precision == 0:
         precision = None
 
-    return Number(size, precision, sign=sign, nan=nan, inf=inf)
+    # Make the formatter.
+    fmt = Number(size, precision, sign=sign, nan=nan, inf=inf)
+
+    if fmt.width < cfg.formatters.min_width:
+        # Expand size to achieve minimum width.
+        size += cfg.formatters.min_width - fmt.width
+        fmt = Number(size, precision, sign=sign, nan=nan, inf=inf)
+
+    return fmt
 
 
 def _choose_formatter_int(values, cfg):
@@ -243,14 +258,16 @@ def _choose_formatter_int(values, cfg):
 
     min_val = values.min()
     max_val = values.max()
-    size    = _get_num_digits(max(abs(min_val), abs(max_val)))
     sign    = " " if min_val >= 0 else "-"
+    size    = _get_num_digits(max(abs(min_val), abs(max_val)))
+    size    = max(size, cfg.formatters.min_width - (sign != " "))
+
     return Number(size, sign=sign)
 
 
 def _choose_formatter_str(values, cfg):
     size = np.vectorize(len)(values).max()
-    size = max(size, cfg.formatters.str.min_size)
+    size = max(size, cfg.formatters.str.min_size, cfg.formatters.min_width)
     size = min(size, cfg.formatters.str.max_size)
     return String(size)
 
