@@ -1,8 +1,5 @@
 Things to do:  (* for MVP)
 
-* category types
-  - pass through to category array
-  - pre-format categories (?)
 * datetime types
 - _cascading_ config for formatters
 - format methods, not just print
@@ -33,6 +30,9 @@ Internal:
 - Add wrap<> for Python functions other than Method.
 - Format into buffers of preallocated length (which must accommodate multibyte
   characters).
+-category types
+  - look up categories through codes
+  - pre-format categories (?)
 
 Cleanup:
 * add accessors to formatters, C++ and Python
