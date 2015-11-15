@@ -106,6 +106,7 @@ UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
             true                    = "\u2714",
             false                   = "\u00b7",
         ),
+        min_width                   = 4,
     ),
     header = dict(
         separator = dict(
@@ -181,6 +182,7 @@ def _colorize(cfg):
         c.start     = style_line(c.start)
     for c in cfg.bottom, cfg.top, cfg.underline:
         c.line      = style_line(c.line)
+    cfg.row_ellipsis.pad = style_line(cfg.row_ellipsis.pad)
 
     # Use underlining instead of drawing an underline.
     # FIXME: Hacky.
