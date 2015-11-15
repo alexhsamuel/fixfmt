@@ -1,5 +1,6 @@
 Things to do:  (* for MVP)
 
+* _cascading_ config for formatters
 * category types
   - pass through to category array
   - pre-format categories (?)
