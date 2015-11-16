@@ -1,6 +1,6 @@
 Things to do:  (* for MVP)
 
-* datetime types
+- real support for datetime types
 - _cascading_ config for formatters
 - format methods, not just print
 - np Array formatter
