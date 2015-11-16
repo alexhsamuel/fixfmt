@@ -369,27 +369,29 @@ class Table:
         self.__table.add_string(string)
 
 
-    def add_index_column(self, name, arr):
+    def add_index_column(self, name, arr, *, fmt=None):
         assert self.__num_idx == len(self.__fmts), \
             "can't add index after normal column"
 
         if self.__num_idx > 0:
             self.add_string(self.__cfg.row.separator.between)
 
-        fmt = _get_formatter(name, arr, self.__cfg)
+        if fmt is None:
+            fmt = _get_formatter(name, arr, self.__cfg)
         self.__add_array(arr, fmt)
         self.__names.append(name)
         self.__fmts.append(fmt)
         self.__num_idx += 1
 
 
-    def add_column(self, name, arr):
+    def add_column(self, name, arr, *, fmt=None):
         if self.__num_idx == len(self.__fmts):
             self.add_string(self.__cfg.row.separator.index)
         elif len(self.__fmts) > 0:
             self.add_string(self.__cfg.row.separator.between)
 
-        fmt = _get_formatter(name, arr, self.__cfg)
+        if fmt is None:
+            fmt = _get_formatter(name, arr, self.__cfg)
         self.__add_array(arr, fmt)
         self.__names.append(name)
         self.__fmts.append(fmt)

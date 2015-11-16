@@ -23,7 +23,14 @@ def from_dataframe(df, cfg, *, names=pln.ctr.ALL):
     names = tuple(pln.ctr.select_ordered(df.columns, names))
     for name in names:
         series = df[name]
-        tbl.add_column(series.name, get_values(series))
+        arr = get_values(series)
+        if arr.dtype.kind == "M":
+            # Convert to an object array of stringified timestmaps.
+            # FIXME: Do this properly.
+            arr = arr.astype(str).astype(object)
+            tbl.add_column(series.name, arr, fmt=String(30))
+        else:
+            tbl.add_column(series.name, arr)
 
     tbl.finish()
     return tbl
@@ -45,7 +52,7 @@ def main():
     
     # FIXME
     cfg = table.DEFAULT_CFG
-    cfg = table.UNICODE_BOX_CFG
+    # cfg = table.UNICODE_BOX_CFG
     table._colorize(cfg)
 
     # FIXME: Support "-".
