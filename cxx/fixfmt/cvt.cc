@@ -1,7 +1,5 @@
-//
-// fcvt.c
-//
-// Floating point to string conversion routines
+// cvt.c - IEEE floating point formatting routines for FreeBSD
+// from GNU libc-4.6.27
 //
 // Copyright (C) 2002 Michael Ringgaard. All rights reserved.
 //
@@ -29,21 +27,16 @@
 // LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 // OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF 
 // SUCH DAMAGE.
-// 
 
 #include <math.h>
 
-//
-// cvt.c - IEEE floating point formatting routines for FreeBSD
-// from GNU libc-4.6.27
-//
-
 #define CVTBUFSIZE 500
 
-static char *cvt(double arg, int ndigits, int *decpt, int *sign, char *buf, int eflag) {
+static char* cvt(double arg, int ndigits, int *decpt, int *sign, char *buf, 
+                 int eflag) {
   int r2;
   double fi, fj;
-  char *p, *p1;
+  char* p,* p1;
 
   if (ndigits < 0) 
     ndigits = 0;
@@ -96,14 +89,14 @@ static char *cvt(double arg, int ndigits, int *decpt, int *sign, char *buf, int 
   *p1 += 5;
   while (*p1 > '9') {
     *p1 = '0';
-    if (p1 > buf) {
+    if (p1 > buf)
       ++*--p1;
-    } 
     else {
       *p1 = '1';
       (*decpt)++;
       if (eflag == 0) {
-        if (p > buf) *p = '0';
+        if (p > buf) 
+          *p = '0';
         p++;
       }
     }
@@ -112,17 +105,9 @@ static char *cvt(double arg, int ndigits, int *decpt, int *sign, char *buf, int 
   return buf;
 }
 
-//char *ecvt(double arg, int ndigits, int *decpt, int *sign) {
-//  return cvt(arg, ndigits, decpt, sign, gettib()->cvtbuf, 1);
-//}
-
 char *ecvtbuf(double arg, int ndigits, int *decpt, int *sign, char *buf) {
   return cvt(arg, ndigits, decpt, sign, buf, 1);
 }
-
-//char *fcvt(double arg, int ndigits, int *decpt, int *sign) {
-//  return cvt(arg, ndigits, decpt, sign, gettib()->cvtbuf, 0);
-//}
 
 char *fcvtbuf(double arg, int ndigits, int *decpt, int *sign, char *buf) {
   return cvt(arg, ndigits, decpt, sign, buf, 0);
