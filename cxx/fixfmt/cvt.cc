@@ -32,8 +32,10 @@
 
 #define CVTBUFSIZE 500
 
-static char* cvt(double arg, int ndigits, int *decpt, int *sign, char *buf, 
-                 int eflag) {
+namespace fixfmt {
+
+char* cvt(double arg, int ndigits, int* decpt, int* sign, char* buf, int eflag)
+{
   int r2;
   double fi, fj;
   char* p,* p1;
@@ -105,11 +107,13 @@ static char* cvt(double arg, int ndigits, int *decpt, int *sign, char *buf,
   return buf;
 }
 
-char *ecvtbuf(double arg, int ndigits, int *decpt, int *sign, char *buf) {
+char* ecvtbuf(double arg, int ndigits, int* decpt, int* sign, char* buf) {
   return cvt(arg, ndigits, decpt, sign, buf, 1);
 }
 
-char *fcvtbuf(double arg, int ndigits, int *decpt, int *sign, char *buf) {
+char* fcvtbuf(double arg, int ndigits, int* decpt, int* sign, char* buf) {
   return cvt(arg, ndigits, decpt, sign, buf, 0);
 }
 
+
+}  // namespace fixfmt
