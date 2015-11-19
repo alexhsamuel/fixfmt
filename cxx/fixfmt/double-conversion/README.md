@@ -16,3 +16,8 @@ rounding](http://c2.com/cgi/wiki?BankersRounding).
 1. Move the code into `namespace fixfmt::double_conversion`, to avoid collisions
 with other instances of this code that may be linked in.
 
+**FIXME:** We only use the fixed length double to string conversion, not the
+shortest correct double conversion logic or the parsing logic.  These can be
+stripped from the library.
+
+
