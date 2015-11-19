@@ -255,31 +255,21 @@ static void FillFractionals(uint64_t fractionals, int exponent,
       point--;
       int digit = static_cast<int>(fractionals >> point);
       ASSERT(digit <= 9);
-      std::cerr << "NEXT DIGIT " << (char) ('0' + digit)
-                << " fractionals=" << std::hex << fractionals
-                << " point=" << point
-                << "\n";
       buffer[*length] = static_cast<char>('0' + digit);
       (*length)++;
       fractionals -= static_cast<uint64_t>(digit) << point;
     }
-    // If the first bit after the point is set we have to round up.
-    int const lead = fractionals >> (point - 1);
-    int const rem = fractionals & ((1 << point) - 1);
+    // Bankers' rounding based on remaining fractional.  Round if,
     bool const round_up = 
-      (lead & 1) == 1 
-      && (rem > 0
-          || (*length > 0 && (buffer[*length - 1] - '0') % 2 == 1));
-    std::cerr << "ROUND UP? " 
-              << std::hex << fractionals << " >> "
-              << (point - 1) << " = " 
-              << std::hex << lead
-              << " length=" << *length
-              << " rem=" << rem
-              << " lastdigit=" << (*length == 0 ? '0' : buffer[*length - 1])
-              << (round_up ? " YES" : " NO")
-              << "\n";
-    if (round_up) {
+      // ... the lead bit is one,
+      ((fractionals >> (point - 1)) & 1) == 1  
+      // ... and either some other bits are set,
+      && ((fractionals & ((1 << point) - 1)) > 0  
+          // ... or else there is a previous digit (no digit means 0),
+          || (*length > 0   
+              // ... and that digit is odd.
+              && (buffer[*length - 1] - '0') % 2 == 1))
+    if (round_up) {  
       RoundUp(buffer, length, decimal_point);
     }
   } else {  // We need 128 bits.
