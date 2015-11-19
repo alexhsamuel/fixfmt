@@ -28,22 +28,25 @@
 // OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF 
 // SUCH DAMAGE.
 
-#include <math.h>
-
-#define CVTBUFSIZE 500
+#include <cassert>
+#include <cstdlib>
+#include <cmath>
 
 namespace fixfmt {
 
+constexpr size_t CVTBUFSIZE = 512;
+
 char* cvt(double arg, int ndigits, int* decpt, int* sign, char* buf, int eflag)
 {
-  int r2;
-  double fi, fj;
-  char* p,* p1;
+  assert(ndigits >= 0);
+  assert(ndigits < CVTBUFSIZE - 1);
 
-  if (ndigits < 0) 
-    ndigits = 0;
-  if (ndigits >= CVTBUFSIZE - 1) 
-    ndigits = CVTBUFSIZE - 2;
+  int r2;
+  double fi;
+  double fj;
+  char* p;
+  char* p1;
+
   r2 = 0;
   *sign = 0;
   p = &buf[0];
@@ -51,20 +54,25 @@ char* cvt(double arg, int ndigits, int* decpt, int* sign, char* buf, int eflag)
     *sign = 1;
     arg = -arg;
   }
+
+  // Split into integral and fractional parts.
   arg = modf(arg, &fi);
   p1 = &buf[CVTBUFSIZE];
-
   if (fi != 0) {
+    // Have an integral part.  Render it right-to-left at the end of the buffer.
     p1 = &buf[CVTBUFSIZE];
     while (fi != 0) {
       fj = modf(fi / 10, &fi);
       *--p1 = (int)((fj + .03) * 10) + '0';
       r2++;
     }
+    // Copy it to the beginning of the buffer.
     while (p1 < &buf[CVTBUFSIZE]) 
       *p++ = *p1++;
   } 
   else if (arg > 0) 
+    // Fractional part only.  Scale it up until the first fractional digit 
+    // is nonzero.
     while ((fj = arg * 10) < 1) {
       arg = fj;
       r2--;

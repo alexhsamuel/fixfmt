@@ -7,7 +7,7 @@ CXXFLAGS        = -std=c++14 -g
 LDLIBS          = -lpthread
 
 SOURCES         = $(wildcard cxx/fixfmt/*.cc) \
-	          $(wildcard cxx/fixfmt/double-conversion/*.cc)
+	          $(wildcard cxx/double-conversion/*.cc)
 DEPS            = $(SOURCES:%.cc=%.dd)
 OBJS            = $(SOURCES:%.cc=%.o)
 LIB	    	= cxx/libfixfmt.a
@@ -48,7 +48,7 @@ $(DEPS): %.dd: 		%.cc
 
 .PHONY: clean-cxx
 clean-cxx:
-	rm -f $(OBJS) $(BINS) $(DEPS) $(OKS)
+	rm -f $(OBJS) $(LIB) $(BINS) $(DEPS) $(OKS)
 
 .PHONY: testclean
 testclean-cxx:
@@ -58,7 +58,7 @@ testclean-cxx:
 test-cxx: $(TEST_OKS)
 
 $(LIB):			$(OBJS)
-	ar -r $@ $<
+	ar -r $@ $^
 
 $(TEST_DEPS): \
 %.dd: 			%.cc

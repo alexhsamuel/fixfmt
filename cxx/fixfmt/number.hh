@@ -2,8 +2,11 @@
 
 #include <cassert>
 #include <cstring>
+#include <ostream>
+#include <sstream>
 #include <string>
 
+#include "double-conversion/double-conversion.h"
 #include "fixfmt/base.hh"
 #include "fixfmt/math.hh"
 #include "fixfmt/text.hh"
@@ -13,6 +16,7 @@
 namespace fixfmt {
 
 using std::string;
+using std::stringstream;
 
 class Number
 {
@@ -188,25 +192,79 @@ inline string Number::operator()(double const val) const
     // Return the appropriate infinity.
     return val > 0 ? pos_inf_result_ : neg_inf_result_;
   else {
-    if (   val < std::numeric_limits<long>::min()
-        || val > std::numeric_limits<long>::max())
-      // FIXME: Handle large values.
+    int const precision = precision_ == PRECISION_NONE ? 0 : precision_;
+
+    // FIXME: Assumes ASCII only.
+    char buf[width_ + 1];
+    bool sign;
+    int length;
+    int decimal_pos;
+    double_conversion::DoubleToStringConverter::DoubleToAscii(
+      fabs(value), 
+      double_conversion::DoubleToStringConverter::FIXED,
+      precision,
+      buf, sizeof(buf),
+      &sign, &length, &decimal_pos);
+    assert(length - decimal_pos == precision);
+
+    string result;
+    result.capacity(width_);
+
+    if (decimal_pos > size_)
+      // Integral part too large.
       return bad_result_;
-    int    const precision = precision_ == PRECISION_NONE ? 0 : precision_;
-    double const abs_val   = round(fabs(val), precision);
-    long   const whole     = abs_val;
-    long   const frac      = round((abs_val - whole) * pow10(precision));
-    return format(nonneg, whole, frac);
-  }
+
+    // The number of digits in the integral part.
+    //
+    // If size_ is positive but there are no integral digits at all, show a
+    // zero regardless; this is conventional.
+    int const int_digits = 
+      decimal_pos > 0 ? decimal_pos 
+      size_ > 0 ? 1
+      : 0;
+
+    // Add pad and sign.  Space padding precedes sign, while zero padding
+    // follows it.  
+    if (pad_ == PAD_SPACE && size_ > int_digits)
+      // Space padding. 
+      result.append(size_ - int_digits, ' ');
+    if (sign_ != SIGN_NONE)
+      // The sign character.
+      result.append(get_sign_char(val >= 0));
+    if (pad_ == PAD_ZERO && size_ > int_digits)
+      // Zero padding.
+      result.append(size_ - int_digits, '0');
+
+    // Add digits for the integral part.
+    if (decimal_pos > 0)
+      result.append(buf, decimal_pos);
+    else if (size_ > 0)
+      // Show at least one zero.
+      result.append('0');
+
+    if (precision_ != PRECISION_NONE) {
+      // Add the decimal point.
+      result.append('.');
+      
+      // Pad with zeros after the decimal point if needed.
+      if (decimal_pos < 0)
+        result.append(-decimal_pos, '0');
+      // Add fractional digits.
+      if (length - decimal_pos > 0)
+        result.append(&buf[std::max(decimal_pos, 0)]);
+    }
+ 
+    assert(result.length() == width_);
+    return result;
 }
 
 
-inline int Number::format_long(char* buf, int width, unsigned long val, 
+inline int Number::format_long(stringstream& ss, int width, unsigned long val, 
                                char fill)
 {
   if (val == 0 && width > 0)
     // For exact zero, render a single zero.
-    buf[--width] = '0';
+    ss << '0';
   else {
     // Render digits.
     while (width > 0 && val > 0) {
@@ -229,9 +287,7 @@ inline string Number::format(
     long  const whole,
     long  const frac) const
 {
-  string result(width_, '?');
-  // Note: dangerous, but works.  We format directly into the string's buffer.
-  char* const buf = &result[0];
+  stringstream ss;
 
   int const sign_len = sign_ == SIGN_NONE ? 0 : 1;
 
