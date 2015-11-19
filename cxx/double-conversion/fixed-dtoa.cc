@@ -268,7 +268,7 @@ static void FillFractionals(uint64_t fractionals, int exponent,
           // ... or else there is a previous digit (no digit means 0),
           || (*length > 0   
               // ... and that digit is odd.
-              && (buffer[*length - 1] - '0') % 2 == 1))
+              && (buffer[*length - 1] - '0') % 2 == 1));
     if (round_up) {  
       RoundUp(buffer, length, decimal_point);
     }
@@ -290,7 +290,6 @@ static void FillFractionals(uint64_t fractionals, int exponent,
       (*length)++;
     }
     if (fractionals128.BitAt(point - 1) == 1) {
-      std::cerr << "ROUND UP 128 '" << "'\n";
       RoundUp(buffer, length, decimal_point);
     }
   }
@@ -402,7 +401,6 @@ bool FastFixedDtoa(double v,
     FillFractionals(significand, exponent, fractional_count,
                     buffer, length, decimal_point);
   }
-  TrimZeros(buffer, length, decimal_point);
   buffer[*length] = '\0';
   if ((*length) == 0) {
     // The string is empty and the decimal_point thus has no importance. Mimick
