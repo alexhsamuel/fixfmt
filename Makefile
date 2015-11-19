@@ -6,9 +6,11 @@ CPPFLAGS        = -I./cxx
 CXXFLAGS        = -std=c++14 -g
 LDLIBS          = -lpthread
 
-SOURCES         = $(wildcard cxx/*.cc)
+SOURCES         = $(wildcard cxx/fixfmt/*.cc) \
+	          $(wildcard cxx/fixfmt/double-conversion/*.cc)
 DEPS            = $(SOURCES:%.cc=%.dd)
 OBJS            = $(SOURCES:%.cc=%.o)
+LIB	    	= cxx/libfixfmt.a
 BINS            = $(SOURCES:%.cc=%)
 
 TEST_SOURCES    = $(wildcard test/*.cc)
@@ -26,7 +28,7 @@ PYTEST	    	= py.test
 #-------------------------------------------------------------------------------
 
 .PHONY: all
-all:			test
+all:			$(LIB) test
 
 .PHONY: test
 test:			test-cxx test-python
@@ -54,6 +56,9 @@ testclean-cxx:
 
 .PHONY: test-cxx
 test-cxx: $(TEST_OKS)
+
+$(LIB):			$(OBJS)
+	ar -r $@ $<
 
 $(TEST_DEPS): \
 %.dd: 			%.cc
