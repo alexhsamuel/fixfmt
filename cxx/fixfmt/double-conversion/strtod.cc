@@ -33,6 +33,7 @@
 #include "cached-powers.h"
 #include "ieee.h"
 
+namespace fixfmt { 
 namespace double_conversion {
 
 // 2^53 = 9007199254740992.
@@ -553,3 +554,4 @@ float Strtof(Vector<const char> buffer, int exponent) {
 }
 
 }  // namespace double_conversion
+}  // namespace fixfmt

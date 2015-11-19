@@ -33,6 +33,7 @@
 
 #include "cached-powers.h"
 
+namespace fixfmt {
 namespace double_conversion {
 
 struct CachedPower {
@@ -173,3 +174,5 @@ void PowersOfTenCache::GetCachedPowerForDecimalExponent(int requested_exponent,
 }
 
 }  // namespace double_conversion
+}  // namespace fixfmt
+

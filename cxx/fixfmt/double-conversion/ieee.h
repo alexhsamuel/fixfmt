@@ -30,6 +30,7 @@
 
 #include "diy-fp.h"
 
+namespace fixfmt {
 namespace double_conversion {
 
 // We assume that doubles and uint64_t have the same endianness.
@@ -398,5 +399,6 @@ class Single {
 };
 
 }  // namespace double_conversion
+}  // namespace fixfmt
 
 #endif  // DOUBLE_CONVERSION_DOUBLE_H_

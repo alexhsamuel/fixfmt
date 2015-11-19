@@ -30,6 +30,7 @@
 
 #include "utils.h"
 
+namespace fixfmt { 
 namespace double_conversion {
 
 class DoubleToStringConverter {
@@ -539,5 +540,6 @@ class StringToDoubleConverter {
 };
 
 }  // namespace double_conversion
+}  // namespace fixfmt
 
 #endif  // DOUBLE_CONVERSION_DOUBLE_CONVERSION_H_

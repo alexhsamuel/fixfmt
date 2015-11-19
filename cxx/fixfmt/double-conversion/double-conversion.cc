@@ -37,6 +37,7 @@
 #include "strtod.h"
 #include "utils.h"
 
+namespace fixfmt {
 namespace double_conversion {
 
 const DoubleToStringConverter& DoubleToStringConverter::EcmaScriptConverter() {
@@ -980,3 +981,5 @@ float StringToDoubleConverter::StringToFloat(
 }
 
 }  // namespace double_conversion
+}  // namespace fixfmt
+

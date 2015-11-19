@@ -8,7 +8,7 @@ CXXFLAGS        = -g
 LDLIBS          = -lpthread
 
 SOURCES         = $(wildcard cxx/fixfmt/*.cc) \
-	          $(wildcard cxx/double-conversion/*.cc)
+	          $(wildcard cxx/fixfmt/double-conversion/*.cc)
 DEPS            = $(SOURCES:%.cc=%.dd)
 OBJS            = $(SOURCES:%.cc=%.o)
 LIB	    	= cxx/libfixfmt.a

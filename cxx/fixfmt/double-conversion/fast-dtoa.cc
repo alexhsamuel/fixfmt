@@ -31,6 +31,7 @@
 #include "diy-fp.h"
 #include "ieee.h"
 
+namespace fixfmt {
 namespace double_conversion {
 
 // The minimal and maximal target exponent define the range of w's binary
@@ -663,3 +664,5 @@ bool FastDtoa(double v,
 }
 
 }  // namespace double_conversion
+}  // namespace fixfmt
+

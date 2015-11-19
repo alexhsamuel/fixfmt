@@ -31,6 +31,7 @@
 #include "fixed-dtoa.h"
 #include "ieee.h"
 
+namespace fixfmt { 
 namespace double_conversion {
 
 // Represents a 128bit type. This class should be replaced by a native type on
@@ -411,3 +412,5 @@ bool FastFixedDtoa(double v,
 }
 
 }  // namespace double_conversion
+}  // namespace fixfmt
+

@@ -32,6 +32,7 @@
 #include "bignum.h"
 #include "ieee.h"
 
+namespace fixfmt {
 namespace double_conversion {
 
 static int NormalizedExponent(uint64_t significand, int exponent) {
@@ -639,3 +640,5 @@ static void FixupMultiply10(int estimated_power, bool is_even,
 }
 
 }  // namespace double_conversion
+}  // namespace fixfmt
+

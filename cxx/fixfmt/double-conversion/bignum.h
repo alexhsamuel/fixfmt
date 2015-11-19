@@ -30,6 +30,7 @@
 
 #include "utils.h"
 
+namespace fixfmt {
 namespace double_conversion {
 
 class Bignum {
@@ -140,5 +141,6 @@ class Bignum {
 };
 
 }  // namespace double_conversion
+}  // namespace fixfmt
 
 #endif  // DOUBLE_CONVERSION_BIGNUM_H_

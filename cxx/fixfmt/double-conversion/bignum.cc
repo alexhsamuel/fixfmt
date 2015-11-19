@@ -28,6 +28,7 @@
 #include "bignum.h"
 #include "utils.h"
 
+namespace fixfmt {
 namespace double_conversion {
 
 Bignum::Bignum()
@@ -764,3 +765,5 @@ void Bignum::SubtractTimes(const Bignum& other, int factor) {
 
 
 }  // namespace double_conversion
+}  // namespace fixfmt
+
