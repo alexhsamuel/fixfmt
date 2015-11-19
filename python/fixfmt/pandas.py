@@ -36,6 +36,11 @@ def from_dataframe(df, cfg, *, names=pln.ctr.ALL):
     return tbl
 
 
+def print_dataframe(df, cfg, *, names=pln.ctr.ALL):
+    tbl = from_dataframe(df, cfg, names=names)
+    tbl.print()
+
+
 #-------------------------------------------------------------------------------
 
 def main():
@@ -52,12 +57,12 @@ def main():
     
     # FIXME
     cfg = table.DEFAULT_CFG
-    # cfg = table.UNICODE_BOX_CFG
+    cfg = table.UNICODE_BOX_CFG
     table._colorize(cfg)
 
     # FIXME: Support "-".
     df = load_pickle(args.filename)
-    from_dataframe(df, cfg).print()
+    print_dataframe(df, cfg)
 
 
 if __name__ == "__main__":
