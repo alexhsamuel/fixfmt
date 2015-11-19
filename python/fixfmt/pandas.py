@@ -17,10 +17,15 @@ def from_dataframe(df, cfg, *, names=pln.container.ALL):
             return series.values
 
     if cfg.index.show:
-        # FIXME: Handle multi-index.
-        tbl.add_index_column(df.index.name, get_values(df.index))
+        idx = df.index
+        if isinstance(idx, pd.core.index.MultiIndex):
+            for name, labels, levels in zip(idx.names, idx.labels, idx.levels):
+                # FIXME: Wasteful.  Handle like category columns.
+                tbl.add_index_column(name, levels.values[labels])
+        else:
+            tbl.add_index_column(idx.name, get_values(idx))
 
-    names = tuple(pln.container.select_ordered(df.columns, names))
+    names = pln.container.select_ordered(tuple(df.columns), names)
     for name in names:
         series = df[name]
         arr = get_values(series)

@@ -12,7 +12,6 @@ Things to do:  (* for MVP)
 - support UTF-8/ANSI in decimal point, sign, etc.
 
 Dataframe features:
-* show Pandas multiindex
 - show nullable columns (object for bool, object for str, etc.)
 - page at a time, with header
 
@@ -34,6 +33,7 @@ Internal:
   characters).
 - category types
   - look up categories through codes
+  - likewise for multiindex
   - pre-format categories (?)
 
 Cleanup:
