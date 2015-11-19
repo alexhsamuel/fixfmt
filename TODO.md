@@ -8,6 +8,7 @@ Things to do:  (* for MVP)
 - fixed-length string columns
 - unsigned columns
 - add exponential E+ formatter
+- auto choose exponential E+ formatter
 - support UTF-8/ANSI in decimal point, sign, etc.
 
 Dataframe features:
@@ -24,6 +25,7 @@ Fancy features:
 - add currency to Number formatter
 - show summary statistics
 - hex or other bases for Number formatter
+- print column offsets from some base instead of values
 
 Internal:
 - Speed up _choose_formatter_* with extension code.  See branch guess_types_cxx.
