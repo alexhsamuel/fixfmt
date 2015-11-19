@@ -260,7 +260,7 @@ static void FillFractionals(uint64_t fractionals, int exponent,
       (*length)++;
       fractionals -= static_cast<uint64_t>(digit) << point;
     }
-    // Bankers' rounding based on remaining fractional.  Round if,
+    // Bankers rounding based on remaining fractional.  Round if,
     bool const round_up = 
       // ... the lead bit is one,
       ((fractionals >> (point - 1)) & 1) == 1  
