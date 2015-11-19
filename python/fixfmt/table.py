@@ -225,9 +225,7 @@ def _choose_formatter_float(values, cfg):
     is_inf      = np.isinf(values)
     has_inf     = is_inf.any()
     has_neg_inf = (values[is_inf] < 0).any()
-    # FIXME: We can't render numbers this big for now.
-    too_big     = abs(values) > sys.maxsize
-    vals        = values[~(is_nan | is_inf | too_big)]
+    vals        = values[~(is_nan | is_inf)]
 
     special_width = max(
         string_length(nan) if has_nan else 0,

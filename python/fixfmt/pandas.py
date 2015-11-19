@@ -1,11 +1,11 @@
 import pandas as pd
-import pln.ctr
+import pln.container
 
 from   . import table, Bool, Number, String
 
 #-------------------------------------------------------------------------------
 
-def from_dataframe(df, cfg, *, names=pln.ctr.ALL):
+def from_dataframe(df, cfg, *, names=pln.container.ALL):
     tbl = table.Table(cfg)
 
     def get_values(series):
@@ -20,7 +20,7 @@ def from_dataframe(df, cfg, *, names=pln.ctr.ALL):
         # FIXME: Handle multi-index.
         tbl.add_index_column(df.index.name, get_values(df.index))
 
-    names = tuple(pln.ctr.select_ordered(df.columns, names))
+    names = tuple(pln.container.select_ordered(df.columns, names))
     for name in names:
         series = df[name]
         arr = get_values(series)
@@ -36,7 +36,7 @@ def from_dataframe(df, cfg, *, names=pln.ctr.ALL):
     return tbl
 
 
-def print_dataframe(df, cfg, *, names=pln.ctr.ALL):
+def print_dataframe(df, cfg, *, names=pln.container.ALL):
     tbl = from_dataframe(df, cfg, names=names)
     tbl.print()
 
