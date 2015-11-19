@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <math.h>
+#include <iostream>
 
 #include "fixed-dtoa.h"
 #include "ieee.h"
@@ -254,12 +255,31 @@ static void FillFractionals(uint64_t fractionals, int exponent,
       point--;
       int digit = static_cast<int>(fractionals >> point);
       ASSERT(digit <= 9);
+      std::cerr << "NEXT DIGIT " << (char) ('0' + digit)
+                << " fractionals=" << std::hex << fractionals
+                << " point=" << point
+                << "\n";
       buffer[*length] = static_cast<char>('0' + digit);
       (*length)++;
       fractionals -= static_cast<uint64_t>(digit) << point;
     }
     // If the first bit after the point is set we have to round up.
-    if (((fractionals >> (point - 1)) & 1) == 1) {
+    int const lead = fractionals >> (point - 1);
+    int const rem = fractionals & ((1 << point) - 1);
+    bool const round_up = 
+      (lead & 1) == 1 
+      && (rem > 0
+          || (*length > 0 && (buffer[*length - 1] - '0') % 2 == 1));
+    std::cerr << "ROUND UP? " 
+              << std::hex << fractionals << " >> "
+              << (point - 1) << " = " 
+              << std::hex << lead
+              << " length=" << *length
+              << " rem=" << rem
+              << " lastdigit=" << (*length == 0 ? '0' : buffer[*length - 1])
+              << (round_up ? " YES" : " NO")
+              << "\n";
+    if (round_up) {
       RoundUp(buffer, length, decimal_point);
     }
   } else {  // We need 128 bits.
@@ -280,6 +300,7 @@ static void FillFractionals(uint64_t fractionals, int exponent,
       (*length)++;
     }
     if (fractionals128.BitAt(point - 1) == 1) {
+      std::cerr << "ROUND UP 128 '" << "'\n";
       RoundUp(buffer, length, decimal_point);
     }
   }
