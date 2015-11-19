@@ -26,12 +26,11 @@ Fancy features:
 - hex or other bases for Number formatter
 
 Internal:
-* Use iostream formatting for floats. (or implement properly!)
 - Speed up _choose_formatter_* with extension code.  See branch guess_types_cxx.
 - Add wrap<> for Python functions other than Method.
 - Format into buffers of preallocated length (which must accommodate multibyte
   characters).
--category types
+- category types
   - look up categories through codes
   - pre-format categories (?)
 
