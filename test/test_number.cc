@@ -56,8 +56,7 @@ TEST(Number, double) {
   ASSERT_EQ(" -1.000", fmt(  -1.0    ));
   ASSERT_EQ("  0.000", fmt(   0.0004 ));
   ASSERT_EQ(" -0.000", fmt(  -0.0004 ));
-  ASSERT_EQ("  0.000", fmt(   0.0005 ));
-  ASSERT_EQ(" -0.000", fmt(  -0.0005 ));
+  ASSERT_EQ(" -1.000", fmt(  -1.0    ));
   ASSERT_EQ("  0.001", fmt(   0.00051));
   ASSERT_EQ(" -0.001", fmt(  -0.00051));
   ASSERT_EQ("  0.001", fmt(   0.0014 ));
@@ -67,10 +66,10 @@ TEST(Number, double) {
   ASSERT_EQ("  0.002", fmt(   0.00151));
   ASSERT_EQ(" -0.002", fmt(  -0.00151));
   ASSERT_EQ("  0.008", fmt(   0.0084 ));
-  ASSERT_EQ("  0.008", fmt(   0.0085 ));
+  ASSERT_EQ("  0.009", fmt(   0.0085 ));
   ASSERT_EQ("  0.009", fmt(   0.0086 ));
   ASSERT_EQ(" -0.009", fmt(  -0.0094 ));
-  ASSERT_EQ(" -0.010", fmt(  -0.0095 ));
+  ASSERT_EQ(" -0.009", fmt(  -0.0095 ));
   ASSERT_EQ(" -0.010", fmt(  -0.0096 ));
   ASSERT_EQ("  5.999", fmt(   5.9994 ));
   ASSERT_EQ("  5.999", fmt(   5.99949));
@@ -78,7 +77,7 @@ TEST(Number, double) {
   ASSERT_EQ("  6.000", fmt(   5.99951));
   ASSERT_EQ("-12.234", fmt( -12.2344 ));
   ASSERT_EQ("-12.234", fmt( -12.23449));
-  ASSERT_EQ("-12.234", fmt( -12.2345 ));
+  ASSERT_EQ("-12.235", fmt( -12.2345 ));
   ASSERT_EQ("-12.235", fmt( -12.23451));
   ASSERT_EQ(" 43.499", fmt(  43.499  ));
   ASSERT_EQ(" 43.500", fmt(  43.4999 ));
@@ -91,8 +90,8 @@ TEST(Number, double) {
   ASSERT_EQ("-99.999", fmt( -99.999  ));
   ASSERT_EQ(" 99.999", fmt(  99.9994 ));
   ASSERT_EQ("-99.999", fmt( -99.9994 ));
-  ASSERT_EQ("#######", fmt(  99.9995 ));
-  ASSERT_EQ("#######", fmt( -99.9995 ));
+  ASSERT_EQ(" 99.999", fmt(  99.9995 ));
+  ASSERT_EQ("-99.999", fmt( -99.9995 ));
   ASSERT_EQ("#######", fmt( 100      ));
   ASSERT_EQ("#######", fmt(-100      ));
   ASSERT_EQ("#######", fmt( 999      ));
@@ -103,8 +102,30 @@ TEST(Number, double) {
   ASSERT_EQ("-inf   ", fmt(-INFINITY ));
 }
 
+TEST(Number, rounding) {
+  Number fmt0{1, 0};
+  ASSERT_EQ(" 0.", fmt0( 0.5));
+  ASSERT_EQ("-0.", fmt0(-0.5));
+  ASSERT_EQ(" 2.", fmt0( 1.5));
+  ASSERT_EQ("-2.", fmt0(-1.5));
+  ASSERT_EQ(" 2.", fmt0( 2.5));
+  ASSERT_EQ("-2.", fmt0(-2.5));
+  ASSERT_EQ(" 8.", fmt0( 7.5));
+  ASSERT_EQ("-8.", fmt0(-7.5));
+
+  Number fmt2{1, 2};
+  ASSERT_EQ(" 0.12", fmt2( 0.125));
+  ASSERT_EQ("-0.12", fmt2(-0.125));
+  ASSERT_EQ(" 0.38", fmt2( 0.375));
+  ASSERT_EQ("-0.38", fmt2(-0.375));
+  ASSERT_EQ(" 0.62", fmt2( 0.625));
+  ASSERT_EQ("-0.62", fmt2(-0.625));
+  ASSERT_EQ(" 0.88", fmt2( 0.875));
+  ASSERT_EQ("-0.88", fmt2(-0.875));
+}
+
 // FIXME: Re-enable.
-TEST(Number, DISABLED_exhaustive) {
+TEST(Number, exhaustive) {
   Number fmt{1, 2, ' ', '+'};
   ASSERT_EQ(5, fmt.get_width());
 

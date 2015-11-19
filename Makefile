@@ -2,8 +2,9 @@ GTEST_DIR       = ./googletest/googletest
 GTEST_INCDIR    = $(GTEST_DIR)/include
 GTEST_LIB       = $(GTEST_DIR)/make/gtest_main.a
 
+CXX            := $(CXX) -std=c++14
 CPPFLAGS        = -I./cxx
-CXXFLAGS        = -std=c++14 -g
+CXXFLAGS        = -g
 LDLIBS          = -lpthread
 
 SOURCES         = $(wildcard cxx/fixfmt/*.cc) \
@@ -20,7 +21,7 @@ TEST_BINS       = $(TEST_SOURCES:%.cc=%.exe)
 TEST_OKS        = $(TEST_SOURCES:%.cc=%.ok)
 
 TEST_CPPFLAGS   = $(CPPFLAGS) -I$(GTEST_INCDIR)
-TEST_LIBS       = $(GTEST_LIB)
+TEST_LIBS       = $(GTEST_LIB) $(LIB)
 
 PYTHON	    	= python3
 PYTEST	    	= py.test

@@ -22,6 +22,12 @@ setup(
         "fixfmt/_ext.cc",
         "fixfmt/functions.cc",
       ],
+      library_dirs=[
+        "../cxx",
+      ],
+      libraries=[
+        "fixfmt",
+      ],
       depends=glob("*.hh") + glob("../cxx/*.hh"),
     ),
 
