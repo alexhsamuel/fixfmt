@@ -81,7 +81,7 @@ private:
     int const size = size_ + has_sign;
 
     // Try to put it in the integer part.
-    if (len <= width_)
+    if (len <= (int) width_)
       return pad(pad(result, size, " ", true), width_, " ", false);
     else {
       // Doesn't fit at all.
@@ -89,15 +89,6 @@ private:
       return result;
     }
   }
-
-  /**
-   * Formats 'width' digits of 'val' into 'buf', filling on the left with
-   * 'fill'.  Returns the number of characters filled, or -1 if 'val' didn't
-   * fit in 'width' digits.
-   */
-  static int format_long(char* buf, int width, unsigned long val, char fill);
-
-  string format(bool const nonneg, long  const whole, long const frac) const;
 
   int      const size_;
   int      const precision_;
@@ -165,84 +156,6 @@ inline Number::Number(
   assert(pad_ == PAD_SPACE || pad_ == PAD_ZERO);
   assert(
       sign_ == SIGN_NONE || sign_ == SIGN_NEGATIVE || sign_ == SIGN_ALWAYS);
-}
-
-
-inline string Number::operator()(long const val) const
-{
-  bool const nonneg = val >= 0;
-  return
-    // With SIGN_NONE, we can't render negative numbers.
-    (! nonneg && sign_ == SIGN_NONE) ? bad_result_
-    : format(nonneg, labs(val), 0);
-}
-
-
-inline int Number::format_long(char* buf, int width, unsigned long val, 
-                               char fill)
-{
-  if (val == 0 && width > 0)
-    // For exact zero, render a single zero.
-    buf[--width] = '0';
-  else {
-    // Render digits.
-    while (width > 0 && val > 0) {
-      buf[--width] = '0' + (val % 10);
-      val /= 10;
-    }
-    // We should have rendered all the value; otherwise we've overflowed.
-    if (val != 0)
-      return -1;
-  }
-
-  // Fill the rest.
-  set(buf, fill, width);
-  return width;
-}
-
-
-inline string Number::format(
-    bool  const nonneg,
-    long  const whole,
-    long  const frac) const
-{
-  string result(width_, '?');
-  // Note: dangerous, but works.  We format directly into the string's buffer.
-  char* const buf = &result[0];
-
-  int const sign_len = sign_ == SIGN_NONE ? 0 : 1;
-
-  // Format the whole number part.
-  int const whole_fill{format_long(buf + sign_len, size_, whole, pad_)};
-  if (whole_fill < 0)
-    // Didn't fit.
-    return bad_result_;
-  else {
-    if (sign_ != SIGN_NONE) {
-      // Add the sign.
-      char const sign_char = get_sign_char(nonneg);
-      if (pad_ == PAD_SPACE) {
-        // Space padding comes outside the sign.
-        buf[0] = pad_;
-        buf[whole_fill] = sign_char;
-      }
-      else
-        buf[0] = sign_char;
-    }
-
-    if (precision_ != PRECISION_NONE) {
-      // Add the decimal point.
-      char* const point = buf + sign_len + size_;
-      *point = point_;
-      if (precision_ > 0) {
-        // Format the fractional part.
-        int const fill = format_long(point + 1, precision_, frac, '0');
-        assert(fill >= 0); unused(fill);
-      }
-    }
-  }
-
-  return std::move(result);
 }
 
 

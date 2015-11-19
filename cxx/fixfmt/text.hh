@@ -127,7 +127,7 @@ string_truncate(string& str, size_t length)
   auto const& begin = str.cbegin();
   auto const& end = str.cend();
   for (auto i = begin; i != end; ! skip_ansi_escape(i, end) && next_utf8(i))
-    if (i - begin == length) {
+    if (i - begin == (int) length) {
       str.resize(i - begin);
       break;
     }

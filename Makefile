@@ -4,7 +4,7 @@ GTEST_LIB       = $(GTEST_DIR)/make/gtest_main.a
 
 CXX            := $(CXX) -std=c++14
 CPPFLAGS        = -I./cxx
-CXXFLAGS        = -g
+CXXFLAGS        = -fPIC -g
 LDLIBS          = -lpthread
 
 SOURCES         = $(wildcard cxx/fixfmt/*.cc) \

@@ -7,6 +7,50 @@ namespace fixfmt {
 
 using std::string;
 
+string Number::operator()(long val) const
+{
+  if (val < 0 && sign_ == SIGN_NONE)
+    return bad_result_;
+
+  // Format directly into the string's buffer.
+  string result(width_, pad_);
+  char* buf = &result[0];
+
+  int const sign_len = sign_ == SIGN_NONE ? 0 : 1;
+  bool const nonneg = val >= 0;
+  val = abs(val);
+
+  int i = size_;
+  if (val == 0 && size_ > 0)
+    // For exact zero, render a single zero.
+    buf[sign_len + --i] = '0';
+  else {
+    // Render digits.
+    for (; i > 0 && val > 0; val /= 10)
+      buf[sign_len + --i] = '0' + val % 10;
+    // We should have rendered the entire value; otherwise we've overflowed.
+    if (val != 0)
+      return bad_result_;
+  }
+
+  // Render the sign.
+  if (sign_ != SIGN_NONE)
+    *(buf + (pad_ == PAD_ZERO ? 0 : i)) = get_sign_char(nonneg);
+      
+  if (precision_ != PRECISION_NONE) {
+    // Add the decimal point.
+    char* point = buf + sign_len + size_;
+    *point++ = point_;
+    if (precision_ > 0) 
+      // Format the fractional part.
+      set(point, '0', precision_);
+  }
+
+  assert(result.length() == width_);
+  return std::move(result);
+}
+
+
 string Number::operator()(double const val) const
 {
   if (isnan(val))
