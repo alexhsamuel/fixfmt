@@ -18,7 +18,7 @@ string Number::operator()(long val) const
 
   int const sign_len = sign_ == SIGN_NONE ? 0 : 1;
   bool const nonneg = val >= 0;
-  val = abs(val);
+  val = std::abs(val);
 
   int i = size_;
   if (val == 0 && size_ > 0)
@@ -71,7 +71,7 @@ string Number::operator()(double const val) const
     int length;
     int decimal_pos;
     double_conversion::DoubleToStringConverter::DoubleToAscii(
-      fabs(val), 
+      std::abs(val), 
       double_conversion::DoubleToStringConverter::FIXED,
       precision,
       buf, sizeof(buf),
