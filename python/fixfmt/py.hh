@@ -15,6 +15,7 @@ class Long;
 class Object;
 class Unicode;
 
+// FIXME: Remove this.
 constexpr PyGetSetDef GETSETDEF_END
     {nullptr, nullptr, nullptr, nullptr, nullptr};
 
@@ -381,6 +382,9 @@ public:
   static auto from(std::string const& str)
     { return FromStringAndSize(const_cast<char*>(str.c_str()), str.length()); }
 
+  static auto from(char character)
+    { return FromStringAndSize(&character, 1); }
+
   char* as_utf8() { return PyUnicode_AsUTF8(this); }
 
   std::string as_utf8_string()
@@ -568,6 +572,68 @@ private:
 
   bool done_;
   std::vector<PyMethodDef> methods_;
+
+};
+
+
+//------------------------------------------------------------------------------
+
+template<typename CLASS>
+using GetPtr = ref<Object> (*)(CLASS* self, void* closure);
+
+
+template<typename CLASS, GetPtr<CLASS> METHOD>
+PyObject* wrap_get(PyObject* self, void* closure)
+{
+  ref<Object> result;
+  try {
+    result = METHOD(reinterpret_cast<CLASS*>(self), closure); 
+  }
+  catch (Exception) {
+    return nullptr;
+  }
+  assert(result != nullptr);
+  return result.release();
+}
+
+
+template<typename CLASS>
+class GetSets
+{
+public:
+
+  GetSets() : done_(false) {}
+
+  template<GetPtr<CLASS> METHOD>
+  GetSets& add_get(char const* name, char const* doc=nullptr, 
+                   void* closure=nullptr)
+  {
+    assert(name != nullptr);
+    assert(!done_);
+    getsets_.push_back({
+      (char*)   name,
+      (getter)  wrap_get<CLASS, METHOD>,
+      (setter)  nullptr,
+      (char*)   doc,
+      (void*)   closure,
+    });
+    return *this;
+  }
+
+  operator PyGetSetDef*()
+  {
+    if (!done_) {
+      // Add the sentry.
+      getsets_.push_back({nullptr, nullptr, nullptr, nullptr, nullptr});
+      done_ = true;
+    }
+    return &getsets_[0];
+  }
+
+private:
+
+  bool done_;
+  std::vector<PyGetSetDef> getsets_;
 
 };
 

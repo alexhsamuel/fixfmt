@@ -78,22 +78,74 @@ auto methods = Methods<PyNumber>()
 ;
 
 
-Object* get_width(PyNumber* const self, void* /* closure */)
+ref<Object> get_bad(PyNumber* const self, void* /* closure */)
 {
-  return Long::FromLong(self->fmt_->get_width()).release();
+  return Unicode::from(self->fmt_->get_bad());
 }
 
 
-PyGetSetDef const tp_getset[] = {
-  {
-    (char*)     "width",                                    // name
-    (getter)    get_width,                                  // get
-    (setter)    nullptr,                                    // set
-    (char*)     nullptr,                                    // doc
-    (void*)     nullptr,                                    // closure
-  },
-  GETSETDEF_END
-};
+ref<Object> get_inf(PyNumber* const self, void* /* closure */)
+{
+  return Unicode::from(self->fmt_->get_inf());
+}
+
+
+ref<Object> get_nan(PyNumber* const self, void* /* closure */)
+{
+  return Unicode::from(self->fmt_->get_nan());
+}
+
+
+ref<Object> get_pad(PyNumber* const self, void* /* closure */)
+{
+  return Unicode::from(self->fmt_->get_pad());
+}
+
+
+ref<Object> get_point(PyNumber* const self, void* /* closure */)
+{
+  return Unicode::from(self->fmt_->get_point());
+}
+
+
+ref<Object> get_precision(PyNumber* const self, void* /* closure */)
+{
+  int const precision = self->fmt_->get_precision();
+  return 
+    precision == fixfmt::Number::PRECISION_NONE ? none_ref()
+    : (ref<Object>) Long::FromLong(precision);
+}
+
+
+ref<Object> get_sign(PyNumber* const self, void* /* closure */)
+{
+  return Unicode::from(self->fmt_->get_sign());
+}
+
+
+ref<Object> get_size(PyNumber* const self, void* /* closure */)
+{
+  return Long::FromLong(self->fmt_->get_size());
+}
+
+
+ref<Object> get_width(PyNumber* const self, void* /* closure */)
+{
+  return Long::FromLong(self->fmt_->get_width());
+}
+
+
+auto getsets = GetSets<PyNumber>()
+  .add_get<get_bad>       ("bad")
+  .add_get<get_inf>       ("inf")
+  .add_get<get_nan>       ("nan")
+  .add_get<get_pad>       ("pad")
+  .add_get<get_point>     ("point")
+  .add_get<get_precision> ("precision")
+  .add_get<get_sign>      ("sign")
+  .add_get<get_size>      ("size")
+  .add_get<get_width>     ("width")
+  ;
 
 
 }  // anonymous namespace
@@ -130,7 +182,7 @@ Type PyNumber::type_ = PyTypeObject{
   (iternextfunc)        nullptr,                            // tp_iternext
   (PyMethodDef*)        methods,                            // tp_methods
   (PyMemberDef*)        nullptr,                            // tp_members
-  (PyGetSetDef*)        tp_getset,                          // tp_getset
+  (PyGetSetDef*)        getsets,                            // tp_getset
   (_typeobject*)        nullptr,                            // tp_base
   (PyObject*)           nullptr,                            // tp_dict
   (descrgetfunc)        nullptr,                            // tp_descr_get
