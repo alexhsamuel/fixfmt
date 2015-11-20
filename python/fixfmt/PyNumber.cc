@@ -136,15 +136,15 @@ ref<Object> get_width(PyNumber* const self, void* /* closure */)
 
 
 auto getsets = GetSets<PyNumber>()
-  .add_get<get_bad>       ("bad")
-  .add_get<get_inf>       ("inf")
-  .add_get<get_nan>       ("nan")
-  .add_get<get_pad>       ("pad")
-  .add_get<get_point>     ("point")
-  .add_get<get_precision> ("precision")
-  .add_get<get_sign>      ("sign")
-  .add_get<get_size>      ("size")
-  .add_get<get_width>     ("width")
+  .add_get<get_bad>         ("bad")
+  .add_get<get_inf>         ("inf")
+  .add_get<get_nan>         ("nan")
+  .add_get<get_pad>         ("pad")
+  .add_get<get_point>       ("point")
+  .add_get<get_precision>   ("precision")
+  .add_get<get_sign>        ("sign")
+  .add_get<get_size>        ("size")
+  .add_get<get_width>       ("width")
   ;
 
 
