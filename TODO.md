@@ -37,7 +37,9 @@ Internal:
   - pre-format categories (?)
 
 Cleanup:
+* docstrings 
 * banners
+* README docs
 - Use wrapped methods consistently.
 - check up on FIXMEs
 
