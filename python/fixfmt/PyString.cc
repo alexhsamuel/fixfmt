@@ -56,36 +56,50 @@ auto methods = Methods<PyString>()
 ;
 
 
-Object* get_pad_left(PyString* const self, void* /* closure */)
+ref<Object> get_ellipsis(PyString* const self, void* /* closure */)
 {
-  return Bool::from(self->fmt_->get_pad_left()).release();
+  return Unicode::from(self->fmt_->get_ellipsis());
 }
 
 
-Object* get_width(PyString* const self, void* /* closure */)
+ref<Object> get_pad(PyString* const self, void* /* closure */)
 {
-  return Long::FromLong(self->fmt_->get_width()).release();
+  return Unicode::from(self->fmt_->get_pad());
 }
 
 
-// FIXME: Other getters.
-PyGetSetDef const tp_getset[] = {
-  {
-    (char*)     "pad_left",                                 // name
-    (getter)    get_pad_left,                               // get
-    (setter)    nullptr,                                    // set
-    (char*)     nullptr,                                    // doc
-    (void*)     nullptr,                                    // closure
-  },
-  {
-    (char*)     "width",                                    // name
-    (getter)    get_width,                                  // get
-    (setter)    nullptr,                                    // set
-    (char*)     nullptr,                                    // doc
-    (void*)     nullptr,                                    // closure
-  },
-  GETSETDEF_END
-};
+ref<Object> get_pad_left(PyString* const self, void* /* closure */)
+{
+  return Bool::from(self->fmt_->get_pad_left());
+}
+
+
+ref<Object> get_position(PyString* const self, void* /* closure */)
+{
+  return Float::FromDouble(self->fmt_->get_position());
+}
+
+
+ref<Object> get_size(PyString* const self, void* /* closure */)
+{
+  return Long::FromLong(self->fmt_->get_size());
+}
+
+
+ref<Object> get_width(PyString* const self, void* /* closure */)
+{
+  return Long::FromLong(self->fmt_->get_width());
+}
+
+
+auto getsets = GetSets<PyString>()
+  .add_get<get_ellipsis>    ("ellipsis")
+  .add_get<get_pad>         ("pad")
+  .add_get<get_pad_left>    ("pad_left")
+  .add_get<get_position>    ("position")
+  .add_get<get_size>        ("size")
+  .add_get<get_width>       ("width")
+  ;
 
 
 }  // anonymous namespace
@@ -122,7 +136,7 @@ Type PyString::type_ = PyTypeObject{
   (iternextfunc)        nullptr,                            // tp_iternext
   (PyMethodDef*)        methods,                            // tp_methods
   (PyMemberDef*)        nullptr,                            // tp_members
-  (PyGetSetDef*)        tp_getset,                          // tp_getset
+  (PyGetSetDef*)        getsets,                            // tp_getset
   (_typeobject*)        nullptr,                            // tp_base
   (PyObject*)           nullptr,                            // tp_dict
   (descrgetfunc)        nullptr,                            // tp_descr_get

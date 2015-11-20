@@ -203,35 +203,22 @@ auto methods = Methods<PyTable>()
 ;
 
 
-Object* get_length(PyTable* const self, void* /* closure */)
+ref<Object> get_length(PyTable* const self, void* /* closure */)
 {
-  return Long::FromLong(self->table_->get_length()).release();
+  return Long::FromLong(self->table_->get_length());
 }
 
 
-Object* get_width(PyTable* const self, void* /* closure */)
+ref<Object> get_width(PyTable* const self, void* /* closure */)
 {
-  return Long::FromLong(self->table_->get_width()).release();
+  return Long::FromLong(self->table_->get_width());
 }
 
 
-PyGetSetDef const tp_getset[] = {
-  {
-    (char*)     "length",                                   // name
-    (getter)    get_length,                                 // get
-    (setter)    nullptr,                                    // set
-    (char*)     nullptr,                                    // doc
-    (void*)     nullptr,                                    // closure
-  },
-  {
-    (char*)     "width",                                    // name
-    (getter)    get_width,                                  // get
-    (setter)    nullptr,                                    // set
-    (char*)     nullptr,                                    // doc
-    (void*)     nullptr,                                    // closure
-  },
-  GETSETDEF_END
-};
+auto getsets = GetSets<PyTable>()
+  .add_get<get_length>      ("length")
+  .add_get<get_width>       ("width")
+  ;
 
 
 }  // anonymous namespace
@@ -268,7 +255,7 @@ Type PyTable::type_ = PyTypeObject{
   (iternextfunc)        nullptr,                            // tp_iternext
   (PyMethodDef*)        methods,                            // tp_methods
   (PyMemberDef*)        nullptr,                            // tp_members
-  (PyGetSetDef*)        tp_getset,                          // tp_getset
+  (PyGetSetDef*)        getsets,                            // tp_getset
   (_typeobject*)        nullptr,                            // tp_base
   (PyObject*)           nullptr,                            // tp_dict
   (descrgetfunc)        nullptr,                            // tp_descr_get

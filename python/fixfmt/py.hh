@@ -307,6 +307,24 @@ public:
 
 //------------------------------------------------------------------------------
 
+class Float
+  : public Object
+{
+public:
+
+  static bool Check(PyObject* obj)
+    { return PyFloat_Check(obj); }
+  static auto FromDouble(double val)
+    { return ref<Float>::take(PyFloat_FromDouble(val)); }
+
+  operator double()
+    { return PyFloat_AsDouble(this); }
+
+};
+
+
+//------------------------------------------------------------------------------
+
 class Module
   : public Object
 {

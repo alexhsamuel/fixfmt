@@ -61,35 +61,43 @@ auto methods = Methods<PyBool>()
 ;
 
 
-Object* get_pad_left(PyBool* const self, void* /* closure */)
+ref<Object> get_false(PyBool* const self, void* /* closure */)
 {
-  return py::Bool::from(self->fmt_->get_pad_left()).release();
+  return Unicode::from(self->fmt_->get_false());
 }
 
 
-Object* get_width(PyBool* const self, void* /* closure */)
+ref<Object> get_pad_left(PyBool* const self, void* /* closure */)
 {
-  return Long::FromLong(self->fmt_->get_width()).release();
+  return Bool::from(self->fmt_->get_pad_left());
 }
 
 
-PyGetSetDef const tp_getset[] = {
-  {
-    (char*)     "pad_left",                                 // name
-    (getter)    get_pad_left,                               // get
-    (setter)    nullptr,                                    // set
-    (char*)     nullptr,                                    // doc
-    (void*)     nullptr,                                    // closure
-  },
-  {
-    (char*)     "width",                                    // name
-    (getter)    get_width,                                  // get
-    (setter)    nullptr,                                    // set
-    (char*)     nullptr,                                    // doc
-    (void*)     nullptr,                                    // closure
-  },
-  GETSETDEF_END
-};
+ref<Object> get_size(PyBool* const self, void* /* closure */)
+{
+  return Long::FromLong(self->fmt_->get_size());
+}
+
+
+ref<Object> get_true(PyBool* const self, void* /* closure */)
+{
+  return Unicode::from(self->fmt_->get_true());
+}
+
+
+ref<Object> get_width(PyBool* const self, void* /* closure */)
+{
+  return Long::FromLong(self->fmt_->get_width());
+}
+
+
+auto getsets = GetSets<PyBool>()
+  .add_get<get_false>       ("false")
+  .add_get<get_pad_left>    ("pad_left")
+  .add_get<get_size>        ("get_size")
+  .add_get<get_true>        ("get_true")
+  .add_get<get_width>       ("get_width")
+  ;
 
 
 }  // anonymous namespace
@@ -126,7 +134,7 @@ Type PyBool::type_ = PyTypeObject{
   (iternextfunc)        nullptr,                            // tp_iternext
   (PyMethodDef*)        methods,                            // tp_methods
   (PyMemberDef*)        nullptr,                            // tp_members
-  (PyGetSetDef*)        tp_getset,                          // tp_getset
+  (PyGetSetDef*)        getsets,                            // tp_getset
   (_typeobject*)        nullptr,                            // tp_base
   (PyObject*)           nullptr,                            // tp_dict
   (descrgetfunc)        nullptr,                            // tp_descr_get

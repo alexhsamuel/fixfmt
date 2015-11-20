@@ -37,7 +37,6 @@ Internal:
   - pre-format categories (?)
 
 Cleanup:
-* add accessors to formatters, C++ and Python
 * banners
 - Use wrapped methods consistently.
 - check up on FIXMEs
