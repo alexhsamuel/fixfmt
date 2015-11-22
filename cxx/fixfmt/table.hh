@@ -13,7 +13,6 @@
 
 namespace fixfmt {
 
-
 using std::string;
 using std::unique_ptr;
 
