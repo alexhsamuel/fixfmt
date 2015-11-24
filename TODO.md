@@ -27,7 +27,7 @@ Fancy features:
 - print column offsets from some base instead of values
 
 Internal:
-- Speed up _choose_formatter_* with extension code.  See branch guess_types_cxx.
+- Speed up \_choose_formatter_* with extension code.  See branch guess_types_cxx.
 - Add wrap<> for Python functions other than Method.
 - Format into buffers of preallocated length (which must accommodate multibyte
   characters).
