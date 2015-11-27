@@ -383,7 +383,7 @@ class Table:
 
 
     def add_column(self, name, arr, *, fmt=None):
-        if self.__num_idx == len(self.__fmts):
+        if self.__num_idx > 0 and self.__num_idx == len(self.__fmts):
             self.add_string(self.__cfg.row.separator.index)
         elif len(self.__fmts) > 0:
             self.add_string(self.__cfg.row.separator.between)
@@ -414,10 +414,11 @@ class Table:
                 name = palide(
                     name, fmt.width, position=cfg.elide.position, left=left)
                 name = cfg.style.prefix + name + cfg.style.suffix
-                if i == self.__num_idx:
-                    name = sep.index + name
-                elif i > 0:
-                    name = sep.between + name
+                if i > 0:
+                    if i == self.__num_idx:
+                        name = sep.index + name
+                    else:
+                        name = sep.between + name
                 return name
 
             header = sep.start + "".join(
@@ -437,7 +438,7 @@ class Table:
             print(
                   sep.start
                 + "".join( 
-                      (sep.index if i == self.__num_idx
+                      (sep.index if i > 0 and i == self.__num_idx
                        else sep.between if i > 0
                        else "")
                     + cfg.line * f.width 
