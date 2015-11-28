@@ -45,6 +45,9 @@ ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
   TYPE precision_scale = 1;
   TYPE tolerance = fixfmt::pow10(-max_precision) / 2;
 
+  // Note: Weird.  LLVM 6.1.0 on OSX vectorizes this loop only if the precision
+  // logic is _present_, with the result that it runs _faster_ than without.
+
   for (size_t i = 0; i < length; ++i) {
     TYPE const val = array[i];
     // Flag NaN.
