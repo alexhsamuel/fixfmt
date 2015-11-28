@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cmath>
 #include <string>
 
 #include "fixfmt/text.hh"
@@ -12,6 +13,87 @@ using std::string;
 // FIXME: Add docstrings.
 
 namespace {
+
+template<typename TYPE>
+ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
+{
+  static char const* arg_names[] = {"buf", "max_precision", nullptr};
+  PyObject* array_obj;
+  int max_precision;
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, "Oi", arg_names, &array_obj, &max_precision);
+
+  BufferRef buffer(array_obj, PyBUF_ND);
+  if (buffer->ndim != 1)
+    throw TypeError("not a one-dimensional array");
+  if (buffer->itemsize != sizeof(TYPE))
+    throw TypeError("wrong itemsize");
+  TYPE const* const array = (TYPE const* const) buffer->buf;
+  size_t const length = buffer->shape[0];
+
+  bool has_nan = false;
+  bool has_pos_inf = false;
+  bool has_neg_inf = false;
+  size_t num = 0;
+  TYPE min = std::numeric_limits<TYPE>::max();
+  TYPE max = std::numeric_limits<TYPE>::min();
+
+  // Estimate precision truncating 'precision' digits to the right of the
+  // decimal point, and comparing the result to 'tolerance'.  
+  // FIXME: Might not be correct for long double.
+  int precision = 0;
+  TYPE precision_scale = 1;
+  TYPE tolerance = fixfmt::pow10(-max_precision) / 2;
+
+  for (size_t i = 0; i < length; ++i) {
+    TYPE const val = array[i];
+    // Flag NaN.
+    if (std::isnan(val)) {
+      has_nan = true;
+      continue;
+    }
+    // Flag positive and negative infinity.
+    if (std::isinf(val)) {
+      if (val > 0)
+        has_pos_inf = true;
+      else
+        has_neg_inf = true;
+      continue;
+    }
+    // Keep count of non-NaN/infinity values.
+    ++num;
+    // Compute min and max, excluding NaN and infinity.
+    if (val < min)
+      min = val;
+    if (val > max)
+      max = val;
+    // Expand precision if necessary to accommodate additional fractional 
+    // digits, up to the maximum specified precision.
+    while (precision < max_precision) {
+      TYPE const scaled = std::abs(val) * precision_scale;
+      TYPE const remainder = scaled - (long) (scaled + tolerance);
+      if (remainder < tolerance) 
+        break;
+      else {
+        ++precision;
+        precision_scale *= 10;
+        tolerance *= 10;
+      }
+    }
+  }
+
+  // FIXME: Wrap this better.
+  PyObject* result = PyTuple_New(7);
+  PyTuple_SET_ITEM(result, 0, Bool::from(has_nan).release());
+  PyTuple_SET_ITEM(result, 1, Bool::from(has_pos_inf).release());
+  PyTuple_SET_ITEM(result, 2, Bool::from(has_neg_inf).release());
+  PyTuple_SET_ITEM(result, 3, Long::FromLong(num).release());
+  PyTuple_SET_ITEM(result, 4, Float::FromDouble(min).release());
+  PyTuple_SET_ITEM(result, 5, Float::FromDouble(max).release());
+  PyTuple_SET_ITEM(result, 6, Long::FromLong(precision).release());
+  return ref<Tuple>::take(result);
+}
+
 
 ref<Object> center(Module* module, Tuple* args, Dict* kw_args)
 {
@@ -110,11 +192,13 @@ ref<Object> string_length(Module* module, Tuple* args, Dict* kw_args)
 Methods<Module>& add_functions(Methods<Module>& methods)
 {
   methods
-    .add<center>            ("center")
-    .add<elide>             ("elide")
-    .add<pad>               ("pad")
-    .add<palide>            ("palide")
-    .add<string_length>     ("string_length")
+    .add<analyze_float<double>> ("analyze_double")
+    .add<analyze_float<float>>  ("analyze_float")
+    .add<center>                ("center")
+    .add<elide>                 ("elide")
+    .add<pad>                   ("pad")
+    .add<palide>                ("palide")
+    .add<string_length>         ("string_length")
     ;
   return methods;
 }
