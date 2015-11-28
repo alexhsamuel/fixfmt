@@ -41,7 +41,7 @@ def from_dataframe(df, cfg, *, names=pln.container.ALL):
     return tbl
 
 
-def print_dataframe(df, cfg, *, names=pln.container.ALL):
+def print_dataframe(df, cfg=table.DEFAULT_CFG, *, names=pln.container.ALL):
     tbl = from_dataframe(df, cfg, names=names)
     tbl.print()
 
