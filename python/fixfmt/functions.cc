@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cmath>
+#include <limits>
 #include <string>
 
 #include "fixfmt/text.hh"
