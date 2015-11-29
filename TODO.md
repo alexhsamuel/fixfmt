@@ -1,6 +1,7 @@
-Things to do:  (* for MVP)
+Things to do:  (* for MVP) (= next)
 
-- real support for datetime types
+= real support for datetime types
+= optionally, choose format for visible lines only
 - _cascading_ config for formatters
 - format methods, not just print
 - np Array formatter
