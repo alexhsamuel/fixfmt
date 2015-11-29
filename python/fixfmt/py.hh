@@ -385,65 +385,6 @@ public:
 
 //------------------------------------------------------------------------------
 
-template<Py_ssize_t LEN>
-class TupleBuilder
-{
-public:
-
-  TupleBuilder(TupleBuilder<LEN - 1> last, baseref&& ref) 
-    : last_(last),
-      obj_(ref.release()) 
-  {}
-
-  ~TupleBuilder() { assert(obj_ == nullptr); }
-
-  auto operator<<(baseref&& ref) const
-  {
-    return TupleBuilder<LEN + 1>(*this, std::move(ref));
-  }
-
-  operator ref<Object>()
-  {
-    auto tuple = ref<Tuple>::take(PyTuple_New(LEN));
-    initialize(tuple);
-    return tuple;
-  }
-
-  void initialize(PyObject* tuple)
-  {
-    assert(obj_ != nullptr);
-    last_.initialize(tuple);
-    PyTuple_SET_ITEM(tuple, LEN - 1, obj_);
-    obj_ = nullptr;
-  }
-
-private:
-
-  TupleBuilder<LEN - 1> last_;
-  PyObject* obj_;
-
-};
-
-
-template<>
-class TupleBuilder<0>
-{
-public:
-
-  TupleBuilder() {}
-  
-  auto operator<<(baseref&& ref) const 
-  { 
-    return TupleBuilder<1>(*this, std::move(ref)); 
-  }
-
-  operator ref<Object>() const { return ref<Tuple>::take(PyTuple_New(0)); }
-
-  void initialize(PyObject* tuple) const {}
-
-};
-
-
 class Tuple
   : public Object
 {
@@ -471,7 +412,73 @@ public:
     return tuple;
   }
 
-  static TupleBuilder<0> builder;
+private:
+
+  template<Py_ssize_t LEN>
+  class Builder
+  {
+  public:
+
+    Builder(Builder<LEN - 1> last, baseref&& ref) 
+      : last_(last),
+        obj_(ref.release()) 
+    {}
+
+    ~Builder() { assert(obj_ == nullptr); }
+
+    auto operator<<(baseref&& ref) const
+    {
+      return Builder<LEN + 1>(*this, std::move(ref));
+    }
+
+    operator ref<Tuple>()
+    {
+      auto tuple = ref<Tuple>::take(PyTuple_New(LEN));
+      initialize(tuple);
+      return tuple;
+    }
+
+    void initialize(PyObject* tuple)
+    {
+      assert(obj_ != nullptr);
+      last_.initialize(tuple);
+      PyTuple_SET_ITEM(tuple, LEN - 1, obj_);
+      obj_ = nullptr;
+    }
+
+  private:
+
+    Builder<LEN - 1> last_;
+    PyObject* obj_;
+
+  };
+
+
+public:
+
+  static Builder<0> builder;
+
+};
+
+
+template<>
+class Tuple::Builder<0>
+{
+public:
+
+  Builder() {}
+
+  auto operator<<(baseref&& ref) const 
+  { 
+    return Builder<1>(*this, std::move(ref)); 
+  }
+
+  operator ref<Tuple>() const 
+  { 
+    return ref<Tuple>::take(PyTuple_New(0)); 
+  }
+
+  void initialize(PyObject* tuple) const {}
 
 };
 

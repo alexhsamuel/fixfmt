@@ -86,18 +86,7 @@ ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
     }
   }
 
-  // FIXME: Wrap this better.
-  // auto result = Tuple::New(7);
-  // result->initialize(0, Bool::from(has_nan));
-  // result->initialize(1, Bool::from(has_pos_inf));
-  // result->initialize(2, Bool::from(has_neg_inf));
-  // result->initialize(3, Long::FromLong(num));
-  // result->initialize(4, Float::FromDouble(min));
-  // result->initialize(5, Float::FromDouble(max));
-  // result->initialize(6, Long::FromLong(precision));
-  // return result;
-
-  return Tuple::builder
+  return (ref<Tuple>) (Tuple::builder
     << Bool::from(has_nan)
     << Bool::from(has_pos_inf)
     << Bool::from(has_neg_inf)
@@ -105,7 +94,7 @@ ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
     << Float::FromDouble(min)
     << Float::FromDouble(max)
     << Long::FromLong(precision)
-    ;
+  );
 }
 
 
