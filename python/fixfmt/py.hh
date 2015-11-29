@@ -414,45 +414,10 @@ public:
 
 private:
 
-  template<Py_ssize_t LEN>
-  class Builder
-  {
-  public:
-
-    Builder(Builder<LEN - 1> last, baseref&& ref) 
-      : last_(last),
-        obj_(ref.release()) 
-    {}
-
-    ~Builder() { assert(obj_ == nullptr); }
-
-    auto operator<<(baseref&& ref) const
-    {
-      return Builder<LEN + 1>(*this, std::move(ref));
-    }
-
-    operator ref<Tuple>()
-    {
-      auto tuple = ref<Tuple>::take(PyTuple_New(LEN));
-      initialize(tuple);
-      return tuple;
-    }
-
-    void initialize(PyObject* tuple)
-    {
-      assert(obj_ != nullptr);
-      last_.initialize(tuple);
-      PyTuple_SET_ITEM(tuple, LEN - 1, obj_);
-      obj_ = nullptr;
-    }
-
-  private:
-
-    Builder<LEN - 1> last_;
-    PyObject* obj_;
-
-  };
-
+  /**
+   * Recursive template for building fixed-sized tuples.
+   */
+  template<Py_ssize_t LEN> class Builder;
 
 public:
 
@@ -461,6 +426,56 @@ public:
 };
 
 
+// FIXME: The syntax for using this isn't great.
+template<Py_ssize_t LEN>
+class Tuple::Builder
+{
+public:
+
+  Builder(Builder<LEN - 1> last, baseref&& ref) 
+    : last_(last),
+      obj_(ref.release()) 
+  {}
+
+  ~Builder() { assert(obj_ == nullptr); }
+
+  /**
+   * Takes 'ref' to append the end of the tuple.
+   */
+  auto operator<<(baseref&& ref) const
+  {
+    return Builder<LEN + 1>(*this, std::move(ref));
+  }
+
+  /**
+   * Builds the tuple.
+   */
+  operator ref<Tuple>()
+  {
+    auto tuple = ref<Tuple>::take(PyTuple_New(LEN));
+    initialize(tuple);
+    return tuple;
+  }
+
+  void initialize(PyObject* tuple)
+  {
+    assert(obj_ != nullptr);
+    last_.initialize(tuple);
+    PyTuple_SET_ITEM(tuple, LEN - 1, obj_);
+    obj_ = nullptr;
+  }
+
+private:
+
+  Builder<LEN - 1> last_;
+  PyObject* obj_;
+
+};
+
+
+/**
+ * Base case for recursive tuple builder template.
+ */
 template<>
 class Tuple::Builder<0>
 {
