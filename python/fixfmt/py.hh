@@ -136,8 +136,43 @@ inline PyObject* decref(PyObject* obj)
 }
 
 
+//------------------------------------------------------------------------------
+
+/**
+ * Type-generic base class for references.
+ *
+ * An instance of this class owns a reference to a Python object.
+ */
+class baseref
+{
+public:
+
+  ~baseref() 
+  {
+    clear();
+  }
+
+  Object* release()
+  {
+    auto obj = obj_;
+    obj_ = nullptr;
+    return obj;
+  }
+
+  void clear();
+
+protected:
+
+  baseref(Object* obj) : obj_(obj) {}
+
+  Object* obj_;
+
+};
+
+
 template<typename T>
 class ref
+  : public baseref
 {
 public:
 
@@ -172,45 +207,38 @@ public:
    * Default ctor: null reference.  
    */
   ref()
-    : obj_(nullptr) {}
+    : baseref(nullptr) {}
 
   /** 
    * Move ctor.  
    */
   ref(ref<T>&& ref)
-    : obj_(ref.release()) {}
+    : baseref(ref.release()) {}
 
   /** 
    * Move ctor from another ref type.  
    */
   template<typename U>
   ref(ref<U>&& ref)
-    : obj_(ref.release()) {}
-
-  ~ref()
-    { clear(); }
+    : baseref(ref.release()) {}
 
   void operator=(ref<T>&& ref)
     { clear(); obj_ = ref.release(); }
 
   operator T*() const
-    { return obj_; }
+    { return (T*) obj_; }
 
   T* operator->() const
-    { return obj_; }
+    { return (T*) obj_; }
 
   T* release()
-    { auto obj = obj_; obj_ = nullptr; return obj; }
-
-  void clear()
-    { if (obj_ != nullptr) decref(obj_); }
+    { return (T*) baseref::release(); }
 
 private:
 
   ref(T* obj)
-    : obj_(obj) {}
-
-  T* obj_;
+    : baseref(obj) 
+  {}
 
 };
 
@@ -427,6 +455,13 @@ inline std::ostream& operator<<(std::ostream& os, ref<Unicode>& ref)
 
 
 //==============================================================================
+
+inline void baseref::clear()
+{
+  if (obj_ != nullptr)
+    decref(obj_);
+}
+
 
 inline ref<Long>
 Object::Long()
