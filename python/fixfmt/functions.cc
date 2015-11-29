@@ -87,15 +87,25 @@ ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
   }
 
   // FIXME: Wrap this better.
-  PyObject* result = PyTuple_New(7);
-  PyTuple_SET_ITEM(result, 0, Bool::from(has_nan).release());
-  PyTuple_SET_ITEM(result, 1, Bool::from(has_pos_inf).release());
-  PyTuple_SET_ITEM(result, 2, Bool::from(has_neg_inf).release());
-  PyTuple_SET_ITEM(result, 3, Long::FromLong(num).release());
-  PyTuple_SET_ITEM(result, 4, Float::FromDouble(min).release());
-  PyTuple_SET_ITEM(result, 5, Float::FromDouble(max).release());
-  PyTuple_SET_ITEM(result, 6, Long::FromLong(precision).release());
-  return ref<Tuple>::take(result);
+  // auto result = Tuple::New(7);
+  // result->initialize(0, Bool::from(has_nan));
+  // result->initialize(1, Bool::from(has_pos_inf));
+  // result->initialize(2, Bool::from(has_neg_inf));
+  // result->initialize(3, Long::FromLong(num));
+  // result->initialize(4, Float::FromDouble(min));
+  // result->initialize(5, Float::FromDouble(max));
+  // result->initialize(6, Long::FromLong(precision));
+  // return result;
+
+  return Tuple::builder
+    << Bool::from(has_nan)
+    << Bool::from(has_pos_inf)
+    << Bool::from(has_neg_inf)
+    << Long::FromLong(num)
+    << Float::FromDouble(min)
+    << Float::FromDouble(max)
+    << Long::FromLong(precision)
+    ;
 }
 
 

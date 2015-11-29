@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <initializer_list>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -13,6 +14,7 @@ namespace py {
 
 class Long;
 class Object;
+class Tuple;
 class Unicode;
 
 // FIXME: Remove this.
@@ -383,6 +385,65 @@ public:
 
 //------------------------------------------------------------------------------
 
+template<Py_ssize_t LEN>
+class TupleBuilder
+{
+public:
+
+  TupleBuilder(TupleBuilder<LEN - 1> last, baseref&& ref) 
+    : last_(last),
+      obj_(ref.release()) 
+  {}
+
+  ~TupleBuilder() { assert(obj_ == nullptr); }
+
+  auto operator<<(baseref&& ref) const
+  {
+    return TupleBuilder<LEN + 1>(*this, std::move(ref));
+  }
+
+  operator ref<Object>()
+  {
+    auto tuple = ref<Tuple>::take(PyTuple_New(LEN));
+    initialize(tuple);
+    return tuple;
+  }
+
+  void initialize(PyObject* tuple)
+  {
+    assert(obj_ != nullptr);
+    last_.initialize(tuple);
+    PyTuple_SET_ITEM(tuple, LEN - 1, obj_);
+    obj_ = nullptr;
+  }
+
+private:
+
+  TupleBuilder<LEN - 1> last_;
+  PyObject* obj_;
+
+};
+
+
+template<>
+class TupleBuilder<0>
+{
+public:
+
+  TupleBuilder() {}
+  
+  auto operator<<(baseref&& ref) const 
+  { 
+    return TupleBuilder<1>(*this, std::move(ref)); 
+  }
+
+  operator ref<Object>() const { return ref<Tuple>::take(PyTuple_New(0)); }
+
+  void initialize(PyObject* tuple) const {}
+
+};
+
+
 class Tuple
   : public Object
 {
@@ -390,6 +451,27 @@ public:
 
   static bool Check(PyObject* obj)
     { return PyTuple_Check(obj); }
+
+  static auto New(Py_ssize_t len)
+    { return ref<Tuple>::take(PyTuple_New(len)); }
+
+  void initialize(Py_ssize_t index, baseref&& ref)
+  {
+    PyTuple_SET_ITEM(this, index, ref.release());
+  }
+
+  // FIXME: Remove?
+  static auto from(std::initializer_list<PyObject*> items) 
+  {
+    auto len = items.size();
+    auto tuple = New(len);
+    Py_ssize_t index = 0;
+    for (auto item : items) 
+      PyTuple_SET_ITEM((PyObject*) tuple, index++, item);
+    return tuple;
+  }
+
+  static TupleBuilder<0> builder;
 
 };
 
