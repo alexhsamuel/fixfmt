@@ -94,9 +94,9 @@ ref<Object> get_width(PyBool* const self, void* /* closure */)
 auto getsets = GetSets<PyBool>()
   .add_get<get_false>       ("false")
   .add_get<get_pad_left>    ("pad_left")
-  .add_get<get_size>        ("get_size")
-  .add_get<get_true>        ("get_true")
-  .add_get<get_width>       ("get_width")
+  .add_get<get_size>        ("size")
+  .add_get<get_true>        ("true")
+  .add_get<get_width>       ("width")
   ;
 
 
