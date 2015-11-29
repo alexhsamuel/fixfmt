@@ -205,10 +205,10 @@ def _get_num_digits(value):
 
 
 def _choose_formatter_bool(values, cfg):
-    true    = cfg.formatters.bool.true
-    false   = cfg.formatters.bool.false
+    true    = cfg.bool.true
+    false   = cfg.bool.false
     size    = max(
-        cfg.formatters.min_width,
+        cfg.min_width,
         string_length(true),
         string_length(false),
     )
@@ -216,50 +216,36 @@ def _choose_formatter_bool(values, cfg):
 
 
 def _choose_formatter_float(values, cfg):
-    # FIXME: This could be done with a single pass more efficiently.
-    inf         = cfg.formatters.float.inf
-    nan         = cfg.formatters.float.nan
-    # Remove NaN and infinite values.
-    is_nan      = np.isnan(values)
-    has_nan     = is_nan.any()
-    is_inf      = np.isinf(values)
-    has_inf     = is_inf.any()
-    has_neg_inf = (values[is_inf] < 0).any()
-    vals        = values[~(is_nan | is_inf)]
+    # Analyze the array to determine relevant properties.
+    # FIXME: Push down type check into C++.
+    analyze = (     _ext.analyze_double if values.dtype.itemsize == 8
+               else _ext.analyze_float)
+    has_nan, has_pos_inf, has_neg_inf, num_vals, min_val, max_val, precision = \
+      analyze(values, cfg.float.max_precision)
 
+    inf = cfg.float.inf
+    nan = cfg.float.nan
     special_width = max(
         string_length(nan) if has_nan else 0,
-        string_length(inf) if has_inf else 0)
+        string_length(inf) if has_pos_inf or has_neg_inf else 0)
 
-    if len(vals) == 0:
+    if num_vals == 0:
         # No values left.
         return Number(max(1, special_width))
 
-    # Determine the scale.
-    min_val = vals.min()
-    max_val = vals.max()
     sign    = "-" if has_neg_inf or min_val < 0 else " "
     size    = _get_num_digits(max(abs(min_val), abs(max_val)))
-
-    # Try progressively higher precision until rounding won't leave any
-    # residuals larger the maximum pecision.
-    precision_min   = cfg.formatters.float.min_precision
-    precision_min   = 0 if precision_min is None else precision_min
-    precision_min   = max(precision_min, special_width - size - 1)
-    precision_max   = cfg.formatters.float.max_precision
-    tolerance       = (10 ** -precision_max) / 2
-    for precision in range(precision_min, precision_max + 1):
-        if (abs(np.round(vals, precision) - vals) < tolerance).all():
-            break
-    if cfg.formatters.float.min_precision is None and precision == 0:
-        precision = None
+    if cfg.float.min_precision is None:
+        precision = None if precision == 0 else precision
+    else:
+        precision = max(cfg.float.min_precision, precision)
 
     # Make the formatter.
     fmt = Number(size, precision, sign=sign, nan=nan, inf=inf)
 
-    if fmt.width < cfg.formatters.min_width:
+    if fmt.width < cfg.min_width:
         # Expand size to achieve minimum width.
-        size += cfg.formatters.min_width - fmt.width
+        size += cfg.min_width - fmt.width
         fmt = Number(size, precision, sign=sign, nan=nan, inf=inf)
 
     return fmt
@@ -273,28 +259,28 @@ def _choose_formatter_int(values, cfg):
     max_val = values.max()
     sign    = " " if min_val >= 0 else "-"
     size    = _get_num_digits(max(abs(min_val), abs(max_val)))
-    size    = max(size, cfg.formatters.min_width - (sign != " "))
+    size    = max(size, cfg.min_width - (sign != " "))
 
     return Number(size, sign=sign)
 
 
 def _choose_formatter_str(values, cfg):
     size = np.vectorize(len)(values).max()
-    size = max(size, cfg.formatters.str.min_size, cfg.formatters.min_width)
-    size = min(size, cfg.formatters.str.max_size)
+    size = max(size, cfg.str.min_size, cfg.min_width)
+    size = min(size, cfg.str.max_size)
     return String(size)
 
 
 def _get_default_formatter(arr, cfg):
     dtype = arr.dtype
     if dtype.kind == "b":
-        return _choose_formatter_bool(arr, cfg=cfg)
+        return _choose_formatter_bool(arr, cfg=cfg.formatters)
     elif dtype.kind == "f":
-        return _choose_formatter_float(arr, cfg=cfg)
+        return _choose_formatter_float(arr, cfg=cfg.formatters)
     elif dtype.kind == "i":
-        return _choose_formatter_int(arr, cfg=cfg)
+        return _choose_formatter_int(arr, cfg=cfg.formatters)
     elif dtype.kind == "O":
-        return _choose_formatter_str(arr, cfg=cfg)
+        return _choose_formatter_str(arr, cfg=cfg.formatters)
     else:
         raise TypeError("no default formatter for {}".format(dtype))
 
