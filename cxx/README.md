@@ -118,7 +118,8 @@ produces
 
 If the precision is 0, the decimal point is included but without any fractional
 digits.  If the precision is `Number::PRECISION_NONE`, the decimal point is
-omitted and the number is formatted as an integer.
+omitted and the number is formatted as an integer.  Numbers are rounded
+half-to-even ("bankers' rounding").
 
 ```c++
 std::cout << "[" << fixfmt::Number(5)(x) << "]\n";
