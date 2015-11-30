@@ -4,9 +4,11 @@ using namespace py;
 
 //------------------------------------------------------------------------------
 
-auto ref<Bool> 
+ref<Bool> const
 Bool::TRUE = ref<Bool>::of(Py_True);
 
-auto ref<Bool>
+ref<Bool> const
 Bool::FALSE = ref<Bool>::of(Py_False);
 
+Tuple::Builder<0> const
+Tuple::builder;

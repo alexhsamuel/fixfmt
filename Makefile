@@ -1,10 +1,16 @@
+ifeq ($(OS),Windows_NT)
+  UNAME	       := Windows
+else
+  UNAME	       := $(shell uname -s)
+endif
+
 GTEST_DIR       = ./googletest/googletest
 GTEST_INCDIR    = $(GTEST_DIR)/include
 GTEST_LIB       = $(GTEST_DIR)/make/gtest_main.a
 
 CXX            := $(CXX) -std=c++14
 CPPFLAGS        = -I./cxx
-CXXFLAGS        = -fPIC -g
+CXXFLAGS        = -fPIC -g -Wall
 LDLIBS          = -lpthread
 
 SOURCES         = $(wildcard cxx/fixfmt/*.cc) \
@@ -25,6 +31,21 @@ TEST_LIBS       = $(GTEST_LIB) $(LIB)
 
 PYTHON	    	= python3
 PYTEST	    	= py.test
+PYTHON_CONFIG	= python3-config
+PY_PREFIX    	= $(shell $(PYTHON_CONFIG) --prefix)
+PY_CPPFLAGS  	= $(CPPFLAGS) $(shell $(PYTHON_CONFIG) --includes)
+PY_CXXFLAGS  	= $(CXXFLAGS) -DNDEBUG -fno-strict-aliasing -fwrapv
+PY_LDFLAGS   	= -L$(PY_PREFIX)/lib
+ifeq ($(UNAME),Darwin)
+  PY_LDFLAGS   += -bundle -undefined dynamic_lookup
+else ifeq ($(UNAME),Linux)
+  PY_LDFLAGS   += -shared
+endif
+PY_LDLIBS	= 
+PY_SOURCES   	= $(wildcard python/fixfmt/*.cc)
+PY_DEPS	    	= $(PY_SOURCES:%.cc=%.dd)
+PY_OBJS	    	= $(PY_SOURCES:%.cc=%.o)
+PY_EXTMOD	= python/fixfmt/_ext.so
 
 #-------------------------------------------------------------------------------
 
@@ -43,7 +64,8 @@ testclean:		testclean-cxx testclean-python
 #-------------------------------------------------------------------------------
 # C++
 
-$(DEPS): %.dd: 		%.cc
+$(DEPS): \
+%.dd: 		%.cc
 	@echo "generating $@"; set -e; \
 	$(CXX) -MM $(CPPFLAGS) $< | sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@
 
@@ -83,21 +105,38 @@ $(TEST_OKS): \
 # Python
 
 .PHONY: python
-python:
-	cd python; $(PYTHON) setup.py build_ext --inplace
+python:			$(PY_EXTMOD)
 
 .PHONY: clean-python
 clean-python:
-	rm -rf python/build python/fixfmt/*.so
+	rm -rf $(PY_DEPS) $(PY_OBJS) $(PY_EXTMOD)
+
+$(PY_DEPS): \
+%.dd: 		    	%.cc
+	$(CXX) -MM $(PY_CPPFLAGS) $< | sed 's,^\(.*\)\.o:,python/fixfmt/\1.o:,g' > $@
+
+$(PY_OBJS): \
+%.o:			%.cc
+	$(CXX) $(PY_CPPFLAGS) $(PY_CXXFLAGS) -c $< -o $@
+
+$(PY_EXTMOD):		$(PY_OBJS) $(LIB)
+	$(CXX) $(PY_LDFLAGS) $^ $(PY_LDLIBS) -o $@
 
 .PHONY: test-python
-test-python: 
+test-python: 		$(PY_EXTMOD)
 	$(PYTEST) python
 
 .PHONY: testclean-python
 testclean-python:
 
+# For compatibility and testing.
+.PHONY: python-setuptools
+python-setuptools:	$(LIB)
+	cd python; $(PYTHON) setup.py build_ext --inplace
+
 #-------------------------------------------------------------------------------
 
-include $(DEPS) $(TEST_DEPS)
+include $(DEPS) 
+include $(TEST_DEPS) 
+include $(PY_DEPS)
 

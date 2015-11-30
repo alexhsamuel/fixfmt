@@ -1,3 +1,8 @@
+#===============================================================================
+# NOTE: This is not the primary build mechanism; it's provided for reference,
+# compatibility, and debugging only.  See ../Makefile for build.
+#===============================================================================
+
 from   glob import glob
 import os
 from   setuptools import setup, Extension
