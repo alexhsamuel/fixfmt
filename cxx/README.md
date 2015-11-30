@@ -13,8 +13,6 @@ formatting any value.  Use the overloaded `operator()` to format a value.
 All formatters have a `get_width()` accessor, which returns the formatted width
 of any value formatted by that formatter.
 
-See the [unit tests](../test/) for additional examples.
-
 
 ## Booleans
 
@@ -159,3 +157,4 @@ either `Number::PAD_SPACE` or `Number::PAD_ZERO`.
 cannot be formatted, for instance if its integral part exceeds the capacity of
 the format size.
 
+See the [unit tests](../test/test_number.cc) for additional examples.
