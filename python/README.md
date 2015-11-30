@@ -45,7 +45,7 @@ dataframe formatting routines.
    2 | Euler's number  2.7182818
 ```
 
-This function takes a second configuration argument, which may be customed to
+This function takes a second configuration argument, which may be customized to
 adjust most aspects of the formatting.  For example, an alternate configuration
 uses [Unicode box drawing characters](http://unicode.org/charts/PDF/U2500.pdf)
 to surround the table.
