@@ -76,8 +76,8 @@ string Number::operator()(double const val) const
       precision,
       buf, sizeof(buf),
       &sign, &length, &decimal_pos);
-    // FIXME: Why are trailing zeros being suppressed?  Can we change this, as we
-    // will just add them later?
+    // FIXME: Why are trailing zeros being suppressed?  Can we change this, as
+    // we will just add them later?
     // assert(length - decimal_pos == precision);
     assert(length - decimal_pos <= precision);
 
