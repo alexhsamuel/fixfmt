@@ -13,6 +13,8 @@ formatting any value.  Use the overloaded `operator()` to format a value.
 All formatters have a `get_width()` accessor, which returns the formatted width
 of any value formatted by that formatter.
 
+See the [unit tests](../test/) for additional examples.
+
 
 ## Booleans
 
