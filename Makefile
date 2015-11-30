@@ -26,15 +26,15 @@ TEST_LIBS       = $(GTEST_LIB) $(LIB)
 PYTHON	    	= python3
 PYTEST	    	= py.test
 PYTHON_CONFIG	= python3-config
-PYPREFIX    	= $(shell $(PYTHON_CONFIG) --prefix)
-PYCPPFLAGS  	= $(CPPFLAGS) $(shell $(PYTHON_CONFIG) --includes)
-PYCXXFLAGS  	= $(CXXFLAGS) -DNDEBUG -fno-strict-aliasing -fwrapv
-PYLDFLAGS   	= -L$(PYPREFIX)/lib -bundle -undefined dynamic_lookup
-PYLDLIBS	= 
-PYSOURCES   	= $(wildcard python/fixfmt/*.cc)
-PYDEPS	    	= $(PYSOURCES:%.cc=%.dd)
-PYOBJS	    	= $(PYSOURCES:%.cc=%.o)
-PYLIB	    	= python/fixfmt/_ext.so
+PY_PREFIX    	= $(shell $(PYTHON_CONFIG) --prefix)
+PY_CPPFLAGS  	= $(CPPFLAGS) $(shell $(PYTHON_CONFIG) --includes)
+PY_CXXFLAGS  	= $(CXXFLAGS) -DNDEBUG -fno-strict-aliasing -fwrapv
+PY_LDFLAGS   	= -L$(PY_PREFIX)/lib -bundle -undefined dynamic_lookup
+PY_LDLIBS	= 
+PY_SOURCES   	= $(wildcard python/fixfmt/*.cc)
+PY_DEPS	    	= $(PY_SOURCES:%.cc=%.dd)
+PY_OBJS	    	= $(PY_SOURCES:%.cc=%.o)
+PY_EXTMOD	= python/fixfmt/_ext.so
 
 #-------------------------------------------------------------------------------
 
@@ -94,27 +94,25 @@ $(TEST_OKS): \
 # Python
 
 .PHONY: python
-python:			$(PYLIB)
+python:			$(PY_EXTMOD)
 
 .PHONY: clean-python
 clean-python:
-	rm -rf $(PYDEPS) $(PYOBJS) $(PYLIB)
+	rm -rf $(PY_DEPS) $(PY_OBJS) $(PY_EXTMOD)
 
-$(PYDEPS): \
+$(PY_DEPS): \
 %.dd: 		    	%.cc
-	$(CXX) -MM $(PYCPPFLAGS) $< | sed 's,^\(.*\)\.o:,python/fixfmt/\1.o:,g' > $@
-	# @echo "generating $@"; set -e; \
-	# $(CXX) -MM $(PYCPPFLAGS) $< | sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@
+	$(CXX) -MM $(PY_CPPFLAGS) $< | sed 's,^\(.*\)\.o:,python/fixfmt/\1.o:,g' > $@
 
-$(PYOBJS): \
+$(PY_OBJS): \
 %.o:			%.cc
-	$(CXX) $(PYCPPFLAGS) $(PYCXXFLAGS) -c $< -o $@
+	$(CXX) $(PY_CPPFLAGS) $(PY_CXXFLAGS) -c $< -o $@
 
-$(PYLIB):		$(LIB) $(PYOBJS)
-	$(CXX) $(PYLDFLAGS) $^ $(PYLDLIBS) -o $@
+$(PY_EXTMOD):		$(LIB) $(PY_OBJS)
+	$(CXX) $(PY_LDFLAGS) $^ $(PY_LDLIBS) -o $@
 
 .PHONY: test-python
-test-python: 		$(PYLIB)
+test-python: 		$(PY_EXTMOD)
 	$(PYTEST) python
 
 .PHONY: testclean-python
@@ -124,5 +122,5 @@ testclean-python:
 
 include $(DEPS) 
 include $(TEST_DEPS) 
-include $(PYDEPS)
+include $(PY_DEPS)
 
