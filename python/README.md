@@ -47,7 +47,8 @@ dataframe formatting routines.
 
 This function takes a second configuration argument, which may be customed to
 adjust most aspects of the formatting.  For example, an alternate configuration
-uses Unicode box drawing characters to surround the table.
+uses [Unicode box drawing characters](http://unicode.org/charts/PDF/U2500.pdf)
+to surround the table.
 
 ```
 >>> fixfmt.pandas.print_dataframe(df, fixfmt.table.UNICODE_BOX_CFG)
