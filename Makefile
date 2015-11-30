@@ -1,3 +1,9 @@
+ifeq ($(OS),Windows_NT)
+  UNAME	       := Windows
+else
+  UNAME	       := $(shell uname -s)
+endif
+
 GTEST_DIR       = ./googletest/googletest
 GTEST_INCDIR    = $(GTEST_DIR)/include
 GTEST_LIB       = $(GTEST_DIR)/make/gtest_main.a
@@ -29,7 +35,12 @@ PYTHON_CONFIG	= python3-config
 PY_PREFIX    	= $(shell $(PYTHON_CONFIG) --prefix)
 PY_CPPFLAGS  	= $(CPPFLAGS) $(shell $(PYTHON_CONFIG) --includes)
 PY_CXXFLAGS  	= $(CXXFLAGS) -DNDEBUG -fno-strict-aliasing -fwrapv
-PY_LDFLAGS   	= -L$(PY_PREFIX)/lib -bundle -undefined dynamic_lookup
+PY_LDFLAGS   	= -L$(PY_PREFIX)/lib
+ifeq ($(UNAME),Darwin)
+  PY_LDFLAGS   += -bundle -undefined dynamic_lookup
+else ifeq ($(UNAME),Linux)
+  PY_LDFLAGS   += -shared
+endif
 PY_LDLIBS	= 
 PY_SOURCES   	= $(wildcard python/fixfmt/*.cc)
 PY_DEPS	    	= $(PY_SOURCES:%.cc=%.dd)
