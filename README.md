@@ -5,7 +5,7 @@ fixed-width fields.  Useful for printing tabular data and similar.
 
 - A single formatter formats any value with the same width: useful for 
   formatting tables, arrays, forms, etc.
-- The width is measured in Unicode code points: supports UTF-8 propertly
+- The width is measured in Unicode code points: supports UTF-8 properly
   (but not combining characters and other fancy features).
 - [ANSI terminal escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code)
   are ignored when counting width, so they may be used to format output
