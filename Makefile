@@ -4,7 +4,7 @@ GTEST_LIB       = $(GTEST_DIR)/make/gtest_main.a
 
 CXX            := $(CXX) -std=c++14
 CPPFLAGS        = -I./cxx
-CXXFLAGS        = -fPIC -g
+CXXFLAGS        = -fPIC -g -Wall
 LDLIBS          = -lpthread
 
 SOURCES         = $(wildcard cxx/fixfmt/*.cc) \
@@ -25,6 +25,16 @@ TEST_LIBS       = $(GTEST_LIB) $(LIB)
 
 PYTHON	    	= python3
 PYTEST	    	= py.test
+PYTHON_CONFIG	= python3-config
+PYPREFIX    	= $(shell $(PYTHON_CONFIG) --prefix)
+PYCPPFLAGS  	= $(CPPFLAGS) $(shell $(PYTHON_CONFIG) --includes)
+PYCXXFLAGS  	= $(CXXFLAGS) -DNDEBUG -fno-strict-aliasing -fwrapv
+PYLDFLAGS   	= -L$(PYPREFIX)/lib -bundle -undefined dynamic_lookup
+PYLDLIBS	= 
+PYSOURCES   	= $(wildcard python/fixfmt/*.cc)
+PYDEPS	    	= $(PYSOURCES:%.cc=%.dd)
+PYOBJS	    	= $(PYSOURCES:%.cc=%.o)
+PYLIB	    	= python/fixfmt/_ext.so
 
 #-------------------------------------------------------------------------------
 
@@ -43,7 +53,8 @@ testclean:		testclean-cxx testclean-python
 #-------------------------------------------------------------------------------
 # C++
 
-$(DEPS): %.dd: 		%.cc
+$(DEPS): \
+%.dd: 		%.cc
 	@echo "generating $@"; set -e; \
 	$(CXX) -MM $(CPPFLAGS) $< | sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@
 
@@ -83,15 +94,27 @@ $(TEST_OKS): \
 # Python
 
 .PHONY: python
-python:
-	cd python; $(PYTHON) setup.py build_ext --inplace
+python:			$(PYLIB)
 
 .PHONY: clean-python
 clean-python:
-	rm -rf python/build python/fixfmt/*.so
+	rm -rf $(PYDEPS) $(PYOBJS) $(PYLIB)
+
+$(PYDEPS): \
+%.dd: 		    	%.cc
+	$(CXX) -MM $(PYCPPFLAGS) $< | sed 's,^\(.*\)\.o:,python/fixfmt/\1.o:,g' > $@
+	# @echo "generating $@"; set -e; \
+	# $(CXX) -MM $(PYCPPFLAGS) $< | sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@
+
+$(PYOBJS): \
+%.o:			%.cc
+	$(CXX) $(PYCPPFLAGS) $(PYCXXFLAGS) -c $< -o $@
+
+$(PYLIB):		$(LIB) $(PYOBJS)
+	$(CXX) $(PYLDFLAGS) $^ $(PYLDLIBS) -o $@
 
 .PHONY: test-python
-test-python: 
+test-python: 		$(PYLIB)
 	$(PYTEST) python
 
 .PHONY: testclean-python
@@ -99,5 +122,7 @@ testclean-python:
 
 #-------------------------------------------------------------------------------
 
-include $(DEPS) $(TEST_DEPS)
+include $(DEPS) 
+include $(TEST_DEPS) 
+include $(PYDEPS)
 

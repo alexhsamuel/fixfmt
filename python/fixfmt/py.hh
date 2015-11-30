@@ -421,7 +421,7 @@ private:
 
 public:
 
-  static Builder<0> builder;
+  static Builder<0> const builder;
 
 };
 
@@ -798,5 +798,4 @@ private:
 //------------------------------------------------------------------------------
 
 }  // namespace py
-
 

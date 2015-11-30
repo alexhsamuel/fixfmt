@@ -1,3 +1,8 @@
+#===============================================================================
+# NOTE: NOT CURRENTLY USED.  See ../Makefile for build.
+# Preserved for reference and debugging only.
+#===============================================================================
+
 from   glob import glob
 import os
 from   setuptools import setup, Extension
