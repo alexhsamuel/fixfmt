@@ -119,7 +119,7 @@ $(PY_OBJS): \
 %.o:			%.cc
 	$(CXX) $(PY_CPPFLAGS) $(PY_CXXFLAGS) -c $< -o $@
 
-$(PY_EXTMOD):		$(LIB) $(PY_OBJS)
+$(PY_EXTMOD):		$(PY_OBJS) $(LIB)
 	$(CXX) $(PY_LDFLAGS) $^ $(PY_LDLIBS) -o $@
 
 .PHONY: test-python
@@ -128,6 +128,11 @@ test-python: 		$(PY_EXTMOD)
 
 .PHONY: testclean-python
 testclean-python:
+
+# For compatibility and testing.
+.PHONY: python-setuptools
+python-setuptools:	$(LIB)
+	cd python; $(PYTHON) setup.py build_ext --inplace
 
 #-------------------------------------------------------------------------------
 
