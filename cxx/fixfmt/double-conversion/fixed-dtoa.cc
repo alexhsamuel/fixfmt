@@ -297,26 +297,6 @@ static void FillFractionals(uint64_t fractionals, int exponent,
 }
 
 
-// Removes leading and trailing zeros.
-// If leading zeros are removed then the decimal point position is adjusted.
-static void TrimZeros(Vector<char> buffer, int* length, int* decimal_point) {
-  while (*length > 0 && buffer[(*length) - 1] == '0') {
-    (*length)--;
-  }
-  int first_non_zero = 0;
-  while (first_non_zero < *length && buffer[first_non_zero] == '0') {
-    first_non_zero++;
-  }
-  if (first_non_zero != 0) {
-    for (int i = first_non_zero; i < *length; ++i) {
-      buffer[i - first_non_zero] = buffer[i];
-    }
-    *length -= first_non_zero;
-    *decimal_point -= first_non_zero;
-  }
-}
-
-
 bool FastFixedDtoa(double v,
                    int fractional_count,
                    Vector<char> buffer,
