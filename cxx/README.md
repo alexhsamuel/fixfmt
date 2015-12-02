@@ -5,6 +5,7 @@ The C++ API provides fixed-width formatters for these types:
 - `fixfmt::Bool` for booleans
 - `fixfmt::String` for strings
 - `fixfmt::Number` for integer and floating-point numbers
+- `fixfmt::TickTime` for timestamps represented as UTC epoch timestamps
 
 An instance of one of these classes represenets a formatter with fixed
 configuration, and will always produce a string of the same width when
@@ -158,3 +159,24 @@ cannot be formatted, for instance if its integral part exceeds the capacity of
 the format size.
 
 See the [unit tests](../test/test_number.cc) for additional examples.
+
+
+# Times
+
+The tick time formatter formats UTC times represented as `long` ticks since the
+UNIX epoch (1970-01-01T00:00:00Z).  A _tick_ is an integral fraction of a
+second, generally whole seconds, milliseconds, microseconds, or nanoseconds.
+
+The time is formatted in ISO-8601 'extended' time, with a fixed number of
+decimal digits of precision for the seconds.
+
+```c++
+fixfmt::TickTime fmt(fixfmt::TickTime::SCALE_NSEC, 4)
+std::cout << "[" << fmt(1447686456947558144l) << "]\n";
+```
+
+produces
+
+```
+[2015-11-16T15:07:36.9476Z]
+```
