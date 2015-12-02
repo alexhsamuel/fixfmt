@@ -56,7 +56,7 @@ inline String::String(
   position_(position),
   pad_left_(pad_left)
 {
-  assert(ellipsis_.length() <= size_);
+  assert(ellipsis_.length() <= (size_t) size_);
   assert(0 <= position_ && position_ <= 1);
 }
 
