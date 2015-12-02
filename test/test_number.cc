@@ -28,7 +28,7 @@ TEST(round, basic) {
 
 TEST(Number, long) {
   Number fmt{3};
-  ASSERT_EQ(4, fmt.get_width());
+  ASSERT_EQ((size_t) 4, fmt.get_width());
   ASSERT_EQ("   0", fmt(    0));
   ASSERT_EQ("   0", fmt(   -0));
   ASSERT_EQ("   1", fmt(    1));
@@ -49,7 +49,7 @@ TEST(Number, long) {
 
 TEST(Number, double) {
   Number fmt{2, 3};
-  ASSERT_EQ(7, fmt.get_width());
+  ASSERT_EQ((size_t) 7, fmt.get_width());
   ASSERT_EQ("  0.000", fmt(   0.0    ));
   ASSERT_EQ("  0.000", fmt(  -0.0    ));
   ASSERT_EQ("  1.000", fmt(   1.0    ));
@@ -127,7 +127,7 @@ TEST(Number, rounding) {
 // FIXME: Re-enable.
 TEST(Number, exhaustive) {
   Number fmt{1, 2, ' ', '+'};
-  ASSERT_EQ(5, fmt.get_width());
+  ASSERT_EQ((size_t) 5, fmt.get_width());
 
   for (int i = -9994; i < 9995; ++i) {
     double const val = 0.001 * i;

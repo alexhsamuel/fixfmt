@@ -4,27 +4,27 @@
 using namespace fixfmt;
 
 TEST(utf8_length, basic) {
-  ASSERT_EQ(utf8_length(""), 0);
-  ASSERT_EQ(utf8_length("x"), 1);
-  ASSERT_EQ(utf8_length("Hello, world!"), 13);
-  ASSERT_EQ(utf8_length("\u2026"), 1);
-  ASSERT_EQ(utf8_length("x\u2026x"), 3);
-  ASSERT_EQ(utf8_length("\u2026...\u2026\u2026"), 6);
+  ASSERT_EQ(utf8_length(""), 0u);
+  ASSERT_EQ(utf8_length("x"), 1u);
+  ASSERT_EQ(utf8_length("Hello, world!"), 13u);
+  ASSERT_EQ(utf8_length("\u2026"), 1u);
+  ASSERT_EQ(utf8_length("x\u2026x"), 3u);
+  ASSERT_EQ(utf8_length("\u2026...\u2026\u2026"), 6u);
 }
 
 TEST(string_length, basic) {
-  ASSERT_EQ(string_length(""), 0);
-  ASSERT_EQ(string_length("x"), 1);
-  ASSERT_EQ(string_length("xxx"), 3);
-  ASSERT_EQ(string_length("-x-x-x-x-x-"), 11);
-  ASSERT_EQ(string_length("\u2026"), 1);
-  ASSERT_EQ(string_length("x\u2026x"), 3);
-  ASSERT_EQ(string_length("\u2026...\u2026\u2026"), 6);
-  ASSERT_EQ(string_length("\x1b[m"), 0);
-  ASSERT_EQ(string_length("\x1b[32m\u2502"), 1);
-  ASSERT_EQ(string_length("\u2502\x1b[m"), 1);
-  ASSERT_EQ(string_length("\x1b[32m\u2502\x1b[m"), 1);
-  ASSERT_EQ(string_length(" \x1b[32m\u2502\x1b[m "), 3);
+  ASSERT_EQ(string_length(""), 0u);
+  ASSERT_EQ(string_length("x"), 1u);
+  ASSERT_EQ(string_length("xxx"), 3u);
+  ASSERT_EQ(string_length("-x-x-x-x-x-"), 11u);
+  ASSERT_EQ(string_length("\u2026"), 1u);
+  ASSERT_EQ(string_length("x\u2026x"), 3u);
+  ASSERT_EQ(string_length("\u2026...\u2026\u2026"), 6u);
+  ASSERT_EQ(string_length("\x1b[m"), 0u);
+  ASSERT_EQ(string_length("\x1b[32m\u2502"), 1u);
+  ASSERT_EQ(string_length("\u2502\x1b[m"), 1u);
+  ASSERT_EQ(string_length("\x1b[32m\u2502\x1b[m"), 1u);
+  ASSERT_EQ(string_length(" \x1b[32m\u2502\x1b[m "), 3u);
 }
 
 TEST(pad, basic) {
