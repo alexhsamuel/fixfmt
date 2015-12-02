@@ -27,8 +27,8 @@ public:
     true_result_(palide(true_str, size, "", " ", 1.0, pad_left)),
     false_result_(palide(false_str, size, "", " ", 1.0, pad_left))
   {
-    assert(true_.size() == size_);
-    assert(false_.size() == size_);
+    assert(true_result_.size() == size_);
+    assert(false_result_.size() == size_);
   }
 
   Bool(
