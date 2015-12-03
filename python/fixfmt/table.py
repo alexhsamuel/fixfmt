@@ -48,6 +48,10 @@ CONFIGURATION = Group(
             min_size                =  1,
             max_size                = 32,
         ),
+        time = Group(
+            max_precision           = 9,
+            min_precision           = None,
+        ),
     ),
     header = Group(
         elide = Group(
@@ -270,19 +274,26 @@ def _choose_formatter_datetime64(values, cfg):
     assert match is not None
     try:
         scale = {
-            "s"     :          1,
-            "ms"    :       1000,
-            "us"    :    1000000,
-            "ns"    : 1000000000,
+            "s"     : 0,
+            "ms"    : 3,
+            "us"    : 6,
+            "ns"    : 9,
         }[match.group(1)]
     except KeyError:
         raise TypeError(
             "no default formatter for datetime64 scale {}".format(scale))
 
-    # FIXME: Choose precision.
-    precision = 4
+    # FIXME: Accelerate this with an extension module.
+    values = values.astype("long")
+    max_prec = min(scale, cfg.time.max_precision)
+    min_prec = 0 if cfg.time.min_precision is None else cfg.time.min_precision
+    for precision in range(max_prec, min_prec, -1):
+        if not (values % (10 ** (scale - precision + 1)) == 0).all():
+            break
+    else:
+        precision = cfg.time.min_precicion
 
-    return TickTime(scale, precision)
+    return TickTime(10 ** scale, precision)
 
 
 def _choose_formatter_str(values, cfg):
