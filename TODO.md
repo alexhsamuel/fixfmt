@@ -1,6 +1,5 @@
 Things to do:  (* for MVP) (= next)
 
-= real support for datetime types
 = optionally, choose format for visible lines only
 - _cascading_ config for formatters
 - format methods, not just print
@@ -17,6 +16,7 @@ Dataframe features:
 - page at a time, with header
 
 Fancy features:
+- real datetime type
 - monkey-patch DataFrame.print()
 - truncate dataframe output to screen
 - rule-based coloring
