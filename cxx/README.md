@@ -167,8 +167,8 @@ The tick time formatter formats UTC times represented as `long` ticks since the
 UNIX epoch (1970-01-01T00:00:00Z).  A _tick_ is an integral fraction of a
 second, generally whole seconds, milliseconds, microseconds, or nanoseconds.
 
-The time is formatted in ISO-8601 'extended' time, with a fixed number of
-decimal digits of precision for the seconds.
+The time is formatted in [ISO-8601](http://www.cl.cam.ac.uk/~mgk25/iso-time.html) 
+extended time, with a fixed number of decimal digits of precision for the seconds.
 
 ```c++
 fixfmt::TickTime fmt(fixfmt::TickTime::SCALE_NSEC, 4)
