@@ -6,6 +6,7 @@
 #include "PyNumber.hh"
 #include "PyString.hh"
 #include "PyTable.hh"
+#include "PyTickTime.hh"
 
 using namespace py;
 using std::unique_ptr;
@@ -161,6 +162,36 @@ private:
 };
 
 
+ref<Object> add_tick_time_column(PyTable* self, Tuple* args, Dict* kw_args)
+{
+  // Parse args.
+  static char const* arg_names[] = { "buf", "format", nullptr };
+  PyObject* array;
+  PyTickTime* format;
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, "OO!", arg_names,
+    &array, &PyTickTime::type_, &format);
+
+  // Validate args.
+  BufferRef buffer(array, PyBUF_ND);
+  if (buffer->ndim != 1)
+    throw TypeError("not a one-dimensional array");
+  if (buffer->itemsize != sizeof(long))
+    throw TypeError("wrong itemsize");
+
+  // Add the column.
+  using Column = fixfmt::ColumnImpl<long, typename PyTickTime::Formatter>;
+  self->table_->add_column(std::make_unique<Column>(
+    reinterpret_cast<long const*>(buffer->buf),
+    buffer->shape[0], 
+    *format->fmt_));
+  // Hold on to the buffer ref.
+  self->buffers_.emplace_back(std::move(buffer));
+
+  return none_ref();
+}
+
+
 ref<Object> add_str_object_column(PyTable* self, Tuple* args, Dict* kw_args)
 {
   // Parse args.
@@ -199,6 +230,7 @@ auto methods = Methods<PyTable>()
   .add<add_column<long,    PyNumber>>   ("add_int64")
   .add<add_column<float,   PyNumber>>   ("add_float32")
   .add<add_column<double,  PyNumber>>   ("add_float64")
+  .add<add_tick_time_column>            ("add_tick_time")
   .add<add_str_object_column>           ("add_str_object")
 ;
 

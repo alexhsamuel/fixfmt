@@ -4,6 +4,7 @@
 #include "PyNumber.hh"
 #include "PyString.hh"
 #include "PyTable.hh"
+#include "PyTickTime.hh"
 #include "py.hh"
 
 using namespace py;
@@ -34,19 +35,27 @@ PyInit__ext(void)
 {
   auto module = Module::Create(&testmod_module);
 
-  PyBool::type_.Ready();
-  module->add(&PyBool::type_);
+  try {
+    PyBool::type_.Ready();
+    module->add(&PyBool::type_);
 
-  PyNumber::type_.Ready();
-  module->add(&PyNumber::type_);
+    PyNumber::type_.Ready();
+    module->add(&PyNumber::type_);
 
-  PyString::type_.Ready();
-  module->add(&PyString::type_);
+    PyString::type_.Ready();
+    module->add(&PyString::type_);
 
-  PyTable::type_.Ready();
-  module->add(&PyTable::type_);
+    PyTable::type_.Ready();
+    module->add(&PyTable::type_);
 
-  return module.release();
+    PyTickTime::type_.Ready();
+    module->add(&PyTickTime::type_);
+
+    return module.release();
+  }
+  catch (Exception) {
+    return nullptr;
+  }
 }
 
 

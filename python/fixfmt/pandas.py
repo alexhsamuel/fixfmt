@@ -29,13 +29,7 @@ def from_dataframe(df, cfg, *, names=pln.container.ALL):
     for name in names:
         series = df[name]
         arr = get_values(series)
-        if arr.dtype.kind == "M":
-            # Convert to an object array of stringified timestmaps.
-            # FIXME: Do this properly.
-            arr = arr.astype(str).astype(object)
-            tbl.add_column(series.name, arr, fmt=String(30))
-        else:
-            tbl.add_column(series.name, arr)
+        tbl.add_column(series.name, arr)
 
     tbl.finish()
     return tbl

@@ -264,6 +264,27 @@ def _choose_formatter_int(values, cfg):
     return Number(size, sign=sign)
 
 
+def _choose_formatter_datetime64(values, cfg):
+    # FIXME: Is this really the right way to extract the datetime64 tick scale??
+    match = re.match(r"datetime64\[(.*)\]$", values.dtype.name)
+    assert match is not None
+    try:
+        scale = {
+            "s"     :          1,
+            "ms"    :       1000,
+            "us"    :    1000000,
+            "ns"    : 1000000000,
+        }[match.group(1)]
+    except KeyError:
+        raise TypeError(
+            "no default formatter for datetime64 scale {}".format(scale))
+
+    # FIXME: Choose precision.
+    precision = 4
+
+    return TickTime(scale, precision)
+
+
 def _choose_formatter_str(values, cfg):
     size = np.vectorize(len)(values).max()
     size = max(size, cfg.str.min_size, cfg.min_width)
@@ -279,6 +300,8 @@ def _get_default_formatter(arr, cfg):
         return _choose_formatter_float(arr, cfg=cfg.formatters)
     elif dtype.kind == "i":
         return _choose_formatter_int(arr, cfg=cfg.formatters)
+    elif dtype.kind == "M":
+        return _choose_formatter_datetime64(arr, cfg=cfg.formatters)
     elif dtype.kind == "O":
         return _choose_formatter_str(arr, cfg=cfg.formatters)
     else:
@@ -312,7 +335,8 @@ def _get_header_justification(fmt):
     elif isinstance(fmt, String):
         return fmt.pad_left
     else:
-        raise TypeError("unrecognized formatter: {!r}".format(fmt))
+        # Assume everythign else is left-justified.
+        return False
 
 
 #-------------------------------------------------------------------------------
@@ -345,6 +369,8 @@ class Table:
             getattr(table, "add_" + name)(arr, fmt)
         elif name == "object":
             table.add_str_object(arr, fmt)
+        elif name.startswith("datetime64"):  # FIXME: Sloppy.
+            table.add_tick_time(arr.astype("int64"), fmt)
         else:
             raise TypeError("unsupported dtype: {}".format(arr.dtype))
 
