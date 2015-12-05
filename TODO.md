@@ -1,6 +1,6 @@
-Things to do:  (* for MVP) (= next)
+Things to do:  (* for MVP) 
 
-= optionally, choose format for visible lines only
+- ** optionally, choose format for visible lines only
 - _cascading_ config for formatters
 - format methods, not just print
 - np Array formatter
