@@ -75,7 +75,7 @@ auto getsets = GetSets<PyTickTime>()
 
 Type PyTickTime::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
-  (char const*)         "fixfmt.TickTime",                  // tp_name
+  (char const*)         "fixfmt._ext.TickTime",             // tp_name
   (Py_ssize_t)          sizeof(PyTickTime),                 // tp_basicsize
   (Py_ssize_t)          0,                                  // tp_itemsize
   (destructor)          nullptr,                            // tp_dealloc

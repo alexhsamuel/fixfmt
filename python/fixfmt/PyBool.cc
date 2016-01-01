@@ -105,7 +105,7 @@ auto getsets = GetSets<PyBool>()
 
 Type PyBool::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
-  (char const*)         "fixfmt.Bool",                      // tp_name
+  (char const*)         "fixfmt._ext.Bool",                 // tp_name
   (Py_ssize_t)          sizeof(PyBool),                     // tp_basicsize
   (Py_ssize_t)          0,                                  // tp_itemsize
   (destructor)          nullptr,                            // tp_dealloc
