@@ -123,6 +123,7 @@ $(PY_EXTMOD):		$(PY_OBJS) $(LIB)
 	$(CXX) $(PY_LDFLAGS) $^ $(PY_LDLIBS) -o $@
 
 .PHONY: test-python
+test-python: export PYTHONPATH=python/
 test-python: 		$(PY_EXTMOD)
 	$(PYTEST) python
 
