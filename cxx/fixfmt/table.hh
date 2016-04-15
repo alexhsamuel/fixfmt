@@ -88,8 +88,10 @@ class IndexedColumn
 {
 public:
 
-  IndexedColumn(IDXTYPE const* index, long index_length, 
-                ColumnImpl<TYPE, FMT> column)
+  IndexedColumn(
+    IDXTYPE const* const index, 
+    long const index_length, 
+    ColumnImpl<TYPE, FMT> column)
     : index_(index),
       index_length_(index_length),
       column_(std::move(column))
@@ -134,9 +136,7 @@ public:
   virtual long get_length() const override { return MAX_INDEX; }
 
   virtual string operator()(long const /* index */) const override
-  {
-    return str_;
-  }
+    { return str_; }
 
 private:
 
@@ -154,23 +154,29 @@ public:
 
   Table() : width_(0), length_(MAX_INDEX) {}
 
-  void add_column(unique_ptr<Column> col)
+  void 
+  add_column(
+    unique_ptr<Column> col)
   {
     width_ += col->get_width();
     length_ = std::min(length_, col->get_length());
     columns_.push_back(std::move(col));
   }
 
-  void add_string(string str)
-  {
-    add_column(unique_ptr<Column>(new StringColumn(std::move(str))));
+  void 
+  add_string(
+    string str)
+  { 
+    add_column(unique_ptr<Column>(new StringColumn(std::move(str)))); 
   }
 
   virtual int get_width() const override { return width_; }
-
   virtual long get_length() const override { return length_; }
 
-  virtual string operator()(long const index) const override
+  virtual string 
+  operator()(
+    long const index) 
+    const override
   {
     std::stringstream result;
     for (auto i = columns_.begin(); i != columns_.end(); ++i)

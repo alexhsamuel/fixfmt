@@ -28,10 +28,10 @@ public:
   TickTime(
     long    const scale     =SCALE_SEC,
     int     const precision =PRECISION_NONE)
-    : width_(20 + (precision == PRECISION_NONE ? 0 : 1 + precision)),
-      bad_result_(width_, '#'),  // FIXME
-      scale_(scale),
-      precision_(precision)
+  : width_(20 + (precision == PRECISION_NONE ? 0 : 1 + precision)),
+    bad_result_(width_, '#'),  // FIXME
+    scale_(scale),
+    precision_(precision)
   {
   }
 
@@ -52,6 +52,8 @@ private:
 
 };
 
+
+//------------------------------------------------------------------------------
 
 }  // namespace fixfmt
 

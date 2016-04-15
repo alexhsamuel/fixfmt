@@ -7,14 +7,17 @@ namespace fixfmt {
 
 using std::string;
 
-string Number::operator()(long val) const
+string 
+Number::operator()(
+  long val) 
+  const
 {
   if (val < 0 && sign_ == SIGN_NONE)
     return bad_result_;
 
   // Format directly into the string's buffer.
   string result(width_, pad_);
-  char* buf = &result[0];
+  char* const buf = &result[0];
 
   int const sign_len = sign_ == SIGN_NONE ? 0 : 1;
   bool const nonneg = val >= 0;
@@ -51,7 +54,10 @@ string Number::operator()(long val) const
 }
 
 
-string Number::operator()(double const val) const
+string 
+Number::operator()(
+  double const val) 
+  const
 {
   if (isnan(val))
     return nan_result_;
@@ -131,7 +137,7 @@ string Number::operator()(double const val) const
     }
  
     assert(result.length() == width_);
-    return result;
+    return std::move(result);
   }
 }
 

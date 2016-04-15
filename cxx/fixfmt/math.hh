@@ -6,7 +6,12 @@
 
 namespace fixfmt {
 
-inline double pow10(int n)
+/*
+ * Returns a power of 10.
+ */
+inline double 
+pow10(
+  int const n)
 {
   static constexpr double POW10[40] = {
     1e-20, 1e-19, 1e-18, 1e-17, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11,
@@ -22,19 +27,29 @@ inline double pow10(int n)
 }
 
 
-/** Rounds 'val' to the nearest integer using banker's rounding.  */
-inline long round(double val)
+/*
+ * Rounds 'val' to the nearest integer using banker's rounding.  
+ */
+inline long 
+round(
+  double const val)
 {
   // FIXME: Broken for val > MAX_LONG.
   long const i = (long) val;
   double const r = val - i;
-  return i + (val > 0
+  return 
+    i + (val > 0
     ? (r <  0.5 || (i % 2 == 0 && r ==  0.5) ? 0 :  1)
     : (r > -0.5 || (i % 2 == 0 && r == -0.5) ? 0 : -1));
 }
 
-/** Rounds 'val' to 'num_digits' of precision using banker's rounding.  */
-inline double round(double val, int num_digits)
+/*
+ * Rounds `val` to `num_digits` of precision using banker's rounding.  
+ */
+inline double 
+round(
+  double const val, 
+  int const num_digits)
 {
   // FIXME: Broken for val > MAX_LONG.
   double const mult = pow10(num_digits);
@@ -42,4 +57,7 @@ inline double round(double val, int num_digits)
 }
 
 
+//------------------------------------------------------------------------------
+
 }  // namespace fixfmt
+

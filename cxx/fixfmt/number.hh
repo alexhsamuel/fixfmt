@@ -30,14 +30,14 @@ public:
   constexpr static int  PRECISION_NONE = -1;
 
   Number(
-      int      const size,
-      int      const precision=PRECISION_NONE,
-      char     const pad=' ',
-      char     const sign=SIGN_NEGATIVE,
-      string   const nan="NaN",
-      string   const inf="inf",
-      char     const point='.',
-      char     const bad='#');
+      int      size,
+      int      precision=PRECISION_NONE,
+      char     pad=' ',
+      char     sign=SIGN_NEGATIVE,
+      string   nan="NaN",
+      string   inf="inf",
+      char     point='.',
+      char     bad='#');
 
   size_t           get_width()     const { return width_; }
 
@@ -129,25 +129,25 @@ inline Number::Number(
     int      const precision,
     char     const pad,
     char     const sign,
-    string   const nan,
-    string   const inf,
+    string         nan,
+    string         inf,
     char     const point,
     char     const bad)
-: size_{size},
-  precision_{precision},
-  pad_{pad},
-  sign_{sign},
-  point_{point},
+: size_(size),
+  precision_(precision),
+  pad_(pad),
+  sign_(sign),
+  point_(point),
   width_(
       size_
       + (precision_ == PRECISION_NONE ? 0 : 1 + precision)
       + (sign == SIGN_NEGATIVE || sign == SIGN_ALWAYS ? 1 : 0)),
-  nan_{std::move(nan)},
-  inf_{std::move(inf)},
-  bad_{bad},
-  nan_result_{format_inf_nan(nan_, 0)},
-  pos_inf_result_{format_inf_nan(inf_,  1)},
-  neg_inf_result_{format_inf_nan(inf_, -1)},
+  nan_(std::move(nan)),
+  inf_(std::move(inf)),
+  bad_(bad),
+  nan_result_(format_inf_nan(nan_, 0)),
+  pos_inf_result_(format_inf_nan(inf_,  1)),
+  neg_inf_result_(format_inf_nan(inf_, -1)),
   bad_result_(width_, bad)
 {
   assert(size_ >= 0);

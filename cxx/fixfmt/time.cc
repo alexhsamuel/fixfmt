@@ -7,7 +7,10 @@
 
 namespace fixfmt {
 
-string TickTime::operator()(long val) const 
+string 
+TickTime::operator()(
+  long val) 
+  const 
 {
   // FIXME: Validate range.
 
@@ -64,6 +67,8 @@ string TickTime::operator()(long val) const
   return result;
 }
 
+
+//------------------------------------------------------------------------------
 
 }  // namespace fixfmt
 

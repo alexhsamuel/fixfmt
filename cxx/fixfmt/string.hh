@@ -43,16 +43,16 @@ private:
 };
 
 
-inline String::String(
+inline 
+String::String(
   int     const size,
-  string  const ellipsis,
-  string  const pad,
+  string        ellipsis,
+  string        pad,
   double  const position,
   bool    const pad_left)
-:
-  size_(size),
+: size_(size),
   ellipsis_(std::move(ellipsis)),
-  pad_(pad),
+  pad_(std::move(pad)),
   position_(position),
   pad_left_(pad_left)
 {
@@ -61,7 +61,10 @@ inline String::String(
 }
 
 
-inline string String::operator()(string const& str) const
+inline string 
+String::operator()(
+  string const& str) 
+  const
 {
   return palide(str, size_, ellipsis_, pad_, position_, pad_left_);
 }

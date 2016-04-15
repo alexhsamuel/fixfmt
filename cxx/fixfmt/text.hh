@@ -26,15 +26,16 @@ namespace fixfmt {
 using std::string;
 
 constexpr char const* ELLIPSIS = "\u2026";
-
 constexpr char ANSI_ESCAPE = '\x1b';
 
-/**
+/*
  * Advances an iterator on a UTF-8 string by one code point.
+ *
+ * FIXME: Take an end parameter.
  */
-// FIXME: Take an end parameter.
 inline bool
-next_utf8(string::const_iterator& i)
+next_utf8(
+  string::const_iterator& i)
 {
   unsigned char c = *i++;
   if ((c & 0xc0) == 0xc0) {
@@ -58,11 +59,12 @@ next_utf8(string::const_iterator& i)
 }
 
 
-/**
+/*
  * Returns the number of code points in a UTF-8-encoded string.
  */
 inline size_t
-utf8_length(string const& str)
+utf8_length(
+  string const& str)
 {
   size_t length = 0;
   // FIXME: Problem if the last code point is malformed.
@@ -72,12 +74,13 @@ utf8_length(string const& str)
 }
 
 
-/**
- * Advances an iterator past an ANSI escape sequence, if it is positioned at
- * one.
+/*
+ * Advances an iterator past an ANSI escape sequence, if at one.
  */
 inline bool
-skip_ansi_escape(string::const_iterator& i, string::const_iterator const& end)
+skip_ansi_escape(
+  string::const_iterator& i, 
+  string::const_iterator const& end)
 {
   assert(i != end);
   if (*i == ANSI_ESCAPE) {
@@ -96,12 +99,13 @@ skip_ansi_escape(string::const_iterator& i, string::const_iterator const& end)
 }
 
 
-/**
+/*
  * Returns the number of code points in a UTF-8-encoded string, skipping
  * escape sequences.
  */
 inline size_t
-string_length(string const& str)
+string_length(
+  string const& str)
 {
   size_t length = 0;
   auto const& end = str.end();
@@ -118,11 +122,13 @@ string_length(string const& str)
 }
 
 
-/**
+/*
  * Truncates a string to `length` code points, skipping escape sequences.
  */
 inline void
-string_truncate(string& str, size_t length)
+string_truncate(
+  string& str, 
+  size_t const length)
 {
   auto const& begin = str.cbegin();
   auto const& end = str.cend();
@@ -134,7 +140,7 @@ string_truncate(string& str, size_t length)
 }
 
 
-/**
+/*
  * Concatenates copies of `str` up to `length`.  If `length` is not divisible
  * by the length of `str`, the last copy is partial.
  */
@@ -271,4 +277,7 @@ palide(
 }
 
 
+//------------------------------------------------------------------------------
+
 }  // namespace fixfmt
+

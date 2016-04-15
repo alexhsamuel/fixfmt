@@ -9,6 +9,7 @@
 
 namespace fixfmt {
 
+using std::move;
 using std::string;
 
 class Bool
@@ -16,26 +17,26 @@ class Bool
 public:
 
   Bool(
-      string const& true_str,
-      string const& false_str,
+      string true_str,
+      string false_str,
       size_t size,
       bool pad_left)
   : size_(size),
     pad_left_(pad_left),
-    true_(true_str),
-    false_(false_str),
-    true_result_(palide(true_str, size, "", " ", 1.0, pad_left)),
-    false_result_(palide(false_str, size, "", " ", 1.0, pad_left))
+    true_(move(true_str)),
+    false_(move(false_str)),
+    true_result_(palide(true_, size, "", " ", 1.0, pad_left)),
+    false_result_(palide(false_, size, "", " ", 1.0, pad_left))
   {
     assert(true_result_.size() == size_);
     assert(false_result_.size() == size_);
   }
 
   Bool(
-    string const& true_str="True",
-    string const& false_str="False")
+    string true_str="True",
+    string false_str="False")
     : Bool(
-        true_str, false_str,
+        move(true_str), move(false_str),
         std::max(string_length(true_str), string_length(false_str)),
         false)
   {
