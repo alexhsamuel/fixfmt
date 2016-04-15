@@ -265,7 +265,11 @@ Type PyTable::type_ = PyTypeObject{
   (printfunc)           nullptr,                            // tp_print
   (getattrfunc)         nullptr,                            // tp_getattr
   (setattrfunc)         nullptr,                            // tp_setattr
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+  (PyAsyncMethods*)     nullptr,                            // tp_as_async
+#else
   (void*)               nullptr,                            // tp_reserved
+#endif
   (reprfunc)            nullptr,                            // tp_repr
   (PyNumberMethods*)    nullptr,                            // tp_as_number
   (PySequenceMethods*)  &tp_as_sequence,                    // tp_as_sequence
