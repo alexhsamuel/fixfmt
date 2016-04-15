@@ -50,7 +50,7 @@ Number::operator()(
   }
 
   assert(result.length() == width_);
-  return std::move(result);
+  return result;
 }
 
 
@@ -137,7 +137,7 @@ Number::operator()(
     }
  
     assert(result.length() == width_);
-    return std::move(result);
+    return result;
   }
 }
 
