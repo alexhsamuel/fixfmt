@@ -124,15 +124,16 @@ inline void set(char* const buf, char const character, size_t const num)
 }  // anonymous namespace
 
 
-inline Number::Number(
-    int      const size,
-    int      const precision,
-    char     const pad,
-    char     const sign,
-    string         nan,
-    string         inf,
-    char     const point,
-    char     const bad)
+inline 
+Number::Number(
+  int       const size,
+  int       const precision,
+  char      const pad,
+  char      const sign,
+  string          nan,
+  string          inf,
+  char      const point,
+  char      const bad)
 : size_(size),
   precision_(precision),
   pad_(pad),
