@@ -179,6 +179,8 @@ See the [unit tests](../test/test_number.cc) for additional examples.
 
 # Times
 
+**Note:** This time functionality is a placeholder, and will be redesigned in the future.
+
 The tick time formatter formats UTC times represented as `long` ticks since the
 UNIX epoch (1970-01-01T00:00:00Z).  A _tick_ is an integral fraction of a
 second, generally whole seconds, milliseconds, microseconds, or nanoseconds.
