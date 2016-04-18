@@ -46,6 +46,9 @@ public:
   
   Number(Args args);
 
+  /*
+   * Convenience ctor for the most common options.
+   */
   Number(
       int   const size,
       int   const precision =PRECISION_NONE,
