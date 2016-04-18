@@ -126,7 +126,7 @@ TEST(Number, rounding) {
 
 // FIXME: Re-enable.
 TEST(Number, exhaustive) {
-  Number fmt{1, 2, ' ', '+'};
+  Number fmt{1, 2, '+'};
   ASSERT_EQ((size_t) 5, fmt.get_width());
 
   for (int i = -9994; i < 9995; ++i) {
@@ -164,64 +164,64 @@ TEST(Number, precision) {
 }
 
 TEST(Number, pad) {
-  ASSERT_EQ("  42.", Number(3, 0, ' ')( 42));
-  ASSERT_EQ(" -42.", Number(3, 0, ' ')(-42));
-  ASSERT_EQ(" 042.", Number(3, 0, '0')( 42));
-  ASSERT_EQ("-042.", Number(3, 0, '0')(-42));
+  ASSERT_EQ("  42.", Number({3, 0, .pad=' '})( 42));
+  ASSERT_EQ(" -42.", Number({3, 0, .pad=' '})(-42));
+  ASSERT_EQ(" 042.", Number({3, 0, .pad='0'})( 42));
+  ASSERT_EQ("-042.", Number({3, 0, .pad='0'})(-42));
 }
 
 TEST(Number, sign) {
-  ASSERT_EQ("     42.", Number(6, 0, ' ', '-')( 42));
-  ASSERT_EQ("    -42.", Number(6, 0, ' ', '-')(-42));
-  ASSERT_EQ(" 000042.", Number(6, 0, '0', '-')( 42));
-  ASSERT_EQ("-000042.", Number(6, 0, '0', '-')(-42));
+  ASSERT_EQ("     42.", Number(6, 0, '-')( 42));
+  ASSERT_EQ("    -42.", Number(6, 0, '-')(-42));
+  ASSERT_EQ(" 000042.", Number({6, 0, .pad='0'})( 42));
+  ASSERT_EQ("-000042.", Number({6, 0, .pad='0'})(-42));
 
-  ASSERT_EQ("    +42.", Number(6, 0, ' ', '+')( 42));
-  ASSERT_EQ("    -42.", Number(6, 0, ' ', '+')(-42));
-  ASSERT_EQ("+000042.", Number(6, 0, '0', '+')( 42));
-  ASSERT_EQ("-000042.", Number(6, 0, '0', '+')(-42));
+  ASSERT_EQ("    +42.", Number(6, 0, '+')( 42));
+  ASSERT_EQ("    -42.", Number(6, 0, '+')(-42));
+  ASSERT_EQ("+000042.", Number({6, 0, .sign='+', .pad='0'})( 42));
+  ASSERT_EQ("-000042.", Number({6, 0, .sign='+', .pad='0'})(-42));
 
-  ASSERT_EQ("    42.", Number(6, 0, ' ', ' ')( 42));
-  ASSERT_EQ("#######", Number(6, 0, ' ', ' ')(-42));
-  ASSERT_EQ("000042.", Number(6, 0, '0', ' ')( 42));
-  ASSERT_EQ("#######", Number(6, 0, '0', ' ')(-42));
+  ASSERT_EQ("    42.", Number({6, 0, .pad=' ', .sign=' '})( 42));
+  ASSERT_EQ("#######", Number({6, 0, .pad=' ', .sign=' '})(-42));
+  ASSERT_EQ("000042.", Number({6, 0, .pad='0', .sign=' '})( 42));
+  ASSERT_EQ("#######", Number({6, 0, .pad='0', .sign=' '})(-42));
 }
 
 TEST(Number, nan) {
-  ASSERT_EQ("N"     , Number(1, -1, ' ', ' ')(NAN));
-  ASSERT_EQ("Na"    , Number(2, -1, ' ', ' ')(NAN));
-  ASSERT_EQ("NaN"   , Number(3, -1, ' ', ' ')(NAN));
-  ASSERT_EQ("NaN   ", Number(2,  2, ' ', '-', "NaN")(NAN));
-  ASSERT_EQ("nan   ", Number(2,  2, ' ', '-', "nan")(NAN));
-  ASSERT_EQ("NotANu", Number(2,  2, ' ', '-', "NotANumber")(NAN));
-  ASSERT_EQ("  NotANumber", Number(12, -1, ' ', ' ', "NotANumber")(NAN));
+  ASSERT_EQ("N"     , Number(1, -1, ' ')(NAN));
+  ASSERT_EQ("Na"    , Number(2, -1, ' ')(NAN));
+  ASSERT_EQ("NaN"   , Number(3, -1, ' ')(NAN));
+  ASSERT_EQ("NaN   ", Number({2,  2, '-', .nan="NaN"})(NAN));
+  ASSERT_EQ("nan   ", Number({2,  2, '-', .nan="nan"})(NAN));
+  ASSERT_EQ("NotANu", Number({2,  2, '-', .nan="NotANumber"})(NAN));
+  ASSERT_EQ("  NotANumber", Number({12, -1, ' ', .nan="NotANumber"})(NAN));
 }
 
 TEST(Number, inf) {
-  ASSERT_EQ("i"     , Number(1, -1, ' ', ' ')( INFINITY));
-  ASSERT_EQ("in"    , Number(2, -1, ' ', ' ')( INFINITY));
-  ASSERT_EQ("inf"   , Number(3, -1, ' ', ' ')( INFINITY));
-  ASSERT_EQ("###"   , Number(3, -1, ' ', ' ')(-INFINITY));
-  ASSERT_EQ(" inf"  , Number(3, -1, ' ', '-')( INFINITY));
-  ASSERT_EQ("-inf"  , Number(3, -1, ' ', '-')(-INFINITY));
-  ASSERT_EQ("+inf"  , Number(3, -1, ' ', '+')( INFINITY));
-  ASSERT_EQ("-inf"  , Number(3, -1, ' ', '+')(-INFINITY));
-  ASSERT_EQ(" inf  ", Number(2,  2, ' ', '-', "NaN", "inf")(INFINITY));
-  ASSERT_EQ(" INF  ", Number(2,  2, ' ', '-', "NaN", "INF")(INFINITY));
-  ASSERT_EQ(" infin", Number(2,  2, ' ', '-', "NaN", "infinity")(INFINITY));
-  ASSERT_EQ("+infin", Number(2,  2, ' ', '+', "NaN", "infinity")(INFINITY));
-  ASSERT_EQ("-infin", Number(2,  2, ' ', '-', "NaN", "infinity")(-INFINITY));
+  ASSERT_EQ("i"     , Number(1, -1, ' ')( INFINITY));
+  ASSERT_EQ("in"    , Number(2, -1, ' ')( INFINITY));
+  ASSERT_EQ("inf"   , Number(3, -1, ' ')( INFINITY));
+  ASSERT_EQ("###"   , Number(3, -1, ' ')(-INFINITY));
+  ASSERT_EQ(" inf"  , Number(3, -1, '-')( INFINITY));
+  ASSERT_EQ("-inf"  , Number(3, -1, '-')(-INFINITY));
+  ASSERT_EQ("+inf"  , Number(3, -1, '+')( INFINITY));
+  ASSERT_EQ("-inf"  , Number(3, -1, '+')(-INFINITY));
+  ASSERT_EQ(" inf  ", Number({2, 2, '-', .inf="inf"})(INFINITY));
+  ASSERT_EQ(" INF  ", Number({2, 2, '-', .inf="INF"})(INFINITY));
+  ASSERT_EQ(" infin", Number({2, 2, '-', .inf="infinity"})(INFINITY));
+  ASSERT_EQ("+infin", Number({2, 2, '+', .inf="infinity"})(INFINITY));
+  ASSERT_EQ("-infin", Number({2, 2, '-', .inf="infinity"})(-INFINITY));
   ASSERT_EQ(
-    "    infinity", Number(12, -1, ' ', ' ', "NaN", "infinity")(INFINITY));
+    "    infinity", Number({12, -1, ' ', .inf="infinity"})(INFINITY));
   ASSERT_EQ(
-    "   -infinity", Number(11, -1, ' ', '-', "NaN", "infinity")(-INFINITY));
+    "   -infinity", Number({11, -1, '-', .inf="infinity"})(-INFINITY));
   ASSERT_EQ(
-    "############", Number(12, -1, ' ', ' ', "NaN", "infinity")(-INFINITY));
+    "############", Number({12, -1, ' ', .inf="infinity"})(-INFINITY));
 }
 
 TEST(Number, inf_fmt) {
-  Number fmt{1, Number::PRECISION_NONE, ' ', Number::SIGN_NEGATIVE, "NaN", 
-      "\u221e"};
+  Number fmt({1, Number::PRECISION_NONE, Number::SIGN_NEGATIVE, 
+        .nan="NaN", .inf="\u221e"});
   ASSERT_EQ(" 5",      fmt(5));
   ASSERT_EQ(" \u221e", fmt( INFINITY));
   ASSERT_EQ("-\u221e", fmt(-INFINITY));

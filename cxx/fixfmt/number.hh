@@ -29,26 +29,41 @@ public:
 
   constexpr static int  PRECISION_NONE = -1;
 
+  /*
+   * Arguments to a number formatter.
+   */
+  struct Args
+  {
+    int      size           = 8;
+    int      precision      = PRECISION_NONE;
+    char     sign           = SIGN_NEGATIVE;
+    char     pad            = ' ';
+    char     point          = '.';
+    string   const nan      = "NaN";
+    string   const inf      = "inf";
+    char     const bad      = '#';
+  };
+  
+  Number(Args args);
+
   Number(
-      int      size,
-      int      precision=PRECISION_NONE,
-      char     pad=' ',
-      char     sign=SIGN_NEGATIVE,
-      string   nan="NaN",
-      string   inf="inf",
-      char     point='.',
-      char     bad='#');
+      int   const size,
+      int   const precision =PRECISION_NONE,
+      char  const sign      =SIGN_NEGATIVE)
+  : Number(Args{size, precision, sign})
+  {
+  }
 
   size_t           get_width()     const { return width_; }
 
-  int              get_size()      const { return size_; }
-  int              get_precision() const { return precision_; }
-  char             get_pad()       const { return pad_; }
-  char             get_sign()      const { return sign_; }
-  char             get_point()     const { return point_; }
-  string const&    get_nan()       const { return nan_; }
-  string const&    get_inf()       const { return inf_; }
-  char             get_bad()       const { return bad_; }
+  int              get_size()      const { return args_.size; }
+  int              get_precision() const { return args_.precision; }
+  char             get_pad()       const { return args_.pad; }
+  char             get_sign()      const { return args_.sign; }
+  char             get_point()     const { return args_.point; }
+  string const&    get_nan()       const { return args_.nan; }
+  string const&    get_inf()       const { return args_.inf; }
+  char             get_bad()       const { return args_.bad; }
 
   string operator()(long           val) const;
   string operator()(double         val) const;
@@ -66,19 +81,19 @@ private:
 
   char get_sign_char(bool const nonneg) const
   {
-    assert(sign_ != SIGN_NONE);
-    return nonneg ? (sign_ == SIGN_ALWAYS ? '+' : ' ') : '-';
+    assert(args_.sign != SIGN_NONE);
+    return nonneg ? (args_.sign == SIGN_ALWAYS ? '+' : ' ') : '-';
   }
 
   string format_inf_nan(string const& str, int const sign) const
   {
     // Tack on the sign.
-    bool const has_sign = sign_ != SIGN_NONE;
+    bool const has_sign = args_.sign != SIGN_NONE;
     string result = 
       ! has_sign || sign == 0 ? str
       : get_sign_char(sign > 0) + str;
     int const len = string_length(result);
-    int const size = size_ + has_sign;
+    int const size = args_.size + has_sign;
 
     // Try to put it in the integer part.
     if (len <= (int) width_)
@@ -90,73 +105,42 @@ private:
     }
   }
 
-  int      const size_;
-  int      const precision_;
-  char     const pad_;
-  char     const sign_;
-  char     const point_;
-  size_t   const width_;
-  string   const nan_;
-  string   const inf_;
-  char     const bad_;
+  Args      const args_;
+  size_t    const width_;
 
-  // Preformatted results.
-  string   const nan_result_;
-  string   const pos_inf_result_;
-  string   const neg_inf_result_;
-  string   const bad_result_;
+  // Preformatted outputs.
+  string    const nan_result_;
+  string    const pos_inf_result_;
+  string    const neg_inf_result_;
+  string    const bad_result_;
 
 };
 
 
 //------------------------------------------------------------------------------
 
-namespace {
-
-// FIXME: Elsewhere.
-inline void set(char* const buf, char const character, size_t const num)
-{
-  if (num > 0)
-    memset(buf, character, num);
-}
-
-
-}  // anonymous namespace
-
-
 inline 
 Number::Number(
-  int       const size,
-  int       const precision,
-  char      const pad,
-  char      const sign,
-  string          nan,
-  string          inf,
-  char      const point,
-  char      const bad)
-: size_(size),
-  precision_(precision),
-  pad_(pad),
-  sign_(sign),
-  point_(point),
+  Args args)
+: args_(std::move(args)),
   width_(
-      size_
-      + (precision_ == PRECISION_NONE ? 0 : 1 + precision)
-      + (sign == SIGN_NEGATIVE || sign == SIGN_ALWAYS ? 1 : 0)),
-  nan_(std::move(nan)),
-  inf_(std::move(inf)),
-  bad_(bad),
-  nan_result_(format_inf_nan(nan_, 0)),
-  pos_inf_result_(format_inf_nan(inf_,  1)),
-  neg_inf_result_(format_inf_nan(inf_, -1)),
-  bad_result_(width_, bad)
+        args_.size
+      + (args_.precision == PRECISION_NONE ? 0 : 1 + args_.precision)
+      + (args_.sign == SIGN_NEGATIVE || args_.sign == SIGN_ALWAYS ? 1 : 0)),
+  nan_result_(format_inf_nan(args_.nan, 0)),
+  pos_inf_result_(format_inf_nan(args_.inf,  1)),
+  neg_inf_result_(format_inf_nan(args_.inf, -1)),
+  bad_result_(width_, args_.bad)
 {
-  assert(size_ >= 0);
-  assert(precision_ == PRECISION_NONE || precision_ >= 0);
-  assert(size_ > 0 || precision_ > 0);
-  assert(pad_ == PAD_SPACE || pad_ == PAD_ZERO);
+  // FIXME: Use Expect() or similar.
+  assert(args_.size >= 0);
+  assert(args_.precision == PRECISION_NONE || args_.precision >= 0);
+  assert(args_.size > 0 || args_.precision > 0);
+  assert(args_.pad == PAD_SPACE || args_.pad == PAD_ZERO);
   assert(
-      sign_ == SIGN_NONE || sign_ == SIGN_NEGATIVE || sign_ == SIGN_ALWAYS);
+         args_.sign == SIGN_NONE 
+      || args_.sign == SIGN_NEGATIVE 
+      || args_.sign == SIGN_ALWAYS);
 }
 
 
