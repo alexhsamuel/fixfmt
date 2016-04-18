@@ -82,13 +82,20 @@ public:
 
 private:
 
-  char get_sign_char(bool const nonneg) const
+  char 
+  get_sign_char(
+    bool const nonneg) 
+    const
   {
     assert(args_.sign != SIGN_NONE);
     return nonneg ? (args_.sign == SIGN_ALWAYS ? '+' : ' ') : '-';
   }
 
-  string format_inf_nan(string const& str, int const sign) const
+  string 
+  format_inf_nan(
+    string const& str, 
+    int const sign) 
+    const
   {
     // Tack on the sign.
     bool const has_sign = args_.sign != SIGN_NONE;
