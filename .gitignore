@@ -4,3 +4,4 @@
 *.ok
 googletest
 __pycache__/
+tmp/
