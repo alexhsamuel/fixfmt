@@ -39,9 +39,9 @@ public:
     char     sign           = SIGN_NEGATIVE;
     char     pad            = ' ';
     char     point          = '.';
-    string   const nan      = "NaN";
-    string   const inf      = "inf";
-    char     const bad      = '#';
+    string   nan            = "NaN";
+    string   inf            = "inf";
+    char     bad            = '#';
   };
   
   Number(Args args);
