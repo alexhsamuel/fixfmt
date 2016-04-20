@@ -21,14 +21,14 @@ namespace {
 int tp_init(PyBool* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {
-    "true", "false", "size", "pad_left", nullptr };
+    "true", "false", "size", "position", nullptr };
   char const*    true_str    = "true";
   char const*    false_str   = "false";
   int            size        = -1;
-  bool           pad_left    = false;
+  float          position= fixfmt::PAD_POSITION_LEFT_JUSTIFY;
   if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "|ssib", (char**) arg_names,
-      &true_str, &false_str, &size, &pad_left)) 
+      args, kw_args, "|ssif", (char**) arg_names,
+      &true_str, &false_str, &size, &position)) 
     return -1;
 
   if (size < 0)
@@ -36,8 +36,8 @@ int tp_init(PyBool* self, PyObject* args, PyObject* kw_args)
       fixfmt::string_length(true_str), fixfmt::string_length(false_str));
 
   new(self) PyBool;
-  self->fmt_ = unique_ptr<fixfmt::Bool>(
-      new fixfmt::Bool(string(true_str), string(false_str), size, pad_left));
+  self->fmt_ = std::make_unique<fixfmt::Bool>(
+      fixfmt::Bool::Args{size, string(true_str), string(false_str), position});
   return 0;
 }
 
@@ -63,25 +63,25 @@ auto methods = Methods<PyBool>()
 
 ref<Object> get_false(PyBool* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_false());
+  return Unicode::from(self->fmt_->get_args().false_str);
 }
 
 
-ref<Object> get_pad_left(PyBool* const self, void* /* closure */)
+ref<Object> get_position(PyBool* const self, void* /* closure */)
 {
-  return Bool::from(self->fmt_->get_pad_left());
+  return Float::FromDouble(self->fmt_->get_args().position);
 }
 
 
 ref<Object> get_size(PyBool* const self, void* /* closure */)
 {
-  return Long::FromLong(self->fmt_->get_size());
+  return Long::FromLong(self->fmt_->get_args().size);
 }
 
 
 ref<Object> get_true(PyBool* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_true());
+  return Unicode::from(self->fmt_->get_args().true_str);
 }
 
 
@@ -93,7 +93,7 @@ ref<Object> get_width(PyBool* const self, void* /* closure */)
 
 auto getsets = GetSets<PyBool>()
   .add_get<get_false>       ("false")
-  .add_get<get_pad_left>    ("pad_left")
+  .add_get<get_position>    ("position")
   .add_get<get_size>        ("size")
   .add_get<get_true>        ("true")
   .add_get<get_width>       ("width")

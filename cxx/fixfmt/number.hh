@@ -51,9 +51,10 @@ public:
   Number& operator=(Number&&)       = default;
   ~Number()                         = default;
 
-  Number(Args const& args)          : args_(args) { check(args_); set_up(); }
-  Number(Args&& args)               : args_(std::move(args)) 
-    { check(args_); set_up(); }
+  Number(Args const& args) 
+    : args_(args) { check(args_); set_up(); }
+  Number(Args&& args) 
+    : args_(std::move(args)) { check(args_); set_up(); }
 
   /*
    * Convenience ctor for the most common options.
