@@ -335,19 +335,19 @@ def _get_formatter(name, arr, cfg):
     return _get_default_formatter(arr, cfg=cfg)
 
 
-def _get_header_justification(fmt):
+def _get_header_position(fmt):
     """
-    Returns true if the format is right-justified.
+    Returns the pad position for justifying the header.
     """
     if isinstance(fmt, Bool):
-        return fmt.pad_left
+        return fmt.pad_position
     elif isinstance(fmt, Number):
-        return True
+        return 0  # FIXME: Constant.
     elif isinstance(fmt, String):
-        return fmt.pad_left
+        return fmt.pad_position
     else:
         # Assume everythign else is left-justified.
-        return False
+        return 1  # FIXME: Constant.
 
 
 #-------------------------------------------------------------------------------
@@ -433,9 +433,10 @@ class Table:
             def format_name(i, name, fmt):
                 name = name or ""
                 name = cfg.prefix + name + cfg.suffix
-                left = _get_header_justification(fmt)
+                pad_position = _get_header_position(fmt)
                 name = palide(
-                    name, fmt.width, position=cfg.elide.position, left=left)
+                    name, fmt.width, elide_position=cfg.elide.position, 
+                    pad_position=pad_position)
                 name = cfg.style.prefix + name + cfg.style.suffix
                 if i > 0:
                     if i == self.__num_idx:
