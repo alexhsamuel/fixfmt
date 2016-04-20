@@ -1,3 +1,6 @@
+To use the Python API, add this directory (`.../fixfmt/python/`) to your
+`PYTHONPATH`.
+
 # API
 
 The Python API is a wrapper around the [C++ API](../cxx/README.md).  For
