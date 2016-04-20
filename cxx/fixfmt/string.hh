@@ -11,53 +11,59 @@ namespace fixfmt {
 
 using std::string;
 
+/*
+ * Fixed-width formatter for strings.
+ */
 class String
 {
 public:
 
-  String(
-    int     size,
-    string  ellipsis="\u2026",
-    string  pad=" ",
-    double  position=1.0,
-    bool    pad_left=false);
+  /*
+   * Arguments to a string formatter.
+   */
+  struct Args
+  {
+    int     size            = 8;
+    string  ellipsis        = ELLIPSIS;
+    string  pad             = " ";
+    float   elide_position  = 1;
+    float   pad_position    = 1;
+  };
 
-  size_t        get_width()     const { return size_; }
+  String()                          = default;
+  String(String const&)             = default;
+  String(String&&)                  = default;
+  String& operator=(String const&)  = default;
+  String& operator=(String&&)       = default;
+  ~String()                         = default;
 
-  int           get_size()      const { return size_; }
-  string const& get_ellipsis()  const { return ellipsis_; }
-  string const& get_pad()       const { return pad_; }
-  double        get_position()  const { return position_; }
-  bool          get_pad_left()  const { return pad_left_; }
+  String(Args const& args)          : args_(args) { check(args_); }
+  String(Args&& args)               : args_(std::move(args)) { check(args_); }
+  explicit String(int const size)   : String(Args{size}) {}
 
-  string operator()(string const& str) const;
+  Args const&   get_args() const { return args_; }
+  void          set_args(Args const& args) { check(args); args_ = args; }
+  void          set_args(Args&& args) { check(args); args_ = std::move(args); }
+
+  size_t        get_width() const { return args_.size; }
+  string        operator()(string const& str) const;
 
 private:
 
-  int       const size_;
-  string    const ellipsis_;
-  string    const pad_;
-  double    const position_;
-  bool      const pad_left_;
+  static void   check(Args const&);
+
+  Args args_ = {};
 
 };
 
 
-inline 
-String::String(
-  int     const size,
-  string        ellipsis,
-  string        pad,
-  double  const position,
-  bool    const pad_left)
-: size_(size),
-  ellipsis_(std::move(ellipsis)),
-  pad_(std::move(pad)),
-  position_(position),
-  pad_left_(pad_left)
+inline void
+String::check(
+  Args const& args)
 {
-  assert(ellipsis_.length() <= (size_t) size_);
-  assert(0 <= position_ && position_ <= 1);
+  assert(args.ellipsis.length() <= (size_t) args.size);
+  assert(0 <= args.elide_position && args.elide_position <= 1);
+  assert(0 <= args.pad_position && args.pad_position <= 1);
 }
 
 
@@ -66,7 +72,9 @@ String::operator()(
   string const& str) 
   const
 {
-  return palide(str, size_, ellipsis_, pad_, position_, pad_left_);
+  return palide(
+    str, args_.size, args_.ellipsis, args_.pad, args_.elide_position, 
+    args_.pad_position);
 }
 
 

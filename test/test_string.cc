@@ -4,7 +4,7 @@
 using namespace fixfmt;
 
 TEST(String, basic) {
-  String fmt{10};
+  String fmt(10);
   ASSERT_EQ(10u, fmt.get_width());
 
   ASSERT_EQ("Hello.    ", fmt("Hello."));

@@ -28,10 +28,10 @@ def test_pad_pad():
 
 
 def test_pad_left():
-    assert pad("hello",  4, left=True ) == "hello"
-    assert pad("hello", 10, left=False) == "hello     "
-    assert pad("hello", 10, left=True ) == "     hello"
-    assert pad("hello", 10, left=True, pad="/") == "/////hello"
+    assert pad("hello",  4, position=0 ) == "hello"
+    assert pad("hello", 10, position=1 ) == "hello     "
+    assert pad("hello", 10, position=0 ) == "     hello"
+    assert pad("hello", 10, position=0, pad="/") == "/////hello"
 
 
 # FIXME: Test center().
@@ -96,9 +96,9 @@ def test_palide_pad():
 
 
 def test_palide_position():
-    assert palide("Hello, world!", 11, "..", position=0.0) == "..o, world!"
-    assert palide("Hello, world!", 11, "..", position=0.6) == "Hello..rld!"
-    assert palide("Hello, world!", 11, "..", position=0.8) == "Hello, ..d!"
+    assert palide("Hello, world!", 11, "..", elide_position=0.0) == "..o, world!"
+    assert palide("Hello, world!", 11, "..", elide_position=0.6) == "Hello..rld!"
+    assert palide("Hello, world!", 11, "..", elide_position=0.8) == "Hello, ..d!"
 
 
 def test_palide_args():
@@ -106,7 +106,7 @@ def test_palide_args():
         ellipsis="-//-", 
         length=20,
         pad="x",
-        position=0.4,
+        elide_position=0.4,
         string="The quick brown fox jumped over the lazy dogs.",
         ) == "The qu-//-lazy dogs."
 

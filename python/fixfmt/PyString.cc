@@ -15,16 +15,16 @@ namespace {
 int tp_init(PyString* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] 
-      = {"size", "ellipsis", "pad", "position", "pad_left", nullptr};
+      = {"size", "ellipsis", "pad", "elide_position", "pad_position", nullptr};
 
   int         size;
   char const* ellipsis = "\u2026";
   char const* pad = " ";
-  double      position = 1.0;
-  bool        pad_left = false;
+  float       elide_position = 1;
+  float       pad_position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
   if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "i|ssdb", (char**) arg_names,
-      &size, &ellipsis, &pad, &position, &pad_left)) 
+      args, kw_args, "i|ssff", (char**) arg_names,
+      &size, &ellipsis, &pad, &elide_position, &pad_position)) 
     return -1;
 
   // FIXME: Validate args.
@@ -34,8 +34,9 @@ int tp_init(PyString* self, PyObject* args, PyObject* kw_args)
   }
 
   new(self) PyString;
-  self->fmt_ = unique_ptr<fixfmt::String>(
-      new fixfmt::String(size, ellipsis, pad, position, pad_left));
+  self->fmt_ = std::make_unique<fixfmt::String>(
+    fixfmt::String::Args{
+      size, ellipsis, pad, (float) elide_position, (float) pad_position});
   return 0;
 }
 
@@ -58,31 +59,31 @@ auto methods = Methods<PyString>()
 
 ref<Object> get_ellipsis(PyString* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_ellipsis());
+  return Unicode::from(self->fmt_->get_args().ellipsis);
 }
 
 
 ref<Object> get_pad(PyString* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_pad());
+  return Unicode::from(self->fmt_->get_args().pad);
 }
 
 
-ref<Object> get_pad_left(PyString* const self, void* /* closure */)
+ref<Object> get_pad_position(PyString* const self, void* /* closure */)
 {
-  return Bool::from(self->fmt_->get_pad_left());
+  return Float::FromDouble(self->fmt_->get_args().pad_position);
 }
 
 
-ref<Object> get_position(PyString* const self, void* /* closure */)
+ref<Object> get_elide_position(PyString* const self, void* /* closure */)
 {
-  return Float::FromDouble(self->fmt_->get_position());
+  return Float::FromDouble(self->fmt_->get_args().elide_position);
 }
 
 
 ref<Object> get_size(PyString* const self, void* /* closure */)
 {
-  return Long::FromLong(self->fmt_->get_size());
+  return Long::FromLong(self->fmt_->get_args().size);
 }
 
 
@@ -93,12 +94,12 @@ ref<Object> get_width(PyString* const self, void* /* closure */)
 
 
 auto getsets = GetSets<PyString>()
-  .add_get<get_ellipsis>    ("ellipsis")
-  .add_get<get_pad>         ("pad")
-  .add_get<get_pad_left>    ("pad_left")
-  .add_get<get_position>    ("position")
-  .add_get<get_size>        ("size")
-  .add_get<get_width>       ("width")
+  .add_get<get_ellipsis>        ("ellipsis")
+  .add_get<get_pad>             ("pad")
+  .add_get<get_pad_position>    ("pad_position")
+  .add_get<get_elide_position>  ("elide_position")
+  .add_get<get_size>            ("size")
+  .add_get<get_width>           ("width")
   ;
 
 

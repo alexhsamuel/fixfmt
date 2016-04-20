@@ -35,12 +35,19 @@ TEST(pad, basic) {
   ASSERT_EQ(pad(s, 20), "Hello, world!       ");
   ASSERT_EQ(pad(s, 14, "~"), "Hello, world!~");
   ASSERT_EQ(pad(s, 20, "~"), "Hello, world!~~~~~~~");
-  ASSERT_EQ(pad(s, 20, " ", true), "       Hello, world!");
-  ASSERT_EQ(pad(s, 20, "-", true), "-------Hello, world!");
+  ASSERT_EQ(
+    pad(s, 20, " ", PAD_POSITION_RIGHT_JUSTIFY), 
+    "       Hello, world!");
+  ASSERT_EQ(
+    pad(s, 20, "-", PAD_POSITION_RIGHT_JUSTIFY), 
+    "-------Hello, world!");
   ASSERT_EQ(pad(s, 20, "-|"), "Hello, world!-|-|-|-");
-  ASSERT_EQ(pad(s, 20, "<->", true), "<-><-><Hello, world!");
-  ASSERT_EQ(pad(s, 20, "\u2026.", true),
-            "\u2026.\u2026.\u2026.\u2026Hello, world!");
+  ASSERT_EQ(
+    pad(s, 20, "<->", PAD_POSITION_RIGHT_JUSTIFY), 
+    "<-><-><Hello, world!");
+  ASSERT_EQ(
+    pad(s, 20, "\u2026.", 0),
+    "\u2026.\u2026.\u2026.\u2026Hello, world!");
 }
 
 TEST(center, basic) {
@@ -48,13 +55,13 @@ TEST(center, basic) {
   ASSERT_EQ(center(s, 10), s);
   ASSERT_EQ(center(s, 13), s);
   ASSERT_EQ(center(s, 20), "    Hello, world!   ");
-  ASSERT_EQ(center(s, 20, " " , 0.0 ), "Hello, world!       ");
-  ASSERT_EQ(center(s, 20, " " , 0.25), "  Hello, world!     ");
-  ASSERT_EQ(center(s, 20, " " , 0.49), "   Hello, world!    ");
-  ASSERT_EQ(center(s, 20, " " , 0.75), "     Hello, world!  ");
-  ASSERT_EQ(center(s, 20, " " , 1.0 ), "       Hello, world!");
-  ASSERT_EQ(center(s, 20, "-" , 0.25), "--Hello, world!-----");
-  ASSERT_EQ(center(s, 20, "+-", 0.25), "+-Hello, world!+-+-+");
+  ASSERT_EQ(pad(s, 20, " " , 1.0 ), "Hello, world!       ");
+  ASSERT_EQ(pad(s, 20, " " , 0.75), "  Hello, world!     ");
+  ASSERT_EQ(pad(s, 20, " " , 0.51), "   Hello, world!    ");
+  ASSERT_EQ(pad(s, 20, " " , 0.25), "     Hello, world!  ");
+  ASSERT_EQ(pad(s, 20, " " , 0.0 ), "       Hello, world!");
+  ASSERT_EQ(pad(s, 20, "-" , 0.75), "--Hello, world!-----");
+  ASSERT_EQ(pad(s, 20, "+-", 0.75), "+-Hello, world!+-+-+");
 }
 
 TEST(elide, basic) {

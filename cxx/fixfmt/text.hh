@@ -175,22 +175,34 @@ fill(
 }
 
 
-// FIXME: Do we need both pad() and center()?
+float constexpr PAD_POSITION_LEFT_JUSTIFY   = 1;
+float constexpr PAD_POSITION_RIGHT_JUSTIFY  = 0;
+float constexpr PAD_POSITION_CENTER         = 0.5;
+
 
 /**
- * Left- or right-justifies a string to fixed length by padding.
+ * Pads a string in to fixed length on one or both sides.
+ *
+ * If position=1, the string is padded at the right, thus left-justified.  If
+ * position=0, the string is padded at the left, thus right-justified.  If
+ * position=0.5, the string is padded equally on both sides, thus centered.
  */
 inline string
 pad(
   string const& str,
   size_t const length,
   string const& pad=" ",
-  bool const left=false)
+  float position=PAD_POSITION_LEFT_JUSTIFY)
 {
+  assert(string_length(pad) > 0);
+  assert(0 <= position);
+  assert(position <= 1);
   size_t const str_len = string_length(str);
   if (str_len < length) {
-    string const padding = fill(pad, length - str_len);
-    string const result = left ? padding + str : str + padding;
+    size_t const pad_len = length - str_len;
+    size_t const left_len = (size_t) round((1 - position) * pad_len);
+    string const result = 
+      fill(pad, left_len) + str + fill(pad, pad_len - left_len);
     assert(string_length(result) == length);
     return result;
   }
@@ -199,30 +211,13 @@ pad(
 }
 
 
-/**
- * Centers a string in to fixed length by padding both sides.
- */
 inline string
 center(
   string const& str,
   size_t const length,
-  string const& pad=" ",
-  float position=0.5)
+  string const& pad=" ")
 {
-  assert(string_length(pad) > 0);
-  assert(0 <= position);
-  assert(position <= 1);
-  size_t const str_len = string_length(str);
-  if (str_len < length) {
-    size_t const pad_len = length - str_len;
-    size_t const left_len = (size_t) round(position * pad_len);
-    string const result = 
-      fill(pad, left_len) + str + fill(pad, pad_len - left_len);
-    assert(string_length(result) == length);
-    return result;
-  }
-  else
-    return str;
+  return fixfmt::pad(str, length, pad, PAD_POSITION_CENTER);
 }
 
 
@@ -235,7 +230,7 @@ elide(
   string const& str,
   size_t const max_length,
   string const& ellipsis=ELLIPSIS,
-  float const position=1.0)
+  float const position=1)
 {
   size_t const ellipsis_len = string_length(ellipsis);
   assert(max_length >= ellipsis_len);
@@ -270,10 +265,11 @@ palide(
   size_t const length,
   string const& ellipsis=ELLIPSIS,
   string const& pad=" ",
-  float const position=1.0,
-  bool const left=false)
+  float const elide_position=1,
+  float pad_position=1)
 {
-  return fixfmt::pad(elide(str, length, ellipsis, position), length, pad, left);
+  return fixfmt::pad(
+    elide(str, length, ellipsis, elide_position), length, pad, pad_position);
 }
 
 

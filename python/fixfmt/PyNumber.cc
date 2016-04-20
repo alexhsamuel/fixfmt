@@ -56,11 +56,10 @@ static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
   }
 
   new(self) PyNumber;
-  self->fmt_ = unique_ptr<fixfmt::Number>(
-      new fixfmt::Number({
-          size, precision, 
-          (char) sign, (char) pad, (char) point, 
-          std::string(nan), std::string(inf), (char) bad}));
+  self->fmt_ = std::make_unique<fixfmt::Number>(
+      fixfmt::Number::Args{size, precision, 
+       .sign=(char) sign, .pad=(char) pad, .point=(char) point, 
+       .bad=(char) bad, .nan=nan, .inf=inf});
   return 0;
 }
 
@@ -81,37 +80,37 @@ auto methods = Methods<PyNumber>()
 
 ref<Object> get_bad(PyNumber* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_bad());
+  return Unicode::from(self->fmt_->get_args().bad);
 }
 
 
 ref<Object> get_inf(PyNumber* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_inf());
+  return Unicode::from(self->fmt_->get_args().inf);
 }
 
 
 ref<Object> get_nan(PyNumber* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_nan());
+  return Unicode::from(self->fmt_->get_args().nan);
 }
 
 
 ref<Object> get_pad(PyNumber* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_pad());
+  return Unicode::from(self->fmt_->get_args().pad);
 }
 
 
 ref<Object> get_point(PyNumber* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_point());
+  return Unicode::from(self->fmt_->get_args().point);
 }
 
 
 ref<Object> get_precision(PyNumber* const self, void* /* closure */)
 {
-  int const precision = self->fmt_->get_precision();
+  int const precision = self->fmt_->get_args().precision;
   return 
     precision == fixfmt::Number::PRECISION_NONE ? none_ref()
     : (ref<Object>) Long::FromLong(precision);
@@ -120,13 +119,13 @@ ref<Object> get_precision(PyNumber* const self, void* /* closure */)
 
 ref<Object> get_sign(PyNumber* const self, void* /* closure */)
 {
-  return Unicode::from(self->fmt_->get_sign());
+  return Unicode::from(self->fmt_->get_args().sign);
 }
 
 
 ref<Object> get_size(PyNumber* const self, void* /* closure */)
 {
-  return Long::FromLong(self->fmt_->get_size());
+  return Long::FromLong(self->fmt_->get_args().size);
 }
 
 

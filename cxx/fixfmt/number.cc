@@ -13,7 +13,7 @@ Number::operator()(
   const
 {
   if (val < 0 && args_.sign == SIGN_NONE)
-    return bad_result_;
+    return bad_;
 
   // Format directly into the string's buffer.
   string result(width_, args_.pad);
@@ -33,7 +33,7 @@ Number::operator()(
       buf[sign_len + --i] = '0' + val % 10;
     // We should have rendered the entire value; otherwise we've overflowed.
     if (val != 0)
-      return bad_result_;
+      return bad_;
   }
 
   // Render the sign.
@@ -60,13 +60,13 @@ Number::operator()(
   const
 {
   if (isnan(val))
-    return nan_result_;
+    return nan_;
   else if (val < 0 && args_.sign == SIGN_NONE)
     // With SIGN_NONE, we can't render negative numbers.
-    return bad_result_;
+    return bad_;
   else if (isinf(val))
     // Return the appropriate infinity.
-    return val >= 0 ? pos_inf_result_ : neg_inf_result_;
+    return val >= 0 ? pos_inf_ : neg_inf_;
 
   else {
     int const precision 
@@ -92,7 +92,7 @@ Number::operator()(
 
     if (decimal_pos > args_.size)
       // Integral part too large.
-      return bad_result_;
+      return bad_;
 
     // The number of digits in the integral part.
     //

@@ -101,13 +101,32 @@ ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
 ref<Object> center(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
+    "string", "length", "pad", nullptr};
+  char const* str;
+  int length;
+  char const* pad = " ";
+  Arg::ParseTupleAndKeywords(
+      args, kw_args, "sI|sd", arg_names, &str, &length, &pad);
+
+  // FIXME: Validate args.
+  if (strlen(pad) == 0)
+    throw ValueError("empty pad");
+
+  return Unicode::from(fixfmt::center(string(str), length, pad));
+}
+
+
+ref<Object> pad(Module* module, Tuple* args, Dict* kw_args)
+{
+  static char const* arg_names[] = {
     "string", "length", "pad", "position", nullptr};
   char const* str;
   int length;
   char const* pad = " ";
-  float position = 0.5;
+  float position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
   Arg::ParseTupleAndKeywords(
-      args, kw_args, "sI|sd", arg_names, &str, &length, &pad, &position);
+      args, kw_args, "sI|sf", arg_names, 
+      &str, &length, &pad, &position, nullptr);
 
   // FIXME: Validate args.
   if (strlen(pad) == 0)
@@ -115,26 +134,7 @@ ref<Object> center(Module* module, Tuple* args, Dict* kw_args)
   if (position < 0 or position > 1)
     throw ValueError("position out of range");
 
-  return Unicode::from(fixfmt::center(string(str), length, pad, position));
-}
-
-
-ref<Object> pad(Module* module, Tuple* args, Dict* kw_args)
-{
-  static char const* arg_names[] = {
-    "string", "length", "pad", "left", nullptr};
-  char const* str;
-  int length;
-  char const* pad = " ";
-  int left = false;
-  Arg::ParseTupleAndKeywords(
-      args, kw_args, "sI|sp", arg_names, &str, &length, &pad, &left);
-
-  // FIXME: Validate args.
-  if (strlen(pad) == 0)
-    throw ValueError("empty pad");
-
-  return Unicode::from(fixfmt::pad(string(str), length, pad, (bool) left));
+  return Unicode::from(fixfmt::pad(string(str), length, pad, (float) position));
 }
 
 
@@ -145,7 +145,7 @@ ref<Object> elide(Module* module, Tuple* args, Dict* kw_args)
   char const* str;
   int length;
   char const* ellipsis = fixfmt::ELLIPSIS;
-  float position = 1.0;
+  float position = 1;
   Arg::ParseTupleAndKeywords(
     args, kw_args, "sI|sf", arg_names, &str, &length, &ellipsis, &position);
 
@@ -157,23 +157,24 @@ ref<Object> elide(Module* module, Tuple* args, Dict* kw_args)
 ref<Object> palide(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
-    "string", "length", "ellipsis", "pad", "position", "left", nullptr };
+    "string", "length", "ellipsis", "pad", "elide_position", 
+    "pad_position", nullptr };
   char const* str;
   int length;
   char const* ellipsis = fixfmt::ELLIPSIS;
   char const* pad = " ";
-  float position = 1.0;
-  int left = false;
+  float elide_position = 1;
+  float pad_position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
   Arg::ParseTupleAndKeywords(
-    args, kw_args, "sI|ssfp", arg_names,
-    &str, &length, &ellipsis, &pad, &position, &left);
+    args, kw_args, "sI|ssff", arg_names,
+    &str, &length, &ellipsis, &pad, &elide_position, &pad_position);
 
   // FIXME: Validate args.
   if (strlen(pad) == 0)
     throw ValueError("empty pad");
 
   string r = fixfmt::palide(
-    string(str), length, string(ellipsis), pad, position, (bool) left);
+    string(str), length, string(ellipsis), pad, elide_position, pad_position);
   return Unicode::from(r);
 }
 
