@@ -11,7 +11,11 @@
 namespace {
 
 inline bool
-within(unsigned char min, unsigned char val, unsigned char max)
+within(
+  unsigned char min, 
+  unsigned char val, 
+  unsigned char max)
+  noexcept
 {
   return min <= val && val <= max;
 }
@@ -36,6 +40,7 @@ constexpr char ANSI_ESCAPE = '\x1b';
 inline bool
 next_utf8(
   string::const_iterator& i)
+  noexcept
 {
   unsigned char c = *i++;
   if ((c & 0xc0) == 0xc0) {
@@ -65,6 +70,7 @@ next_utf8(
 inline size_t
 utf8_length(
   string const& str)
+  noexcept
 {
   size_t length = 0;
   // FIXME: Problem if the last code point is malformed.
@@ -81,6 +87,7 @@ inline bool
 skip_ansi_escape(
   string::const_iterator& i, 
   string::const_iterator const& end)
+  noexcept
 {
   assert(i != end);
   if (*i == ANSI_ESCAPE) {
@@ -106,6 +113,7 @@ skip_ansi_escape(
 inline size_t
 string_length(
   string const& str)
+  noexcept
 {
   size_t length = 0;
   auto const& end = str.end();

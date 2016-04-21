@@ -30,22 +30,22 @@ public:
     float   pad_position    = 1;
   };
 
-  String()                          = default;
-  String(String const&)             = default;
-  String(String&&)                  = default;
-  String& operator=(String const&)  = default;
-  String& operator=(String&&)       = default;
-  ~String()                         = default;
+  String()                              = default;
+  String(String const&)                 = default;
+  String(String&&) noexcept             = default;
+  String& operator=(String const&)      = default;
+  String& operator=(String&&) noexcept  = default;
+  ~String() noexcept                    = default;
 
   String(Args const& args)          : args_(args) { check(args_); }
   String(Args&& args)               : args_(std::move(args)) { check(args_); }
   explicit String(int const size)   : String(Args{size}) {}
 
-  Args const&   get_args() const { return args_; }
+  Args const&   get_args() const noexcept { return args_; }
   void          set_args(Args const& args) { check(args); args_ = args; }
   void          set_args(Args&& args) { check(args); args_ = std::move(args); }
 
-  size_t        get_width() const { return args_.size; }
+  size_t        get_width() const noexcept { return args_.size; }
   string        operator()(string const& str) const;
 
 private:

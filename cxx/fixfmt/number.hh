@@ -44,12 +44,12 @@ public:
     string   inf            = "inf";
   };
   
-  Number()                          = default;
-  Number(Number const&)             = default;
-  Number(Number&&)                  = default;
-  Number& operator=(Number const&)  = default;
-  Number& operator=(Number&&)       = default;
-  ~Number()                         = default;
+  Number()                              = default;
+  Number(Number const&)                 = default;
+  Number(Number&&) noexcept             = default;
+  Number& operator=(Number const&)      = default;
+  Number& operator=(Number&&) noexcept  = default;
+  ~Number() noexcept                    = default;
 
   Number(Args const& args) 
     : args_(args) { check(args_); set_up(); }
@@ -68,14 +68,14 @@ public:
   {
   }
 
-  Args const& get_args() const 
+  Args const& get_args() const noexcept
     { return args_; }
   void set_args(Args const& args) 
     { check(args); args_ = args; set_up(); }
   void set_args(Args&& args) 
     { check(args); args_ = std::move(args); set_up(); }
 
-  size_t        get_width() const { return width_; }
+  size_t        get_width() const noexcept { return width_; }
   string        operator()(long val) const;
   string        operator()(double val) const;
 

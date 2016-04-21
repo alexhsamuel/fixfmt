@@ -30,12 +30,12 @@ public:
     float   position    = PAD_POSITION_LEFT_JUSTIFY;
   };
 
-  Bool()                        = default;
-  Bool(Bool const&)             = default;
-  Bool(Bool&&)                  = default;
-  Bool& operator=(Bool const&)  = default;
-  Bool& operator=(Bool&&)       = default;
-  ~Bool()                       = default;
+  Bool()                            = default;
+  Bool(Bool const&)                 = default;
+  Bool(Bool&&) noexcept             = default;
+  Bool& operator=(Bool const&)      = default;
+  Bool& operator=(Bool&&) noexcept  = default;
+  ~Bool() noexcept                  = default;
 
   Bool(Args const& args) 
     : args_(args) { check(args_); set_up(); }
@@ -51,14 +51,14 @@ public:
   {
   }
 
-  Args const& get_args() const 
+  Args const& get_args() const noexcept
     { return args_; }
   void set_args(Args const& args)
     { check(args); args_ = args; set_up(); }
   void set_args(Args&& args)
     { check(args); args_ = std::move(args); set_up(); }
 
-  size_t get_width() const { return args_.size; }
+  size_t get_width() const noexcept { return args_.size; }
   string operator()(bool const val) const
     { return val ? true_ : false_; }
 

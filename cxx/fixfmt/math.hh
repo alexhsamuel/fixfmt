@@ -12,6 +12,7 @@ namespace fixfmt {
 inline double 
 pow10(
   int const n)
+  noexcept
 {
   static constexpr double POW10[40] = {
     1e-20, 1e-19, 1e-18, 1e-17, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11,
@@ -33,6 +34,7 @@ pow10(
 inline long 
 round(
   double const val)
+  noexcept
 {
   // FIXME: Broken for val > MAX_LONG.
   long const i = (long) val;
@@ -50,6 +52,7 @@ inline double
 round(
   double const val, 
   int const num_digits)
+  noexcept
 {
   // FIXME: Broken for val > MAX_LONG.
   double const mult = pow10(num_digits);
