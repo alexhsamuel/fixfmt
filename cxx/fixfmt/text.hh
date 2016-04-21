@@ -219,6 +219,9 @@ pad(
 }
 
 
+/*
+ * Deprecated.  Use `pad(str, len, pad, PAD_POSITION_CENTER)` instead.
+ */
 inline string
 center(
   string const& str,
