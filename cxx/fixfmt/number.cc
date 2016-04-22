@@ -7,6 +7,8 @@ using std::string;
 
 //------------------------------------------------------------------------------
 
+Number::Scale const Number::SCALE_NONE          = {};
+
 Number::Scale const Number::SCALE_PERCENT       = {1 / 1E-2 , "%"};
 Number::Scale const Number::SCALE_PER_MILLE     = {1 / 1E-3 , "\u2030"};
 Number::Scale const Number::SCALE_BASIS_POINTS  = {1 / 1E-4 , " bps"};
@@ -42,7 +44,7 @@ Number::operator()(
     return bad_;
 
   // Format directly into the string's buffer.
-  string result(width_, args_.pad);
+  string result(alloc_size_, args_.pad);
   char* const buf = &result[0];
 
   int const sign_len = args_.sign == SIGN_NONE ? 0 : 1;
@@ -75,7 +77,7 @@ Number::operator()(
       memset(point, '0', args_.precision);
   }
 
-  assert(result.length() == width_);
+  assert(string_length(result) == width_);
   return result;
 }
 
@@ -167,10 +169,11 @@ Number::operator()(
         result.append(args_.precision - (length - decimal_pos), '0');
     }
  
-    if (args_.scale.enabled())
+    if (args_.scale.enabled()) 
+      // Tack on the scale suffix.
       result.append(args_.scale.suffix);
 
-    assert(result.length() == width_);
+    assert(string_length(result) == width_);
     return result;
   }
 }
