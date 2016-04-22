@@ -34,14 +34,14 @@ public:
    */
   struct Args
   {
-    int      size           = 8;
-    int      precision      = PRECISION_NONE;
-    char     sign           = SIGN_NEGATIVE;
-    char     pad            = ' ';
-    char     point          = '.';
-    char     bad            = '#';
-    string   nan            = "NaN";
-    string   inf            = "inf";
+    int     size            = 8;
+    int     precision       = PRECISION_NONE;
+    char    sign            = SIGN_NEGATIVE;
+    char    pad             = ' ';
+    char    point           = '.';
+    char    bad             = '#';
+    string  nan             = "NaN";
+    string  inf             = "inf";
   };
   
   Number()                              = default;
