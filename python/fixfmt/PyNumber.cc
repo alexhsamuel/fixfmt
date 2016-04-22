@@ -13,20 +13,23 @@ static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {
     "size", "precision", "pad", "sign", "nan", "inf", "point", "bad",
-    nullptr
+    "scale", nullptr
   };
 
-  int            size;
-  Object*        precision_arg   = (Object*) Py_None;
-  int            pad             = fixfmt::Number::PAD_SPACE;
-  int            sign            = fixfmt::Number::SIGN_NEGATIVE;
-  char const*    nan             = "NaN";
-  char const*    inf             = "inf";
-  int            point           = '.';
-  int            bad             = '#';
+  int           size;
+  Object*       precision_arg   = (Object*) Py_None;
+  int           pad             = fixfmt::Number::PAD_SPACE;
+  int           sign            = fixfmt::Number::SIGN_NEGATIVE;
+  char const*   nan             = "NaN";
+  char const*   inf             = "inf";
+  int           point           = '.';
+  int           bad             = '#';
+  double        scale_factor    = fixfmt::Number::Scale{}.factor;
+  char const*   scale_suffix    = "";
   if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "i|O$CCssCC", (char**) arg_names,
-      &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad)) 
+      args, kw_args, "i|O$CCssCC(ds)", (char**) arg_names,
+      &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad,
+      &scale_factor, &scale_suffix)) 
     return -1;
 
   if (size < 0) {
@@ -53,12 +56,17 @@ static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
     PyErr_SetString(PyExc_ValueError, "invalid sign");
     return 1;
   }
+  if (!(scale_factor >= 0)) {
+    PyErr_SetString(PyExc_ValueError, "invalid scale factor");
+    return 1;
+  }
 
   new(self) PyNumber;
   self->fmt_ = std::make_unique<fixfmt::Number>(
       fixfmt::Number::Args{size, precision, 
        .sign=(char) sign, .pad=(char) pad, .point=(char) point, 
-       .bad=(char) bad, .nan=nan, .inf=inf});
+       .bad=(char) bad, .nan=nan, .inf=inf,
+       .scale={scale_factor, scale_suffix}});
   return 0;
 }
 

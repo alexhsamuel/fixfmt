@@ -2,6 +2,8 @@ import pytest
 
 from   fixfmt import *
 
+NAN = float("NaN")
+
 #-------------------------------------------------------------------------------
 
 def test_precision():
@@ -12,5 +14,13 @@ def test_precision():
     assert Number(4,    0)(x) == "  123."
     assert Number(4,    1)(x) == "  123.5"
     assert Number(4,    3)(x) == "  123.457"
+
+
+def test_scale():
+    assert Number(8, scale=Scale.CENTI)(1) == "      100c"
+    assert Number(8, scale=Scale.MICRO)(1) == "  1000000µ"
+
+    assert Number(5, 2, scale=Scale.KILO)(123456) == "   123.46k"
+    assert Number(5, 2, scale=Scale.KILO)(NAN)    == "   NaN    "
 
 
