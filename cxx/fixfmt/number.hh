@@ -29,6 +29,14 @@ public:
 
   constexpr static int  PRECISION_NONE = -1;
 
+  struct Scale
+  {
+    double  factor          = NAN;
+    string  suffix          = "";
+
+    bool enabled() const { return !isnan(factor); }
+  };
+
   /*
    * Arguments to a number formatter.
    */
@@ -42,6 +50,7 @@ public:
     char    bad             = '#';
     string  nan             = "NaN";
     string  inf             = "inf";
+    Scale   scale           = {};
   };
   
   Number()                              = default;
@@ -121,6 +130,7 @@ Number::check(
          args.sign == SIGN_NONE 
       || args.sign == SIGN_NEGATIVE 
       || args.sign == SIGN_ALWAYS);
+  assert(isnan(args.scale.factor) || args.scale.factor > 0);
 }
 
 
@@ -150,14 +160,14 @@ Number::format_inf_nan(
 
   // Try to put it in the integer part.
   if (len <= (int) width_)
-    return pad(
+    result = pad(
       pad(result, size, " ", PAD_POSITION_RIGHT_JUSTIFY), 
       width_, " ", PAD_POSITION_LEFT_JUSTIFY);
-  else {
+  else 
     // Doesn't fit at all.
     string_truncate(result, width_);
-    return result;
-  }
+
+  return result;
 }
 
 
@@ -167,7 +177,8 @@ Number::set_up()
   width_ =
         args_.size
       + (args_.precision == PRECISION_NONE ? 0 : 1 + args_.precision)
-      + (args_.sign == SIGN_NEGATIVE || args_.sign == SIGN_ALWAYS ? 1 : 0);
+      + (args_.sign == SIGN_NEGATIVE || args_.sign == SIGN_ALWAYS ? 1 : 0)
+      + (args_.scale.enabled() ? string_length(args_.scale.suffix) : 0);
   nan_ = format_inf_nan(args_.nan, 0);
   pos_inf_ = format_inf_nan(args_.inf,  1);
   neg_inf_ = format_inf_nan(args_.inf, -1);

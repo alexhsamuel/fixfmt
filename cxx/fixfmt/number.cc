@@ -12,6 +12,10 @@ Number::operator()(
   long val) 
   const
 {
+  // Always use the FP code path if there's a scale.
+  if (args_.scale.enabled())
+    return (*this)((double) val);
+
   if (val < 0 && args_.sign == SIGN_NONE)
     return bad_;
 
@@ -56,15 +60,19 @@ Number::operator()(
 
 string 
 Number::operator()(
-  double const val) 
+  double const value) 
   const
 {
-  if (isnan(val))
+  if (isnan(value))
     return nan_;
-  else if (val < 0 && args_.sign == SIGN_NONE)
+  else if (value < 0 && args_.sign == SIGN_NONE)
     // With SIGN_NONE, we can't render negative numbers.
     return bad_;
-  else if (isinf(val))
+
+  // Apply the scale factor, if any.
+  double const val = args_.scale.enabled() ? value * args_.scale.factor : value;
+
+  if (isinf(val))
     // Return the appropriate infinity.
     return val >= 0 ? pos_inf_ : neg_inf_;
 
@@ -137,6 +145,9 @@ Number::operator()(
         result.append(args_.precision - (length - decimal_pos), '0');
     }
  
+    if (args_.scale.enabled())
+      result.append(args_.scale.suffix);
+
     assert(result.length() == width_);
     return result;
   }

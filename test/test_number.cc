@@ -241,3 +241,45 @@ TEST(Number, types) {
   ASSERT_EQ("-42.500", fmt((double) -42.5));
 }
 
+TEST(Number, scale_m) {
+  Number fmt({3, 1, .scale={1e-6, "M"}});
+  ASSERT_EQ(7, fmt.get_width());
+  ASSERT_EQ(" 100.0M", fmt(         1E+8  ));
+  ASSERT_EQ("  12.3M", fmt(  12345678     ));
+  ASSERT_EQ("  12.3M", fmt(  12345678.0   ));
+  ASSERT_EQ(" 123.5M", fmt( 123456789     ));
+  ASSERT_EQ("-234.6M", fmt(-234567890     ));
+  ASSERT_EQ("   1.0M", fmt(         1.0E+6));
+  ASSERT_EQ("  -0.1M", fmt(   -100000     ));
+  ASSERT_EQ("   0.1M", fmt(     50001     ));
+  ASSERT_EQ("   0.0M", fmt(     50000     ));
+  ASSERT_EQ("   0.0M", fmt(     50000.0   ));
+}
+
+TEST(Number, scale_percent) {
+  Number fmt({3, 1, fixfmt::Number::SIGN_NONE, .scale={100, "%"}});
+  ASSERT_EQ("  0.0%", fmt(0));
+  ASSERT_EQ("  0.0%", fmt(0.0));
+  ASSERT_EQ(" 50.0%", fmt(0.4995));
+  ASSERT_EQ(" 50.0%", fmt(0.5));
+  ASSERT_EQ("100.0%", fmt(1));
+  ASSERT_EQ("100.0%", fmt(1.0));
+}
+
+TEST(Number, scale_bps) {
+  Number fmt({5, .scale={1 / 1E-4, " bps"}});
+  ASSERT_EQ("     0 bps", fmt( 0.00001));
+  ASSERT_EQ("     1 bps", fmt( 0.0001 ));
+  ASSERT_EQ("   100 bps", fmt( 0.01   ));
+  ASSERT_EQ("  -100 bps", fmt(-0.01   ));
+  ASSERT_EQ(" 10000 bps", fmt( 1      ));
+  ASSERT_EQ("-50000 bps", fmt(-5      ));
+}
+
+TEST(Number, scale_special) {
+  Number fmt({3, 1, .scale={1e-6, "M"}});
+  ASSERT_EQ(" NaN   ", fmt(NAN));
+  ASSERT_EQ(" inf   ", fmt(INFINITY));
+  ASSERT_EQ("-inf   ", fmt(-INFINITY));
+}
+
