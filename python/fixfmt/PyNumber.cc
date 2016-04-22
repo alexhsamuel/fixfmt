@@ -12,8 +12,8 @@ namespace {
 static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {
-      "size", "precision", "pad", "sign", "nan", "inf", "point", "bad",
-      nullptr
+    "size", "precision", "pad", "sign", "nan", "inf", "point", "bad",
+    nullptr
   };
 
   int            size;
