@@ -43,8 +43,7 @@ static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
       precision = fixfmt::Number::PRECISION_NONE;
   }
   if (!(size > 0 || precision > 0)) {
-    // FIXME
-    PyErr_SetString(PyExc_ValueError, "no size or precision");
+    PyErr_SetString(PyExc_ValueError, "no digits to show");
     return 1;
   }
   if (   sign != fixfmt::Number::SIGN_NONE
