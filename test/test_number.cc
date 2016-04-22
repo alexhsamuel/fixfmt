@@ -257,7 +257,8 @@ TEST(Number, scale_m) {
 }
 
 TEST(Number, scale_percent) {
-  Number fmt({3, 1, fixfmt::Number::SIGN_NONE, .scale={100, "%"}});
+  Number fmt(
+    {3, 1, fixfmt::Number::SIGN_NONE, .scale=fixfmt::Number::SCALE_PERCENT});
   ASSERT_EQ("  0.0%", fmt(0));
   ASSERT_EQ("  0.0%", fmt(0.0));
   ASSERT_EQ(" 50.0%", fmt(0.4995));
@@ -267,7 +268,7 @@ TEST(Number, scale_percent) {
 }
 
 TEST(Number, scale_bps) {
-  Number fmt({5, .scale={1 / 1E-4, " bps"}});
+  Number fmt({5, .scale=fixfmt::Number::SCALE_BASIS_POINTS});
   ASSERT_EQ("     0 bps", fmt( 0.00001));
   ASSERT_EQ("     1 bps", fmt( 0.0001 ));
   ASSERT_EQ("   100 bps", fmt( 0.01   ));

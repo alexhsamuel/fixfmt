@@ -34,8 +34,28 @@ public:
     double  factor          = NAN;
     string  suffix          = "";
 
-    bool enabled() const { return !isnan(factor); }
+    bool enabled() const noexcept { return !isnan(factor); }
   };
+
+  static Scale const    SCALE_PERCENT;
+  static Scale const    SCALE_PER_MILLE;
+  static Scale const    SCALE_BASIS_POINTS;
+
+  static Scale const    SCALE_TERA;
+  static Scale const    SCALE_GIGA;
+  static Scale const    SCALE_MEGA;
+  static Scale const    SCALE_KILO;
+  static Scale const    SCALE_DECI;
+  static Scale const    SCALE_CENTI;
+  static Scale const    SCALE_MILLI;
+  static Scale const    SCALE_MICRO;
+  static Scale const    SCALE_NANO;
+  static Scale const    SCALE_PICO;
+  static Scale const    SCALE_FEMTO;
+
+  static Scale const    SCALE_GIBI;
+  static Scale const    SCALE_MEBI;
+  static Scale const    SCALE_KIBI;
 
   /*
    * Arguments to a number formatter.
