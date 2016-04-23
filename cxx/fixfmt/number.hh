@@ -30,6 +30,45 @@ public:
   constexpr static int  PRECISION_NONE = -1;
 
   /*
+   * Fixed scaling for rendering numbers.
+   *
+   * @factor
+   *   The (positive) scale factor by which to multiply values before 
+   *   formatting, or 0 for no scaling.
+   * @suffix
+   *   A suffix to append to formatted numbers to indicate scale.
+   */
+  struct Scale
+  {
+    double  factor          = 0;
+    string  suffix          = "";
+
+    bool enabled() const noexcept { return factor > 0; }
+  };
+
+  static Scale const    SCALE_NONE;
+
+  static Scale const    SCALE_PERCENT;
+  static Scale const    SCALE_PER_MILLE;
+  static Scale const    SCALE_BASIS_POINTS;
+
+  static Scale const    SCALE_TERA;
+  static Scale const    SCALE_GIGA;
+  static Scale const    SCALE_MEGA;
+  static Scale const    SCALE_KILO;
+  static Scale const    SCALE_DECI;
+  static Scale const    SCALE_CENTI;
+  static Scale const    SCALE_MILLI;
+  static Scale const    SCALE_MICRO;
+  static Scale const    SCALE_NANO;
+  static Scale const    SCALE_PICO;
+  static Scale const    SCALE_FEMTO;
+
+  static Scale const    SCALE_GIBI;
+  static Scale const    SCALE_MEBI;
+  static Scale const    SCALE_KIBI;
+
+  /*
    * Arguments to a number formatter.
    */
   struct Args
@@ -42,6 +81,7 @@ public:
     char    bad             = '#';
     string  nan             = "NaN";
     string  inf             = "inf";
+    Scale   scale           = {};
   };
   
   Number()                              = default;
@@ -97,7 +137,11 @@ private:
 
   Args      args_ = {};
 
+  // Display width.
   size_t    width_;
+  // Maximum allocation size.
+  size_t    alloc_size_;
+
   string    nan_;
   string    pos_inf_;
   string    neg_inf_;
@@ -121,6 +165,7 @@ Number::check(
          args.sign == SIGN_NONE 
       || args.sign == SIGN_NEGATIVE 
       || args.sign == SIGN_ALWAYS);
+  assert(args.scale.factor >= 0);
 }
 
 
@@ -150,24 +195,27 @@ Number::format_inf_nan(
 
   // Try to put it in the integer part.
   if (len <= (int) width_)
-    return pad(
+    result = pad(
       pad(result, size, " ", PAD_POSITION_RIGHT_JUSTIFY), 
       width_, " ", PAD_POSITION_LEFT_JUSTIFY);
-  else {
+  else 
     // Doesn't fit at all.
     string_truncate(result, width_);
-    return result;
-  }
+
+  return result;
 }
 
 
 inline void
 Number::set_up()
 {
-  width_ =
+  auto sz =
         args_.size
       + (args_.precision == PRECISION_NONE ? 0 : 1 + args_.precision)
       + (args_.sign == SIGN_NEGATIVE || args_.sign == SIGN_ALWAYS ? 1 : 0);
+  width_ = sz + (args_.scale.enabled() ? string_length(args_.scale.suffix) : 0);
+  alloc_size_ = sz + (args_.scale.enabled() ? args_.scale.suffix.size() : 0);
+
   nan_ = format_inf_nan(args_.nan, 0);
   pos_inf_ = format_inf_nan(args_.inf,  1);
   neg_inf_ = format_inf_nan(args_.inf, -1);
