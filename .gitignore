@@ -5,6 +5,3 @@
 googletest
 __pycache__/
 tmp/
-
-# Vim temp files
-*.swp
