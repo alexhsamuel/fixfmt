@@ -6,23 +6,20 @@ from   . import Number
 
 #-------------------------------------------------------------------------------
 
-def NdArray(fmt, cfg=array.DEFAULT_CFG, sep=','):
-    """
-    """
-    arr = array.Array(fmt, cfg, sep)
-    return arr
-
-
 def main():
-    #fmt = Number(2)
-    #ndarray = np.empty(2)
-    #f = NdArray(fmt)
-    #f(ndarray)
-
-    fmt = Number(2)
-    ndarray = np.empty((4,3,6))
-    f = NdArray(fmt)
-    f(ndarray)
+    import math
+    fmt = array.Array(Number(4, 4))
+    arr = np.array([
+        [
+            [8, math.pi],
+            [999999, -1]
+        ],
+        [
+            [4.0, -2.0],
+            [2, math.e]
+        ],
+    ])
+    fmt(arr)
 
 
 if __name__ == "__main__":
