@@ -34,14 +34,13 @@ class Array:
         --------
         One-dimensional array:
 
-        >>> fmt = fixfmt.Number(4)
-        >>> ndfmt = fixfmt.numpy.NdArray(fmt)
-        >>> ndfmt(np.array(range(5)))
+        >>> fmt = fixfmt.numpy.NdArray( fixfmt.Number(4) )
+        >>> fmt(np.array(range(5)))
         ['    0.00', '    1.00', '    2.00', '    3.00', '    4.00']
 
         Multidimensional array:
 
-        >>> fmt = fixfmt.numpy.NdArray(Number(4, 4))
+        >>> fmt = fixfmt.numpy.NdArray( Number(4, 4) )
         >>> arr = np.array(
         ...     [[[8, math.pi], [999999, -1]], [[4.0, -2.0], [2, math.e]]]
         ... )
@@ -60,9 +59,8 @@ class Array:
 
         Multi-typed array:
 
-        >>> fmt = fixfmt.String(8)
-        >>> ndfmt = fixfmt.numpy.NdArray(fmt)
-        >>> ndfmt(np.array([[1, 'hello, world'], [True, False]]))
+        >>> fmt = fixfmt.numpy.NdArray( fixfmt.String(8) )
+        >>> fmt(np.array([[1, 'hello, world'], [True, False]]))
         [
             ['1       ', 'hello, …'],
             ['True    ', 'False   ']
@@ -77,7 +75,7 @@ class Array:
 
     def _format_array(self, a, rank, indent):
         """
-        Prints numpy.ndarray using configured formatter.
+        Converts numpy.ndarray to formatted string using configured formatter.
         """
 
         if rank == 1:
