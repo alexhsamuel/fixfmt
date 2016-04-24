@@ -1,29 +1,30 @@
-class Array:
+import numpy as np
 
-    def __init__(self, fmt, width=None, *, left="", right="", margin=" "):
-        self.__fmt = fmt
-        self.__width = width
-        self.__left = left
-        self.__right = right
-        self.__margin = margin
+from   . import array
+from   . import Number
 
 
-    def __call__(self, arr):
-        twidth = get_terminal_width() if self.__width is None else self.__width
+#-------------------------------------------------------------------------------
 
-        fmt = self.__fmt
-        width = fmt.width
-        assert twidth >= len(self.__left) + len(self.__right) + width
-        num_cols = 1 + (
-            (twidth - len(self.__left) - len(self.__right) - width)
-            // (width + len(self.__marign)))
-
-        for row in arr:
-            print(
-                self.__left 
-                + self.__margin.join( fmt(c) for c in row[: num_cols] )
-                + self.__right
-            )
+def NdArray(fmt, cfg=array.DEFAULT_CFG, sep=','):
+    """
+    """
+    arr = array.Array(fmt, cfg, sep)
+    return arr
 
 
+def main():
+    #fmt = Number(2)
+    #ndarray = np.empty(2)
+    #f = NdArray(fmt)
+    #f(ndarray)
+
+    fmt = Number(2)
+    ndarray = np.empty((4,3,6))
+    f = NdArray(fmt)
+    f(ndarray)
+
+
+if __name__ == "__main__":
+    main()
 
