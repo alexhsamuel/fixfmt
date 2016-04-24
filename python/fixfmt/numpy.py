@@ -6,9 +6,16 @@ from   . import Number
 
 #-------------------------------------------------------------------------------
 
+def NdArray(fmt):
+    """
+    Returns an Array formatter.
+    """
+    return array.Array(fmt)
+
+
 def main():
     import math
-    fmt = array.Array(Number(4, 4))
+    fmt = NdArray(Number(4, 4))
     arr = np.array([
         [
             [8, math.pi],
