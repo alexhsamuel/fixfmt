@@ -3,6 +3,8 @@ Array class and utility methods.
 """
 
 from   contextlib import suppress
+import numpy as np
+import shutil
 
 from   . import Bool, Number, String
 
@@ -15,10 +17,11 @@ from   . import Bool, Number, String
 
 class Array:
 
-    def __init__(self, fmt):
+    def __init__(self, fmt, axis):
         self.__fmt = fmt
+        self.__axis = axis
         # TODO: This should be configurable from the cfg object.
-        self.__sep = ','
+        self.__sep = ","
 
 
     def __call__(self, a):
@@ -60,32 +63,55 @@ class Array:
         Multi-typed array:
 
         >>> fmt = fixfmt.numpy.NdArray( fixfmt.String(8) )
-        >>> fmt(np.array([[1, 'hello, world'], [True, False]]))
+        >>> fmt(np.array([[1, "hello, world"], [True, False]]))
         [
             ['1       ', 'hello, …'],
             ['True    ', 'False   ']
         ]
         """
-
+        
         rank = len(a.shape)
-        indent = ''
-        s = self._format_array(a, rank, indent)
+        if rank == 1:
+            s = self._format_vector(a)
+        else:
+            indent = " " * rank
+            s = self._format_array0(a, rank, indent)
         print(s)
 
 
-    def _format_array(self, a, rank, indent):
+    def _format_array0(self, a, rank, indent):
         """
         Converts numpy.ndarray to formatted string using configured formatter.
         """
 
         if rank == 1:
-            s = indent + str([self.__fmt(x) for x in a])
+            s = self._format_vector(a)
         else:
-            s = indent + '[\n'
+            s = "["
             for i in range(len(a), 1, -1):
-                item = self._format_array(a[-i], rank-1, indent + '  ')
-                s += item + self.__sep + '\n'
-            s += self._format_array(a[-1], rank-1, indent + '  ')
-            s += '\n' + indent + ']'
+                elem = self._format_array0(a[-i], rank-1, indent)
+                s += elem + self.__sep + '\n'
+            s += self._format_array(a[-1], rank-1, indent)
+            s += "]"
         return s
+
+
+    def _format_vector(self, a):
+        """
+        """
+
+        cwidth = self.__fmt.width + 1
+        max_cols = shutil.get_terminal_size().columns
+        if self.__axis == 0:
+            s = ""
+            i = 0
+            for x in a:
+                i += cwidth
+                if i > max_cols:
+                    s += "\n"
+                    i = 0
+                s += self.__fmt(x) + " "
+            return s
+        elif self.__axis == 1:
+            return "\n".join([self.__fmt(x) for x in a])
 
