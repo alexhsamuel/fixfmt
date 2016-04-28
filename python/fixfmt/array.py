@@ -15,13 +15,15 @@ from   . import Bool, Number, String
 #-------------------------------------------------------------------------------
 # Array class definition
 
+IND = " "
+# TODO: This should be configurable from the cfg object.
+SEP = ","
+
 class Array:
 
     def __init__(self, fmt, axis):
         self.__fmt = fmt
         self.__axis = axis
-        # TODO: This should be configurable from the cfg object.
-        self.__sep = ","
 
 
     def __call__(self, a):
@@ -35,13 +37,13 @@ class Array:
 
         Examples
         --------
-        One-dimensional array:
+        One-sizesional array:
 
         >>> fmt = fixfmt.numpy.NdArray( fixfmt.Number(4) )
         >>> fmt(np.array(range(5)))
         ['    0.00', '    1.00', '    2.00', '    3.00', '    4.00']
 
-        Multidimensional array:
+        Multisizesional array:
 
         >>> fmt = fixfmt.numpy.NdArray( Number(4, 4) )
         >>> arr = np.array(
@@ -72,10 +74,12 @@ class Array:
         
         rank = len(a.shape)
         if rank == 1:
-            s = self._format_1vector(a, is_1d=True)
+            s = self._format_vector(a, is_1d=True)
         else:
-            indent = "."
+            indent = IND
             s = self._format_array(a, rank, indent)
+
+        print()
         print(s)
 
 
@@ -84,28 +88,36 @@ class Array:
         Converts numpy.ndarray to formatted string using configured formatter.
         """
 
-        trailing_items = len(a)
+        # If rank == 1, there are no arrays nested in the current one. Just
+        # print the vector.
         if rank == 1:
-            s = "[" + self._format_1vector(a) + "]"
+            s = "[" + self._format_vector(a) + "]"
         else:
             s = "["
-            for i in range(len(a), 1, -1):
-                if i != trailing_items:
+            size = len(a)
+
+            # Loop through every array in reverse. We write the innermost
+            # elements first and work our way back up the call stack.
+            for i in range(size, 1, -1):
+                # Skip indenting the first element in the array. We do not
+                # want to write "[<indent>[", but rather "[[".
+                if i != size:
                     s += indent
-
-                word = self._format_array(a[-i], rank-1, " "+indent)
-                word = word + self.__sep + '\n'
+                word = self._format_array(a[-i], rank-1, IND+indent)
+                word = word + SEP + '\n'
                 s += word
-
-            if trailing_items > 1:
+            if size > 1:
+                # Whenever we have more than one element in the current array,
+                # we need to indent the last line. If size == 1, then we would
+                # want to write "[" back-to-back.
                 s += indent
 
-            s += self._format_array(a[-1], rank-1, " "+indent)
+            s += self._format_array(a[-1], rank-1, IND+indent)
             s += "]"
         return s
 
 
-    def _format_1vector(self, a, is_1d=False):
+    def _format_vector(self, a, is_1d=False):
         """
         Converts a 1-vector numpy.ndarray to a formatted string using
         configured formatter.
@@ -131,5 +143,8 @@ class Array:
 
 
     def _write_line():
+        """
+        Writes a single line of the array, handling column widths and newlines.
+        """
         pass
 
