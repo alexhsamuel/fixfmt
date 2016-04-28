@@ -37,39 +37,14 @@ class Array:
 
         Examples
         --------
-        One-sizesional array:
+        1D array:
+        TODO.
 
-        >>> fmt = fixfmt.numpy.NdArray( fixfmt.Number(4) )
-        >>> fmt(np.array(range(5)))
-        ['    0.00', '    1.00', '    2.00', '    3.00', '    4.00']
+        2D array:
+        TODO.
 
-        Multisizesional array:
-
-        >>> fmt = fixfmt.numpy.NdArray( Number(4, 4) )
-        >>> arr = np.array(
-        ...     [[[8, math.pi], [999999, -1]], [[4.0, -2.0], [2, math.e]]]
-        ... )
-        ...
-        >>> fmt(arr)
-        [
-            [
-                ['    8.0000', '    3.1416'],
-                ['##########', '   -1.0000']
-            ],
-            [
-                ['    4.0000', '   -2.0000'],
-                ['    2.0000', '    2.7183']
-            ]
-        ]
-
-        Multi-typed array:
-
-        >>> fmt = fixfmt.numpy.NdArray( fixfmt.String(8) )
-        >>> fmt(np.array([[1, "hello, world"], [True, False]]))
-        [
-            ['1       ', 'hello, …'],
-            ['True    ', 'False   ']
-        ]
+        3D array:
+        TODO.
         """
         
         rank = len(a.shape)
@@ -79,7 +54,6 @@ class Array:
             indent = IND
             s = self._format_array(a, rank, indent)
 
-        print()
         print(s)
 
 
