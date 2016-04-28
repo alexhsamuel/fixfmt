@@ -72,32 +72,43 @@ class Array:
         
         rank = len(a.shape)
         if rank == 1:
-            s = self._format_vector(a)
+            s = self._format_1vector(a, is_1d=True)
         else:
-            indent = " " * rank
-            s = self._format_array0(a, rank, indent)
+            indent = "."
+            s = self._format_array(a, rank, indent)
         print(s)
 
 
-    def _format_array0(self, a, rank, indent):
+    def _format_array(self, a, rank, indent):
         """
         Converts numpy.ndarray to formatted string using configured formatter.
         """
 
+        trailing_items = len(a)
         if rank == 1:
-            s = self._format_vector(a)
+            s = "[" + self._format_1vector(a) + "]"
         else:
             s = "["
             for i in range(len(a), 1, -1):
-                elem = self._format_array0(a[-i], rank-1, indent)
-                s += elem + self.__sep + '\n'
-            s += self._format_array(a[-1], rank-1, indent)
+                if i != trailing_items:
+                    s += indent
+
+                word = self._format_array(a[-i], rank-1, " "+indent)
+                word = word + self.__sep + '\n'
+                s += word
+
+            if trailing_items > 1:
+                s += indent
+
+            s += self._format_array(a[-1], rank-1, " "+indent)
             s += "]"
         return s
 
 
-    def _format_vector(self, a):
+    def _format_1vector(self, a, is_1d=False):
         """
+        Converts a 1-vector numpy.ndarray to a formatted string using
+        configured formatter.
         """
 
         cwidth = self.__fmt.width + 1
@@ -110,8 +121,15 @@ class Array:
                 if i > max_cols:
                     s += "\n"
                     i = 0
-                s += self.__fmt(x) + " "
+                word = self.__fmt(x)
+                if is_1d and self.__axis == 0:
+                    word += " "
+                s += word
             return s
         elif self.__axis == 1:
             return "\n".join([self.__fmt(x) for x in a])
+
+
+    def _write_line():
+        pass
 
