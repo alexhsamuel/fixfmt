@@ -25,10 +25,6 @@ def mock_terminal_size(monkeypatch):
 #-------------------------------------------------------------------------------
 # Tests
 
-def test_shutil_mock(mock_terminal_size):
-    pass
-
-
 def test_1d_array(mock_terminal_size):
     fmt = Array(Number(3, 2))
     arr = np.array([8, math.pi, 4.88])
