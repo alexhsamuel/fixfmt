@@ -25,7 +25,7 @@ def mock_terminal_size(monkeypatch):
 #-------------------------------------------------------------------------------
 # Tests
 
-def test_1d_array(mock_terminal_size):
+def test_row_vector(mock_terminal_size):
     fmt = Array(Number(3, 2))
     arr = np.array([8, math.pi, 4.88])
     assert fmt(arr) == "[   8.00,    3.14,    4.88]"
