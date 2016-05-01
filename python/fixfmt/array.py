@@ -12,6 +12,8 @@ from   . import Bool, Number, String
 #-------------------------------------------------------------------------------
 # Configuration
 
+# TODO. See Array __init__ function.
+
 #-------------------------------------------------------------------------------
 # Array class definition
 
@@ -39,6 +41,18 @@ class Array:
         """
         Call Array formatter.
         """
+        if type(arr) != np.ndarray:
+            # numpy will cast an inconsistently typed list to Unicode strings.
+            # Rather than check every type and change formatters, we insist
+            # every element is the same type.
+            #
+            # TODO: Why can't the user format a multi-typed list with a string
+            # formatter?
+            if not _all_same_type(arr):
+                raise TypeError("Every element must have the same type.")
+            else:
+                arr = np.array(arr)
+
         rank = len(arr.shape)
         # Skip first "[".
         # TODO: This should be configurable if no decoration is desired.
@@ -183,4 +197,13 @@ class Array:
         if not self.__show_index:
             return 0
         return fmt.width + len(self.__index_border)
+
+
+# TODO: Implement in C++ for performance?
+def _all_same_type(lst):
+    """
+    Return True if all elements are the same type, False otherwise.
+    """
+    type_ = type(lst[0])
+    return all(isinstance(x, type_) for x in lst)
 

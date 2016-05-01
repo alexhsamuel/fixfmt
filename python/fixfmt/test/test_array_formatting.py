@@ -151,3 +151,17 @@ def test_index_column_vector(mock_terminal_size):
         "  7|   0.00\n"\
         "  8|   0.00\n"\
         "  9|   0.00]"
+
+
+def test_cast_list_all_same_type(mock_terminal_size):
+    arr = list(range(5))
+    fmt = Array(Number(3))
+    assert fmt(arr) == "[   0,    1,    2,    3,    4]"
+
+
+def test_raise_type_error_if_list_not_all_same_type(mock_terminal_size):
+    arr = [1, 2, 'foo']
+    fmt = Array(Number(3))
+    with pytest.raises(TypeError) as e:
+        fmt(arr)
+
