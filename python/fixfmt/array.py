@@ -18,13 +18,21 @@ from   . import Bool, Number, String
 
 class Array:
 
-    def __init__(self, fmt, axis=0, dim_sep=",", elem_sep=", "):
+    def __init__(self, fmt, axis=0, dim_sep=",", elem_sep=", ", 
+                 show_index=False, index_at_1=False, ix_fmt=None):
+        """
+        Construct Array instance.
+        """
         self.__fmt = fmt
-        self.__axis = axis
-        self.__indent_sym = "." 
         # TODO: These should be configurable from the cfg object.
+        self.__indent_sym = " "
+        self.__index_border = "|"
+        self.__axis = axis
         self.__dim_sep = dim_sep
         self.__elem_sep = elem_sep
+        self.__show_index = show_index
+        self.__index_at_1 = index_at_1
+        self.__ix_fmt = ix_fmt
 
 
     def __call__(self, arr):
@@ -44,7 +52,7 @@ class Array:
 
     def _format_array(self, arr, rank, indent):
         """
-        Converts numpy.ndarray to formatted string using configured formatter.
+        Converts a numpy.ndarray to a formatted string.
         """
         # If rank == 1, there are no arrays nested in the current one. Just
         # print the vector.
@@ -78,29 +86,45 @@ class Array:
 
     def _format_vector(self, arr, indent=""):
         """
-        Converts a vector numpy.ndarray to a formatted string using
-        configured formatter.
+        Converts a one-dimensional row vector to a formatted string.
         """
-        cwidth = self._get_column_width()
-        iwidth = len(indent)
-        max_cols = shutil.get_terminal_size().columns
+        if self.__axis == 1:
+            return self._format_column_vector(arr)
 
-        if self.__axis == 0:
-            s = ""
-            i = iwidth
-            for x in arr:
-                i += cwidth
-                if i > max_cols:
-                    s += "\n" + indent
-                    # Reset index to account for indent and column we are
-                    # about to add.
-                    i = iwidth + cwidth
-                s += self.__fmt(x) + self.__elem_sep
-            s = self._rm_trailing_sep(s)
-            return s
-        elif self.__axis == 1:
-            j = "\n" + self.__indent_sym
-            return j.join([self.__fmt(x) for x in arr])
+        idx_fmt = self._get_index_formatter(arr)
+        ix_width = self._get_index_width(idx_fmt)
+        cwidth = self._get_column_width() + ix_width
+        ind_width = len(indent)
+        max_cols = shutil.get_terminal_size().columns
+        
+        s = ""
+        end = ind_width
+        for i, elem in enumerate(arr):
+            end += cwidth
+            if end > max_cols:
+                s += "\n" + indent
+                # Reset index to account for indent and column we are
+                # about to add.
+                end = ind_width + cwidth
+            if self.__show_index:
+                s += self._format_index(i, idx_fmt)
+            s += self.__fmt(elem) + self.__elem_sep
+        s = self._rm_trailing_sep(s)
+        return s
+
+    def _format_column_vector(self, arr):
+        """
+        Converts a one-dimensional column vector to a formatted
+        string.
+        """
+        idx_fmt = self._get_index_formatter(arr)
+        s = ""
+        for i, elem in enumerate(arr):
+            if self.__show_index:
+                s += self._format_index(i, idx_fmt)
+            s += self.__fmt(elem) + "\n" + self.__indent_sym
+        s = self._rm_trailing_sep(s)
+        return s
 
     
     def _get_column_width(self):
@@ -116,3 +140,47 @@ class Array:
         """
         n = len(self.__elem_sep)
         return s[:-n]
+
+
+    def _format_index(self, i, idx_fmt):
+        """
+        Returns formatted index, accounting for if the index begins at 0 or 1
+        and the index border.
+        """
+        if self.__index_at_1:
+            i += 1
+        return idx_fmt(i) + self.__index_border
+
+
+    def _get_index_formatter(self, arr):
+        """
+        Returns index formatter if necessary, None otherwise.
+        """
+        if not self.__show_index:
+            return None
+        if self.__ix_fmt:
+            return self.__ix_fmt
+
+        # If the index starts at 0, the width computed by len(str(len(arr)))
+        # is off by 1. For example:
+        #
+        # >>> arr = list(range(10))
+        # >>> len(str(len(arr)))
+        # 2
+        #
+        # This is wrong since the max index is 9. This is why we subtract 1
+        # below. But if the index begins at 1, 2 is the correct length since
+        # the max index is 10.
+        offset = 0 if self.__index_at_1 else 1
+        width = len(str(len(arr) - offset))
+        fmt = Number(width)
+        return fmt
+
+    def _get_index_width(self, fmt):
+        """
+        Returns index width accounting for border if necessary, 0 otherwise.
+        """
+        if not self.__show_index:
+            return 0
+        return fmt.width + len(self.__index_border)
+
