@@ -40,8 +40,7 @@ class Array:
             s = self._format_vector(arr, indent, is_1d=True)
         else:
             s = self._format_array(arr, rank, indent)
-
-        print(s)
+        return s
 
 
     def _format_array(self, arr, rank, indent):
