@@ -18,10 +18,9 @@ from   . import Bool, Number, String
 
 class Array:
 
-    def __init__(self, fmt, axis, dim_sep=",", elem_sep="|"):
+    def __init__(self, fmt, axis=0, dim_sep=",", elem_sep=", "):
         self.__fmt = fmt
         self.__axis = axis
-        # This should be a space in production mode.
         self.__indent_sym = "." 
         # TODO: These should be configurable from the cfg object.
         self.__dim_sep = dim_sep
@@ -37,7 +36,7 @@ class Array:
         # TODO: This should be configurable if no decoration is desired.
         indent = self.__indent_sym
         if rank == 1:
-            s = self._format_vector(arr, indent, is_1d=True)
+            s = "[" + self._format_vector(arr, indent) + "]"
         else:
             s = self._format_array(arr, rank, indent)
         return s
@@ -51,7 +50,7 @@ class Array:
         # print the vector.
         ind = self.__indent_sym
         if rank == 1:
-            s = "[" + self._format_vector(arr, indent=ind+indent) + "]"
+            s = "[" + self._format_vector(arr, indent=indent) + "]"
         else:
             s = "["
             size = len(arr)
@@ -77,9 +76,9 @@ class Array:
         return s
 
 
-    def _format_vector(self, arr, indent="", is_1d=False):
+    def _format_vector(self, arr, indent=""):
         """
-        Converts a 1-vector numpy.ndarray to a formatted string using
+        Converts a vector numpy.ndarray to a formatted string using
         configured formatter.
         """
         cwidth = self._get_column_width()
@@ -87,7 +86,7 @@ class Array:
         max_cols = shutil.get_terminal_size().columns
 
         if self.__axis == 0:
-            s = "["
+            s = ""
             i = iwidth
             for x in arr:
                 i += cwidth
@@ -96,13 +95,12 @@ class Array:
                     # Reset index to account for indent and column we are
                     # about to add.
                     i = iwidth + cwidth
-                word = self.__fmt(x)
-                word += self.__elem_sep
-                s += word
+                s += self.__fmt(x) + self.__elem_sep
             s = self._rm_trailing_sep(s)
-            return s + "]"
+            return s
         elif self.__axis == 1:
-            return "\n".join([self.__fmt(x) for x in arr])
+            j = "\n" + self.__indent_sym
+            return j.join([self.__fmt(x) for x in arr])
 
     
     def _get_column_width(self):
