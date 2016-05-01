@@ -11,7 +11,7 @@ from   fixfmt import *
 @pytest.fixture
 def mock_terminal_size(monkeypatch):
     """
-    Mock terminal size to make tests independent of actual terminal size.
+    Mock to make tests independent of actual terminal size.
     """
 
     class TerminalSize:
