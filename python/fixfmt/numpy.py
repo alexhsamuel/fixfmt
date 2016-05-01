@@ -76,7 +76,10 @@ def main():
     arr = np.array(np.empty((1,5,5)))
     _l(arr)
     fmt(arr)
-    
+
+    arr = np.array(np.empty((1,5,20)))
+    _l(arr)
+    fmt(arr)   
 
 if __name__ == "__main__":
     main()

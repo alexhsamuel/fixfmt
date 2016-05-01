@@ -15,60 +15,47 @@ from   . import Bool, Number, String
 #-------------------------------------------------------------------------------
 # Array class definition
 
-IND = " "
-# TODO: This should be configurable from the cfg object.
-SEP = ","
 
 class Array:
 
-    def __init__(self, fmt, axis):
+    def __init__(self, fmt, axis, dim_sep=",", elem_sep="|"):
         self.__fmt = fmt
         self.__axis = axis
+        # This should be a space in production mode.
+        self.__indent_sym = "." 
+        # TODO: These should be configurable from the cfg object.
+        self.__dim_sep = dim_sep
+        self.__elem_sep = elem_sep
 
 
-    def __call__(self, a):
+    def __call__(self, arr):
         """
         Call Array formatter.
-        
-        Parameters
-        ----------
-        a : numpy.ndarray
-            Array to be formatted.
-
-        Examples
-        --------
-        1D array:
-        TODO.
-
-        2D array:
-        TODO.
-
-        3D array:
-        TODO.
         """
-        
-        rank = len(a.shape)
+        rank = len(arr.shape)
+        # Skip first "[".
+        # TODO: This should be configurable if no decoration is desired.
+        indent = self.__indent_sym
         if rank == 1:
-            s = self._format_vector(a, is_1d=True)
+            s = self._format_vector(arr, indent, is_1d=True)
         else:
-            indent = IND
-            s = self._format_array(a, rank, indent)
+            s = self._format_array(arr, rank, indent)
 
         print(s)
 
 
-    def _format_array(self, a, rank, indent):
+    def _format_array(self, arr, rank, indent):
         """
         Converts numpy.ndarray to formatted string using configured formatter.
         """
-
         # If rank == 1, there are no arrays nested in the current one. Just
         # print the vector.
+        ind = self.__indent_sym
         if rank == 1:
-            s = "[" + self._format_vector(a) + "]"
+            s = "[" + self._format_vector(arr, indent=ind+indent) + "]"
         else:
             s = "["
-            size = len(a)
+            size = len(arr)
 
             # Loop through every array in reverse. We write the innermost
             # elements first and work our way back up the call stack.
@@ -77,48 +64,58 @@ class Array:
                 # want to write "[<indent>[", but rather "[[".
                 if i != size:
                     s += indent
-                word = self._format_array(a[-i], rank-1, IND+indent)
-                word = word + SEP + '\n'
+                word = self._format_array(arr[-i], rank-1, ind+indent)
+                word = word + self.__dim_sep + '\n'
                 s += word
             if size > 1:
                 # Whenever we have more than one element in the current array,
                 # we need to indent the last line. If size == 1, then we would
                 # want to write "[" back-to-back.
                 s += indent
-
-            s += self._format_array(a[-1], rank-1, IND+indent)
+            
+            s += self._format_array(arr[-1], rank-1, ind+indent)
             s += "]"
         return s
 
 
-    def _format_vector(self, a, is_1d=False):
+    def _format_vector(self, arr, indent="", is_1d=False):
         """
         Converts a 1-vector numpy.ndarray to a formatted string using
         configured formatter.
         """
-
-        cwidth = self.__fmt.width + 1
+        cwidth = self._get_column_width()
+        iwidth = len(indent)
         max_cols = shutil.get_terminal_size().columns
+
         if self.__axis == 0:
-            s = ""
-            i = 0
-            for x in a:
+            s = "["
+            i = iwidth
+            for x in arr:
                 i += cwidth
                 if i > max_cols:
-                    s += "\n"
-                    i = 0
+                    s += "\n" + indent
+                    # Reset index to account for indent and column we are
+                    # about to add.
+                    i = iwidth + cwidth
                 word = self.__fmt(x)
-                if is_1d and self.__axis == 0:
-                    word += " "
+                word += self.__elem_sep
                 s += word
-            return s
+            s = self._rm_trailing_sep(s)
+            return s + "]"
         elif self.__axis == 1:
-            return "\n".join([self.__fmt(x) for x in a])
+            return "\n".join([self.__fmt(x) for x in arr])
 
-
-    def _write_line():
+    
+    def _get_column_width(self):
         """
-        Writes a single line of the array, handling column widths and newlines.
+        Returns width a formatted column, including separator if applicable.
         """
-        pass
+        return self.__fmt.width + len(self.__elem_sep)
 
+
+    def _rm_trailing_sep(self, s):
+        """
+        Remove trailing element separator.
+        """
+        n = len(self.__elem_sep)
+        return s[:-n]
