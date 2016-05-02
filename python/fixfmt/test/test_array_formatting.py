@@ -151,15 +151,21 @@ def test_index_column_vector(mock_terminal_size):
         "  9|   0.00]"
 
 
-def test_cast_list_all_same_type(mock_terminal_size):
-    arr = list(range(5))
+def test_cast_sequence_all_same_type(mock_terminal_size):
     fmt = Array(Number(3))
+    arr = [0, 1, 2, 3, 4]
+    assert fmt(arr) == "[   0,    1,    2,    3,    4]"
+    arr = (0, 1, 2, 3, 4)
+    assert fmt(arr) == "[   0,    1,    2,    3,    4]"
+    arr = range(5)
     assert fmt(arr) == "[   0,    1,    2,    3,    4]"
 
-
-def test_raise_type_error_if_list_not_all_same_type(mock_terminal_size):
-    arr = [1, 2, 'foo']
+def test_raise_type_error_if_sequence_not_all_same_type(mock_terminal_size):
     fmt = Array(Number(3))
+    arr = [1, 2, 'foo']
     with pytest.raises(TypeError) as e:
         fmt(arr)
-
+    arr = (1, 2, 'foo')
+    with pytest.raises(TypeError) as e:
+        fmt(arr)
+    # Cannot have multi-typed range.
