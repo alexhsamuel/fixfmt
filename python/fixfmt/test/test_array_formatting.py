@@ -16,6 +16,7 @@ def mock_terminal_size(monkeypatch):
 
     class TerminalSize:
         columns = 50
+        lines = 50
 
     def mock():
         return TerminalSize()
@@ -36,7 +37,7 @@ def test_row_vector(mock_terminal_size):
 
 
 def test_column_vector(mock_terminal_size):
-    fmt = Array(Number(3, 2), axis=1)
+    fmt = Array(Number(3, 2), print_col_vec=True)
     arr = np.array([8, math.pi, 4.88])
     assert fmt(arr) == ""\
         "[   8.00\n"\
@@ -136,7 +137,7 @@ def test_index_at_1(mock_terminal_size):
 
 def test_index_column_vector(mock_terminal_size):
     arr = np.zeros(10)
-    fmt = Array(Number(3, 2), axis=1, show_index=True)
+    fmt = Array(Number(3, 2), print_col_vec=True, show_index=True)
     assert fmt(arr) == ""\
         "[ 0|   0.00\n"\
         "  1|   0.00\n"\
