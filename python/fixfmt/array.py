@@ -22,7 +22,7 @@ from   . import Bool, Number, String
 
 class Array:
 
-    def __init__(self, fmt, axis=0, dim_sep=",", elem_sep=", ", 
+    def __init__(self, fmt, print_col_vec=False, dim_sep=",", elem_sep=", ",
                  show_index=False, index_at_1=False, ix_fmt=None):
         """
         Construct Array instance.
@@ -31,7 +31,7 @@ class Array:
         # TODO: These should be configurable from the cfg object.
         self.__indent_sym = " "
         self.__index_border = "|"
-        self.__axis = axis
+        self.__print_col_vec = print_col_vec
         self.__dim_sep = dim_sep
         self.__elem_sep = elem_sep
         self.__show_index = show_index
@@ -107,7 +107,7 @@ class Array:
         """
         Converts a one-dimensional row vector to a formatted string.
         """
-        if self.__axis == 1:
+        if self.__print_col_vec:
             return self._format_column_vector(arr)
 
         idx_fmt = self._get_index_formatter(arr)
