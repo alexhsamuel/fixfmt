@@ -3,7 +3,9 @@ Array class and utility methods.
 """
 
 from   contextlib import suppress
+import math
 import numpy as np
+from   pydoc import pager
 import shutil
 
 from   . import Bool, Number, String
@@ -61,6 +63,9 @@ class Array:
             s = "[" + self._format_vector(arr, indent) + "]"
         else:
             s = self._format_array(arr, rank, indent)
+
+        if _string_too_large(s):
+            return pager(s)
         return s
 
 
@@ -206,4 +211,19 @@ def _all_same_type(lst):
     """
     type_ = type(lst[0])
     return all(isinstance(x, type_) for x in lst)
+
+
+# Can we assume the user will always have a terminal?
+def _string_too_large(s):
+    """
+    Returns True if the formatted string is more than twice as large as the
+    terminal window, False otherwise.
+    """
+    # +1 for fenceposts:
+    # https://en.wikipedia.org/wiki/Off-by-one_error#Fencepost_error
+    snl = s.count("\n") + 1
+    tnl = shutil.get_terminal_size().lines
+    if snl > tnl * 2:
+        return True
+    return False
 
