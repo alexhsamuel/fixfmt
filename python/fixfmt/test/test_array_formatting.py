@@ -160,6 +160,7 @@ def test_cast_sequence_all_same_type(mock_terminal_size):
     arr = range(5)
     assert fmt(arr) == "[   0,    1,    2,    3,    4]"
 
+
 def test_raise_type_error_if_sequence_not_all_same_type(mock_terminal_size):
     fmt = Array(Number(3))
     arr = [1, 2, 'foo']
