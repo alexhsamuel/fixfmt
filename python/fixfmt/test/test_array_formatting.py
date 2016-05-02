@@ -20,7 +20,8 @@ def mock_terminal_size(monkeypatch):
     def mock():
         return TerminalSize()
 
-    monkeypatch.setattr(shutil, 'get_terminal_size', mock)
+    monkeypatch.setattr(shutil, "get_terminal_size", mock)
+
 
 #-------------------------------------------------------------------------------
 # Tests
