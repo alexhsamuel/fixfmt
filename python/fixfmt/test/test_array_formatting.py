@@ -44,22 +44,22 @@ def test_column_vector(mock_terminal_size):
 
 
 def test_dimension_separator(mock_terminal_size):
-    fmt = Array(Number(2), dim_sep=';')
     arr = np.array([[1,2,3], [4,55,6]])
+    fmt = Array(Number(2))
+    assert fmt(arr) == ""\
+        "[[  1,   2,   3],\n"\
+        " [  4,  55,   6]]"
+    fmt = Array(Number(2), dim_sep=';')
     assert fmt(arr) == ""\
         "[[  1,   2,   3];\n"\
         " [  4,  55,   6]]"
 
 
 def test_element_separator(mock_terminal_size):
-    fmt = Array(Number(3, 2), elem_sep='|')
     arr = np.array([8, math.pi, 4.88])
-    assert fmt(arr) == "[   8.00|   3.14|   4.88]"
-
-
-def test_element_separator(mock_terminal_size):
+    fmt = Array(Number(3, 2))
+    assert fmt(arr) == "[   8.00,    3.14,    4.88]"
     fmt = Array(Number(3, 2), elem_sep='|')
-    arr = np.array([8, math.pi, 4.88])
     assert fmt(arr) == "[   8.00|   3.14|   4.88]"
 
 
