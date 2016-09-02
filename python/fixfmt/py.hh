@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <experimental/optional>
 #include <initializer_list>
 #include <iostream>
 #include <string>
@@ -12,14 +13,14 @@
 
 namespace py {
 
+using std::experimental::optional;
+
+class Float;
 class Long;
 class Object;
 class Tuple;
+class Type;
 class Unicode;
-
-// FIXME: Remove this.
-constexpr PyGetSetDef GETSETDEF_END
-    {nullptr, nullptr, nullptr, nullptr, nullptr};
 
 //------------------------------------------------------------------------------
 
@@ -34,7 +35,7 @@ public:
     PyErr_SetString(exception, message);
   }
 
-  template<typename A>
+  template<class A>
   Exception(PyObject* exception, A&& message)
   {
     PyErr_SetString(exception, std::string(std::forward<A>(message)).c_str());
@@ -57,7 +58,7 @@ class ExceptionWrapper
 {
 public:
 
-  template<typename A>
+  template<class A>
   ExceptionWrapper(A&& message)
     : Exception(*EXC, std::forward<A>(message))
   {}
@@ -71,6 +72,7 @@ using EnvironmentError      = ExceptionWrapper<&PyExc_EnvironmentError>;
 using FileExistsError       = ExceptionWrapper<&PyExc_FileExistsError>;
 using FileNotFoundError     = ExceptionWrapper<&PyExc_FileNotFoundError>;
 using IOError               = ExceptionWrapper<&PyExc_IOError>;
+using ImportError           = ExceptionWrapper<&PyExc_ImportError>;
 using IndexError            = ExceptionWrapper<&PyExc_IndexError>;
 using InterruptedError      = ExceptionWrapper<&PyExc_InterruptedError>;
 using IsADirectoryError     = ExceptionWrapper<&PyExc_IsADirectoryError>;
@@ -102,6 +104,32 @@ inline void check_zero(int value)
 }
 
 
+/*
+ * Raises 'Exception' if value is not one.
+ */
+inline void
+check_one(
+  int const value)
+{
+  assert(value == 0 || value == 1);
+  if (value != 1)
+    throw Exception();
+}
+
+
+/**
+ * Raises 'Exception' if 'value' is -1; returns it otherwise.
+ */
+template<class TYPE>
+inline TYPE check_not_minus_one(TYPE value)
+{
+  if (value == -1)
+    throw Exception();
+  else
+    return value;
+}
+
+
 /**
  * Raises 'Exception' if value is not true.
  */
@@ -112,19 +140,48 @@ inline void check_true(int value)
 }
 
 
+/**
+ * Raises 'Exception' if 'value' is null; otherwise, returns it.
+ */
+inline Object* check_not_null(PyObject* obj)
+{
+  if (obj == nullptr)
+    throw Exception();
+  else
+    return (Object*) obj;
+}
+
+
+inline Type* check_not_null(PyTypeObject* type)
+{
+  if (type == nullptr)
+    throw Exception();
+  else
+    return (Type*) type;
+}
+
+
 //------------------------------------------------------------------------------
 
-template<typename T>
-inline T* cast(PyObject* obj)
+template<class T>
+inline T* 
+cast(PyObject* obj)
 {
   assert(T::Check(obj));  // FIXME: TypeError?
   return static_cast<T*>(obj);
 }
 
 
-//------------------------------------------------------------------------------
-
 inline PyObject* incref(PyObject* obj)
+{
+  Py_INCREF(obj);
+  return obj;
+}
+
+
+inline PyTypeObject* 
+incref(
+  PyTypeObject* obj)
 {
   Py_INCREF(obj);
   return obj;
@@ -172,7 +229,15 @@ protected:
 };
 
 
-template<typename T>
+// FIXME: ref<> does not work with Type and derived objects, since it's not
+// a subtype of Object.  This would be hard to do because Object derives from
+// PyObject, which declares data attributes, the same as PyTypeObject.
+//
+// One way around this would be to separate the mixin Object, like PyObject
+// with extra helpers, from a BaseObject type that derives from the concrete
+// PyObject.
+
+template<class T>
 class ref
   : public baseref
 {
@@ -184,6 +249,7 @@ public:
    * Call this method on an object pointer that comes with an assumed reference,
    * such as the return value of an API call that returns ownership.
    */
+  // FIXME: Maybe do an unchecked cast here, since C API functions do a check?
   static ref<T> take(PyObject* obj)
     { return ref(cast<T>(obj)); }
 
@@ -220,12 +286,27 @@ public:
   /** 
    * Move ctor from another ref type.  
    */
-  template<typename U>
+  template<class U>
   ref(ref<U>&& ref)
     : baseref(ref.release()) {}
 
+  /**
+   * Returns a new (additional) reference.
+   */
+  ref inc() const
+    { return ref::of(obj_); }
+
   void operator=(ref<T>&& ref)
     { clear(); obj_ = ref.release(); }
+
+  bool operator==(T* const ptr) const
+    { return obj_ == ptr; }
+
+  bool operator!=(T* const ptr) const
+    { return obj_ != ptr; }
+
+  operator T&() const
+    { return *(T*) obj_; }
 
   operator T*() const
     { return (T*) obj_; }
@@ -251,6 +332,34 @@ inline ref<Object> none_ref()
 }
 
 
+inline ref<Object> not_implemented_ref()
+{
+  return ref<Object>::of(Py_NotImplemented);
+}
+
+
+template<class TYPE>
+inline ref<TYPE>
+take_not_null(
+  PyObject* obj)
+{
+  if (obj == nullptr)
+    throw Exception();
+  else
+    return ref<TYPE>::take(obj);
+}
+
+
+//------------------------------------------------------------------------------
+
+template<class T>
+inline ref<T>
+cast(ref<Object>&& obj)
+{
+  return ref<T>::take(obj.release());
+}
+
+
 //==============================================================================
 
 class Object
@@ -258,29 +367,147 @@ class Object
 {
 public:
 
+  ref<Object> CallMethodObjArgs(char const* name, bool check=true);
+  // FIXME: Hacky.
+  ref<Object> CallMethodObjArgs(char const* name, PyObject* arg0, bool check=true);
+  ref<Object> CallMethodObjArgs(char const* name, PyObject* arg0, PyObject* arg1, bool check=true);
+  ref<Object> CallObject(Tuple* args);
   static bool Check(PyObject* obj)
     { return true; }
-
+  ref<Object> GetAttrString(char const* const name, bool check=true);
+  bool IsInstance(PyObject* type)
+    { return (bool) PyObject_IsInstance(this, type); }
+  bool IsInstance(PyTypeObject* type)
+    { return IsInstance((PyObject*) type); }
   auto Length()
     { return PyObject_Length(this); }
   auto Repr()
     { return ref<Unicode>::take(PyObject_Repr(this)); }
+  auto SetAttrString(char const* name, PyObject* obj)
+    { check_not_minus_one(PyObject_SetAttrString(this, name, obj)); }
   auto Str()
     { return ref<Unicode>::take(PyObject_Str(this)); }
 
-  ref<py::Long> Long();
+  optional<ref<Object>> maybe_get_attr(std::string const& name);
 
+  ref<py::Long> Long(bool check=true);
   long long_value();
+  unsigned long unsigned_long_value();
+  /** If the object can be converted to a long, returns its value. */
+  optional<long> maybe_long_value();
+
+  ref<py::Float> Float();
+  double double_value();
+  /** If the object can be converted to a long, returns its value. */
+  optional<double> maybe_double_value();
+
 
 };
 
 
-template<typename T>
+inline ref<Object>
+Object::CallMethodObjArgs(
+  char const* name,
+  bool check)
+{
+  ref<Object> method = GetAttrString(name, check);
+  if (!check && method == nullptr) {
+    Exception::Clear();
+    return ref<Object>::take(nullptr);
+  }
+  auto result = PyObject_CallFunctionObjArgs(method, nullptr);
+  if (check)
+    check_not_null(result);
+  // FIXME: Clumsy.
+  else if (result == nullptr)
+    Exception::Clear();
+  return ref<Object>::take(result);
+}
+
+
+inline ref<Object>
+Object::CallMethodObjArgs(
+  char const* name,
+  PyObject* arg0,
+  bool check)
+{
+  ref<Object> method = GetAttrString(name, check);
+  if (!check && method == nullptr) {
+    Exception::Clear();
+    return ref<Object>::take(nullptr);
+  }
+  auto result = PyObject_CallFunctionObjArgs(method, arg0, nullptr);
+  if (check)
+    check_not_null(result);
+  // FIXME: Clumsy.
+  else if (result == nullptr)
+    Exception::Clear();
+  return ref<Object>::take(result);
+}
+
+
+inline ref<Object>
+Object::CallMethodObjArgs(
+  char const* name,
+  PyObject* arg0,
+  PyObject* arg1,
+  bool check)
+{
+  ref<Object> method = GetAttrString(name, check);
+  if (!check && method == nullptr) {
+    Exception::Clear();
+    return ref<Object>::take(nullptr);
+  }
+  auto result = PyObject_CallFunctionObjArgs(method, arg0, arg1, nullptr);
+  if (check)
+    check_not_null(result);
+  // FIXME: Clumsy.
+  else if (result == nullptr)
+    Exception::Clear();
+  return ref<Object>::take(result);
+}
+
+
+inline ref<Object>
+Object::GetAttrString(
+  char const* const name, 
+  bool const check)
+{ 
+  auto result = PyObject_GetAttrString(this, name);
+  if (check)
+    result = check_not_null(result);
+  // FIXME: Clumsy.
+  else if (result == nullptr)
+    Exception::Clear();
+  return ref<Object>::take(result);
+}
+
+
+inline optional<ref<Object>>
+Object::maybe_get_attr(
+  std::string const& name)
+{ 
+  auto result = PyObject_GetAttrString(this, name.c_str());
+  // FIXME: Encapsulate this pattern.
+  if (result == nullptr) {
+    Exception::Clear();
+    return {};
+  }
+  else
+    return ref<Object>::take(result);
+}
+
+
+template<class T>
 inline std::ostream& operator<<(std::ostream& os, ref<T>& ref)
 {
   os << ref->Str()->as_utf8();
   return os;
 }
+
+
+extern ref<Object> const
+None;
 
 
 //------------------------------------------------------------------------------
@@ -290,8 +517,24 @@ class Dict
 {
 public:
 
-  static bool Check(PyObject* obj)
+  static bool Check(PyObject* const obj)
     { return PyDict_Check(obj); }
+
+  Object* GetItemString(char const* const key)
+  { 
+    Object* const value = (Object*) PyDict_GetItemString(this, key);
+    if (value == nullptr)
+      throw KeyError(key);
+    else
+      return value;
+  }
+
+  // FIXME: Add an rvalue variant that takes the ref?
+  void SetItemString(char const* const key, PyObject* const value)
+    { check_zero(PyDict_SetItemString(this, key, value)); }
+
+  Py_ssize_t Size()
+    { return check_not_minus_one(PyDict_Size(this)); }
 
 };
 
@@ -319,8 +562,22 @@ public:
 
 //------------------------------------------------------------------------------
 
-class Long
+class Number
   : public Object
+{
+public:
+
+  auto Lshift(PyObject* rhs)
+    { return take_not_null<Number>(PyNumber_Lshift(this, rhs)); }
+  auto Or(PyObject* rhs)
+    { return take_not_null<Number>(PyNumber_Or(this, rhs)); }
+
+};
+
+//------------------------------------------------------------------------------
+
+class Long
+  : public Number
 {
 public:
 
@@ -328,11 +585,69 @@ public:
     { return PyLong_Check(obj); }
   static auto FromLong(long val)
     { return ref<Long>::take(PyLong_FromLong(val)); }
+  static auto FromUnsignedLong(unsigned long val)
+    { return ref<Long>::take(PyLong_FromUnsignedLong(val)); }
+
+  static ref<Long> from(int const val)
+    { return FromLong(val); }
+  static ref<Long> from(unsigned int const val)
+    { return FromUnsignedLong(val); }
+  static ref<Long> from(long const val)
+    { return FromLong(val); }
+  static ref<Long> from(unsigned long const val)
+    { return FromUnsignedLong(val); }
+  static ref<Long> from(long long const val)
+    { return FromLong(val); }
+  static ref<Long> from(unsigned long long const val)
+    { return FromUnsignedLong(val); }
+  static ref<Long> from(__int128 const val);
+  static ref<Long> from(unsigned __int128 const val);
 
   operator long()
     { return PyLong_AsLong(this); }
+  operator unsigned long()
+    { return PyLong_AsUnsignedLong(this); }
+
+  explicit operator __int128();
+  explicit operator unsigned __int128();
 
 };
+
+
+inline ref<Long> 
+Long::from(__int128 val)
+{ 
+  return take_not_null<Long>(
+    _PyLong_FromByteArray((unsigned char const*) &val, sizeof(val), 1, 1));
+}
+
+
+inline ref<Long> 
+Long::from(unsigned __int128 val)
+{ 
+  return take_not_null<Long>(
+    _PyLong_FromByteArray((unsigned char const*) &val, sizeof(val), 1, 0));
+}
+
+
+inline 
+Long::operator __int128()
+{
+  __int128 val = 0;
+  check_not_minus_one(_PyLong_AsByteArray(
+    (PyLongObject*) this, (unsigned char*) &val, sizeof(val), 1, 1));
+  return val;
+}
+
+
+inline
+Long::operator unsigned __int128()
+{
+  unsigned __int128 val;
+  check_not_minus_one(_PyLong_AsByteArray(
+    (PyLongObject*) this, (unsigned char*) &val, sizeof(val), 1, 0));
+  return val;
+}
 
 
 //------------------------------------------------------------------------------
@@ -346,6 +661,8 @@ public:
     { return PyFloat_Check(obj); }
   static auto FromDouble(double val)
     { return ref<Float>::take(PyFloat_FromDouble(val)); }
+  static auto from(double const val)
+    { return FromDouble(val); }
 
   operator double()
     { return PyFloat_AsDouble(this); }
@@ -364,9 +681,17 @@ public:
     { return PyModule_Check(obj); }
   static auto Create(PyModuleDef* def)
     { return ref<Module>::take(PyModule_Create(def)); }
+  static ref<Module> ImportModule(char const* const name)
+    { return take_not_null<Module>(PyImport_ImportModule(name)); }
+  static ref<Module> New(char const* name)
+    { return take_not_null<Module>(PyModule_New(name)); }
 
+  void AddFunctions(PyMethodDef* functions) 
+    { check_zero(PyModule_AddFunctions(this, functions)); }
   void AddObject(char const* name, PyObject* val)
     { check_zero(PyModule_AddObject(this, name, incref(val))); }
+  char const* GetName()
+    { return PyModule_GetName(this); }
 
   void add(PyTypeObject* type)
   {
@@ -385,8 +710,27 @@ public:
 
 //------------------------------------------------------------------------------
 
-class Tuple
+class Sequence
   : public Object
+{
+public:
+
+  static bool Check(PyObject* obj)
+    { return PySequence_Check(obj); }
+
+  Object* GetItem(Py_ssize_t index)
+    { return check_not_null(PySequence_GetItem(this, index)); }
+
+  Py_ssize_t Length()
+    { return PySequence_Length(this); }
+
+};
+
+
+//------------------------------------------------------------------------------
+
+class Tuple
+  : public Sequence
 {
 public:
 
@@ -397,9 +741,13 @@ public:
     { return ref<Tuple>::take(PyTuple_New(len)); }
 
   void initialize(Py_ssize_t index, baseref&& ref)
-  {
-    PyTuple_SET_ITEM(this, index, ref.release());
-  }
+    { PyTuple_SET_ITEM(this, index, ref.release()); }
+
+  Object* GetItem(Py_ssize_t index) 
+    { return check_not_null(PyTuple_GET_ITEM(this, index)); }
+
+  Py_ssize_t GetLength() 
+    { return PyTuple_GET_SIZE(this); }
 
   // FIXME: Remove?
   static auto from(std::initializer_list<PyObject*> items) 
@@ -457,6 +805,8 @@ public:
     return tuple;
   }
 
+  operator ref<Object>() { return (ref<Tuple>) *this; }
+
   void initialize(PyObject* tuple)
   {
     assert(obj_ != nullptr);
@@ -500,15 +850,77 @@ public:
 
 //------------------------------------------------------------------------------
 
+class List
+: public Sequence
+{
+public:
+
+  static bool Check(PyObject* const obj)
+    { return PyList_Check(obj); }
+  static ref<List> New(Py_ssize_t const len)
+    { return take_not_null<List>(PyList_New(len)); }
+
+  void initialize(Py_ssize_t const index, Object* const obj)
+    { PyList_SET_ITEM(this, index, incref(obj)); }
+
+};
+
+
+//------------------------------------------------------------------------------
+
 class Type
   : public PyTypeObject
 {
 public:
 
+  static bool Check(PyObject* const obj)
+    { return PyType_Check(obj); }
+
+  Type() {}
   Type(PyTypeObject o) : PyTypeObject(o) {}
 
   void Ready()
     { check_zero(PyType_Ready(this)); }
+
+};
+
+
+//------------------------------------------------------------------------------
+
+class StructSequence
+  : public Object
+{
+public:
+
+  Object* GetItem(Py_ssize_t index)
+    { return check_not_null(PyStructSequence_GET_ITEM(this, index)); }
+
+  void initialize(Py_ssize_t index, baseref&& ref)
+    { PyStructSequence_SET_ITEM(this, index, ref.release()); }
+
+};
+
+
+//------------------------------------------------------------------------------
+
+class StructSequenceType
+  : public Type
+{
+public:
+
+  static void InitType(StructSequenceType* type, PyStructSequence_Desc* desc)
+    { check_zero(PyStructSequence_InitType2(type, desc)); }
+
+#if 0
+  static StructSequenceType* NewType(PyStructSequence_Desc* desc)
+    { return (StructSequenceType*) check_not_null(PyStructSequence_NewType(desc)); }
+#endif
+
+  // FIXME: Doesn't work; see https://bugs.python.org/issue20066.  We can't
+  // just set TPFLAGS_HEAPTYPE, as the returned type object doesn't have the
+  // layout that implies.
+  ref<StructSequence> New()
+    { return ref<StructSequence>::take(check_not_null((PyObject*) PyStructSequence_New((PyTypeObject*) this))); }
 
 };
 
@@ -558,6 +970,15 @@ inline std::ostream& operator<<(std::ostream& os, ref<Unicode>& ref)
 }
 
 
+inline std::string
+operator+(
+  std::string const& str0,
+  Unicode& str1)
+{
+  return str0 + str1.as_utf8_string();
+}
+
+
 //==============================================================================
 
 inline void baseref::clear()
@@ -568,10 +989,15 @@ inline void baseref::clear()
 
 
 inline ref<Long>
-Object::Long()
+Object::Long(bool const check)
 {
-  // FIXME: Check errors.
-  return ref<py::Long>::take(PyNumber_Long(this));
+  auto long_obj = PyNumber_Long(this);
+  if (check)
+    long_obj = check_not_null(long_obj);
+  // FIXME: Clumsy.
+  else if (long_obj == nullptr)
+    Exception::Clear();
+  return ref<py::Long>::take(long_obj);
 }
 
 
@@ -582,9 +1008,74 @@ Object::long_value()
 }
 
 
+inline unsigned long
+Object::unsigned_long_value()
+{
+  return (unsigned long) *Long();
+}
+
+
+inline optional<long>
+Object::maybe_long_value()
+{
+  auto obj = PyNumber_Long(this);
+  if (obj == nullptr) {
+    Exception::Clear();
+    return {};
+  }
+  else {
+    auto long_obj = ref<py::Long>::take(obj);
+    return (long) *long_obj;
+  }
+}
+
+
+inline ref<Float>
+Object::Float()
+{
+  return ref<py::Float>::take(check_not_null(PyNumber_Float(this)));
+}
+
+
+inline double
+Object::double_value()
+{
+  return (double) *Float();
+}
+
+
+inline optional<double>
+Object::maybe_double_value()
+{
+  auto obj = PyNumber_Float(this);
+  if (obj == nullptr) {
+    Exception::Clear();
+    return {};
+  }
+  else {
+    auto float_obj = ref<py::Float>::take(obj);
+    return (double) *float_obj;
+  }
+}
+
+
 //==============================================================================
 
 namespace Arg {
+
+inline void
+ParseTuple(
+  Tuple* const args,
+  char const* const format,
+  ...)
+{
+  va_list vargs;
+  va_start(vargs, format);
+  auto result = PyArg_VaParse(args, (char*) format, vargs);
+  va_end(vargs);
+  check_true(result);
+}
+
 
 inline void ParseTupleAndKeywords(
     Tuple* args, Dict* kw_args, 
@@ -607,8 +1098,6 @@ class ExtensionType
   : public Object
 {
 public:
-
-  PyObject_HEAD
 
 };
 
@@ -668,23 +1157,190 @@ private:
 
 
 //==============================================================================
+// Inline methods
 
-template<typename CLASS>
+inline ref<Object> 
+Object::CallObject(Tuple* args)
+{ 
+  return ref<Object>::take(check_not_null(PyObject_CallObject(this, args))); 
+}
+
+
+//------------------------------------------------------------------------------
+// Exception translation
+//------------------------------------------------------------------------------
+// Inspired by exception translation in boost::python.
+
+/*
+ * Common base class for <TranslateException>.  Don't use directly.
+ */
+class ExceptionTranslator
+{
+public:
+
+  static void 
+  translate()
+  {
+    if (head_ == nullptr)
+      // No translations registerd.
+      throw;
+    else
+      // Start at the head of the list.
+      head_->translate1();
+  }
+
+private:
+
+  ExceptionTranslator() = default;
+
+  // Head of the list of registered translations.
+  static ExceptionTranslator* head_;
+
+  // Next registered translation, i.e. link field in the list of translations.
+  ExceptionTranslator* next_ = nullptr;
+
+  virtual void translate1() const = 0;
+
+  template<class EXCEPTION>
+  friend class TranslateException;
+
+};
+
+
+template<class EXCEPTION>
+class TranslateException
+: ExceptionTranslator
+{
+public:
+
+  /*
+   * Registers an exception translation.
+   *
+   * Registers translation from C++ exception class `EXCEPTION` to Python 
+   * exception class `exception`.
+   *
+   * The `EXCEPTION` class must have a `what()` method that returns the
+   * exception message.
+   */
+  static void
+  to(
+    PyObject* const exception)
+  {
+    // Register an instance of ourselves at the front of the list.
+    auto const translator = new TranslateException(exception);
+    translator->next_ = head_;
+    head_ = translator;
+  }
+
+private:
+
+  /*
+   * Translates the current C++ exception.
+   * 
+   * - If the exception matches `EXCEPTION`, throw <Exception> to raise the
+   *   registered Python exception class.
+   * - Otherwise, call <translate1()> on the next exception translator in the
+   *   list, with the previous C++ exception still in flight.
+   * - If this is the last exception translator on the list, translate to
+   *   a Python `RuntimeError`.
+   */
+  virtual void 
+  translate1()
+    const
+  {
+    try {
+      throw;
+    }
+    catch (EXCEPTION exc) {
+      throw Exception(exception_, exc.what());
+    }
+    catch (...) {
+      if (next_ == nullptr)
+        throw Exception(PyExc_RuntimeError, "untranslated C++ exception");
+      else
+        next_->translate1();
+    }
+  }
+
+  TranslateException(
+    PyObject* exception)
+  : exception_(exception)
+  {
+  }
+
+  // The Python exception type into which to translate `EXCEPTION` instances.
+  PyObject* const exception_;
+
+};
+
+
+//==============================================================================
+
+template<class CLASS>
+using
+BinaryfuncPtr
+  = ref<Object> (*)(CLASS* self, Object* other, bool right);
+
+template<class CLASS>
+using
+DestructorPtr
+  = void (*)(CLASS* self);
+
+template<class CLASS>
+using 
+InitprocPtr
+  = void (*)(CLASS* self, Tuple* args, Dict* kw_args);
+
+template<class CLASS>
+using
+ReprfuncPtr
+  = ref<Unicode> (*)(CLASS* self);
+
+template<class CLASS>
+using
+RichcmpfuncPtr
+  = ref<Object> (*)(CLASS* self, Object* other, int comparison);
+
+template<class CLASS>
+using
+HashfuncPtr
+  = Py_hash_t (*)(CLASS* self);
+
+template<class CLASS>
 using MethodPtr = ref<Object> (*)(CLASS* self, Tuple* args, Dict* kw_args);
+
+using StaticMethodPtr = ref<Object> (*)(Tuple* args, Dict* kw_args);
+
+using ClassMethodPtr = ref<Object> (*)(PyTypeObject* class_, Tuple* args, Dict* kw_args);
 
 
 /**
- * Wraps a method that takes args and kw_args and returns an object.
+ * Wraps a binaryfunc.
  */
-template<typename CLASS, MethodPtr<CLASS> METHOD>
-PyObject* wrap(PyObject* self, PyObject* args, PyObject* kw_args)
+template<class CLASS, BinaryfuncPtr<CLASS> FUNCTION>
+PyObject*
+wrap(
+  PyObject* lhs,
+  PyObject* rhs)
 {
   ref<Object> result;
   try {
-    result = METHOD(
-      reinterpret_cast<CLASS*>(self),
-      reinterpret_cast<Tuple*>(args),
-      reinterpret_cast<Dict*>(kw_args));
+    try {
+      if (CLASS::Check(lhs)) 
+        result = FUNCTION(
+          static_cast<CLASS*>(lhs), static_cast<Object*>(rhs), false);
+      else if (CLASS::Check(rhs))
+        result = FUNCTION(
+          static_cast<CLASS*>(rhs), static_cast<Object*>(lhs), true);
+      else
+        result = not_implemented_ref();
+    }
+    catch (Exception) {
+      return nullptr;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
   }
   catch (Exception) {
     return nullptr;
@@ -694,7 +1350,244 @@ PyObject* wrap(PyObject* self, PyObject* args, PyObject* kw_args)
 }
 
 
-template<typename CLASS>
+/**
+ * Wraps a destructor.
+ */
+template<class CLASS, DestructorPtr<CLASS> FUNCTION>
+void
+wrap(
+  PyObject* self)
+{
+  // tp_dealloc should preserve exception state; maybe wrap with PyErr_Fetch()
+  // and PyErr_restore()?
+  try {
+    try {
+      FUNCTION(static_cast<CLASS*>(self));
+    }
+    catch (Exception) {
+      return;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
+  }
+  catch (Exception exc) {
+    // Eat it.
+  }
+}
+
+
+/**
+ * Wraps an initproc.
+ */
+template<class CLASS, InitprocPtr<CLASS> FUNCTION>
+int
+wrap(
+  PyObject* self,
+  PyObject* args,
+  PyObject* kw_args)
+{
+  try {
+    try {
+      FUNCTION(
+        static_cast<CLASS*>(self),
+        static_cast<Tuple*>(args),
+        static_cast<Dict*>(kw_args));
+    }
+    catch (Exception) {
+      return -1;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
+  }
+  catch (Exception) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/**
+ * Wraps a reprfunc.
+ */
+template<class CLASS, ReprfuncPtr<CLASS> FUNCTION>
+PyObject*
+wrap(
+  PyObject* self)
+{
+  ref<Unicode> result;
+  try {
+    try {
+      result = FUNCTION(static_cast<CLASS*>(self));
+    }
+    catch (Exception) {
+      return nullptr;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
+  }
+  catch (Exception) {
+    return nullptr;
+  }
+  assert(result != nullptr);
+  return result.release();
+}
+
+
+/**
+ * Wraps a richcmpfunc.
+ */
+template<class CLASS, RichcmpfuncPtr<CLASS> FUNCTION>
+PyObject*
+wrap(
+  PyObject* const self,
+  PyObject* const other,
+  int const comparison)
+{
+  ref<Object> result;
+  try {
+    try {
+      result = FUNCTION(
+        static_cast<CLASS*>(self), 
+        static_cast<Object*>(other), 
+        comparison);
+    }
+    catch (Exception) {
+      return nullptr;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
+  }
+  catch (Exception) {
+    return nullptr;
+  }
+  assert(result != nullptr);
+  return result.release();
+}
+
+
+/*
+ * Wraps a hashfunc.
+ */
+template<class CLASS, HashfuncPtr<CLASS> HASHFUNC>
+Py_hash_t
+wrap(
+  PyObject* self)
+{
+  Py_hash_t result;
+  try {
+    try {
+      result = HASHFUNC(static_cast<CLASS*>(self));
+    }
+    catch (Exception) {
+      return -1;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
+  }
+  catch (Exception) {
+    return -1;
+  }
+  assert(result != -1);
+  return result;
+}
+
+
+/**
+ * Wraps a method that takes args and kw_args and returns an object.
+ */
+template<class CLASS, MethodPtr<CLASS> METHOD>
+PyObject* wrap(PyObject* self, PyObject* args, PyObject* kw_args)
+{
+  ref<Object> result;
+  try {
+    try {
+      result = METHOD(
+        reinterpret_cast<CLASS*>(self),
+        reinterpret_cast<Tuple*>(args),
+        reinterpret_cast<Dict*>(kw_args));
+    }
+    catch (Exception) {
+      return nullptr;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
+  }
+  catch (Exception) {
+    return nullptr;
+  }
+  assert(result != nullptr);
+  return result.release();
+}
+
+
+template<StaticMethodPtr METHOD>
+PyObject* 
+wrap_static_method(
+  PyObject* /* unused */, 
+  PyObject* args, 
+  PyObject* kw_args)
+{
+  ref<Object> result;
+  try {
+    try {
+      result = METHOD(
+        reinterpret_cast<Tuple*>(args),
+        reinterpret_cast<Dict*>(kw_args));
+    }
+    catch (Exception) {
+      return nullptr;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
+  }
+  catch (Exception) {
+    return nullptr;
+  }
+  assert(result != nullptr);
+  return result.release();
+}
+
+
+template<ClassMethodPtr METHOD>
+PyObject* 
+wrap_class_method(
+  PyObject* class_,
+  PyObject* args, 
+  PyObject* kw_args)
+{
+  ref<Object> result;
+  try {
+    try {
+      result = METHOD(
+        reinterpret_cast<PyTypeObject*>(class_),
+        reinterpret_cast<Tuple*>(args),
+        reinterpret_cast<Dict*>(kw_args));
+    }
+    catch (Exception) {
+      return nullptr;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
+  }
+  catch (Exception) {
+    return nullptr;
+  }
+  assert(result != nullptr);
+  return result.release();
+}
+
+
+//------------------------------------------------------------------------------
+
+template<class CLASS>
 class Methods
 {
 public:
@@ -710,6 +1603,34 @@ public:
       name,
       (PyCFunction) wrap<CLASS, METHOD>,
       METH_VARARGS | METH_KEYWORDS,
+      doc
+    });
+    return *this;
+  }
+
+  template<StaticMethodPtr METHOD>
+  Methods& add_static(char const* const name, char const* const doc=nullptr)
+  {
+    assert(name != nullptr);
+    assert(!done_);
+    methods_.push_back({
+      name,
+      (PyCFunction) wrap_static_method<METHOD>,
+      METH_VARARGS | METH_KEYWORDS | METH_STATIC,
+      doc
+    });
+    return *this;
+  }
+
+  template<ClassMethodPtr METHOD>
+  Methods& add_class(char const* const name, char const* const doc=nullptr)
+  {
+    assert(name != nullptr);
+    assert(!done_);
+    methods_.push_back({
+      name,
+      (PyCFunction) wrap_class_method<METHOD>,
+      METH_VARARGS | METH_KEYWORDS | METH_CLASS,
       doc
     });
     return *this;
@@ -735,16 +1656,24 @@ private:
 
 //------------------------------------------------------------------------------
 
-template<typename CLASS>
+template<class CLASS>
 using GetPtr = ref<Object> (*)(CLASS* self, void* closure);
 
 
-template<typename CLASS, GetPtr<CLASS> METHOD>
+template<class CLASS, GetPtr<CLASS> METHOD>
 PyObject* wrap_get(PyObject* self, void* closure)
 {
   ref<Object> result;
   try {
-    result = METHOD(reinterpret_cast<CLASS*>(self), closure); 
+    try {
+      result = METHOD(reinterpret_cast<CLASS*>(self), closure); 
+    }
+    catch (Exception) {
+      return nullptr;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
   }
   catch (Exception) {
     return nullptr;
@@ -754,7 +1683,7 @@ PyObject* wrap_get(PyObject* self, void* closure)
 }
 
 
-template<typename CLASS>
+template<class CLASS>
 class GetSets
 {
 public:
@@ -793,6 +1722,15 @@ private:
   std::vector<PyGetSetDef> getsets_;
 
 };
+
+
+//==============================================================================
+
+inline ref<Object>
+import(const char* module_name, const char* name)
+{
+  return Module::ImportModule(module_name)->GetAttrString(name);
+}
 
 
 //------------------------------------------------------------------------------
