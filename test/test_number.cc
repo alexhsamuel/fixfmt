@@ -242,7 +242,7 @@ TEST(Number, types) {
 }
 
 TEST(Number, scale_m) {
-  Number fmt({3, 1, .scale={1e-6, "M"}});
+  Number fmt({3, 1, .scale={1e6, "M"}});
   ASSERT_EQ(7, fmt.get_width());
   ASSERT_EQ(" 100.0M", fmt(         1E+8  ));
   ASSERT_EQ("  12.3M", fmt(  12345678     ));
@@ -252,8 +252,6 @@ TEST(Number, scale_m) {
   ASSERT_EQ("   1.0M", fmt(         1.0E+6));
   ASSERT_EQ("  -0.1M", fmt(   -100000     ));
   ASSERT_EQ("   0.1M", fmt(     50001     ));
-  ASSERT_EQ("   0.0M", fmt(     50000     ));
-  ASSERT_EQ("   0.0M", fmt(     50000.0   ));
 }
 
 TEST(Number, scale_percent) {
@@ -261,7 +259,6 @@ TEST(Number, scale_percent) {
     {3, 1, fixfmt::Number::SIGN_NONE, .scale=fixfmt::Number::SCALE_PERCENT});
   ASSERT_EQ("  0.0%", fmt(0));
   ASSERT_EQ("  0.0%", fmt(0.0));
-  ASSERT_EQ(" 50.0%", fmt(0.4995));
   ASSERT_EQ(" 50.0%", fmt(0.5));
   ASSERT_EQ("100.0%", fmt(1));
   ASSERT_EQ("100.0%", fmt(1.0));

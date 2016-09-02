@@ -9,25 +9,25 @@ using std::string;
 
 Number::Scale const Number::SCALE_NONE          = {};
 
-Number::Scale const Number::SCALE_PERCENT       = {1 / 1E-2 , "%"};
-Number::Scale const Number::SCALE_PER_MILLE     = {1 / 1E-3 , "\u2030"};
-Number::Scale const Number::SCALE_BASIS_POINTS  = {1 / 1E-4 , " bps"};
+Number::Scale const Number::SCALE_PERCENT       = {1E-2 , "%"};
+Number::Scale const Number::SCALE_PER_MILLE     = {1E-3 , "\u2030"};
+Number::Scale const Number::SCALE_BASIS_POINTS  = {1E-4 , " bps"};
 
-Number::Scale const Number::SCALE_TERA          = {1 / 1E+12, "T"};
-Number::Scale const Number::SCALE_GIGA          = {1 / 1E+9 , "G"};
-Number::Scale const Number::SCALE_MEGA          = {1 / 1E+6 , "M"};
-Number::Scale const Number::SCALE_KILO          = {1 / 1E+3 , "k"};
-Number::Scale const Number::SCALE_DECI          = {1 / 1E-1 , "d"};
-Number::Scale const Number::SCALE_CENTI         = {1 / 1E-2 , "c"};
-Number::Scale const Number::SCALE_MILLI         = {1 / 1E-3 , "m"};
-Number::Scale const Number::SCALE_MICRO         = {1 / 1E-6 , "\u00b5"};
-Number::Scale const Number::SCALE_NANO          = {1 / 1E-9 , "n"};
-Number::Scale const Number::SCALE_PICO          = {1 / 1E-12, "p"};
-Number::Scale const Number::SCALE_FEMTO         = {1 / 1E-15, "f"};
+Number::Scale const Number::SCALE_TERA          = {1E+12, "T"};
+Number::Scale const Number::SCALE_GIGA          = {1E+9 , "G"};
+Number::Scale const Number::SCALE_MEGA          = {1E+6 , "M"};
+Number::Scale const Number::SCALE_KILO          = {1E+3 , "k"};
+Number::Scale const Number::SCALE_DECI          = {1E-1 , "d"};
+Number::Scale const Number::SCALE_CENTI         = {1E-2 , "c"};
+Number::Scale const Number::SCALE_MILLI         = {1E-3 , "m"};
+Number::Scale const Number::SCALE_MICRO         = {1E-6 , "\u00b5"};
+Number::Scale const Number::SCALE_NANO          = {1E-9 , "n"};
+Number::Scale const Number::SCALE_PICO          = {1E-12, "p"};
+Number::Scale const Number::SCALE_FEMTO         = {1E-15, "f"};
 
-Number::Scale const Number::SCALE_GIBI          = {1.0 / (1 << 30), "Gi"};
-Number::Scale const Number::SCALE_MEBI          = {1.0 / (1 << 20), "Mi"};
-Number::Scale const Number::SCALE_KIBI          = {1.0 / (1 << 10), "Ki"};
+Number::Scale const Number::SCALE_GIBI          = {1 << 30, "Gi"};
+Number::Scale const Number::SCALE_MEBI          = {1 << 20, "Mi"};
+Number::Scale const Number::SCALE_KIBI          = {1 << 10, "Ki"};
 
 //------------------------------------------------------------------------------
 
@@ -94,7 +94,7 @@ Number::operator()(
     return bad_;
 
   // Apply the scale factor, if any.
-  double const val = args_.scale.enabled() ? value * args_.scale.factor : value;
+  double const val = args_.scale.enabled() ? value / args_.scale.factor : value;
 
   if (isinf(val))
     // Return the appropriate infinity.

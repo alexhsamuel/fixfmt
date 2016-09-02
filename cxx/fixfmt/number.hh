@@ -33,8 +33,8 @@ public:
    * Fixed scaling for rendering numbers.
    *
    * @factor
-   *   The (positive) scale factor by which to multiply values before 
-   *   formatting, or 0 for no scaling.
+   *   The positive scale factor in which values are represented.  A value is
+   *   divided by this value when formatted.  Use 0 for no scaling.
    * @suffix
    *   A suffix to append to formatted numbers to indicate scale.
    */
