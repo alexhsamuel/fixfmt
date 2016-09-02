@@ -7,9 +7,12 @@ using std::unique_ptr;
 
 namespace {
 
-// FIXME: Wrap for exceptions.
 // FIXME: Accept sign=None.
-static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
+static void
+tp_init(
+  PyNumber* self, 
+  Tuple* args, 
+  Dict* kw_args)
 {
   static char const* arg_names[] = {
     "size", "precision", "pad", "sign", "nan", "inf", "point", "bad",
@@ -25,16 +28,12 @@ static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
   int           point           = '.';
   int           bad             = '#';
   Object*       scale_arg       = (Object*) Py_None;
-  if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "i|O$CCssCCO", (char**) arg_names,
-      &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad, &scale_arg))
-    return -1;
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, "i|O$CCssCCO", arg_names,
+    &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad, &scale_arg);
 
-  if (size < 0) {
-    // FIXME
-    PyErr_SetString(PyExc_ValueError, "negative size");
-    return 1;
-  }
+  if (size < 0) 
+    throw ValueError("negative size");
   int precision;
   if (precision_arg == Py_None)
     precision = fixfmt::Number::PRECISION_NONE;
@@ -43,36 +42,26 @@ static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
     if (precision < 0)
       precision = fixfmt::Number::PRECISION_NONE;
   }
-  if (!(size > 0 || precision > 0)) {
-    PyErr_SetString(PyExc_ValueError, "no digits to show");
-    return 1;
-  }
+  if (!(size > 0 || precision > 0))
+    throw ValueError("no digits to show");
   if (   sign != fixfmt::Number::SIGN_NONE
       && sign != fixfmt::Number::SIGN_NEGATIVE
-      && sign != fixfmt::Number::SIGN_ALWAYS) {
-    // FIXME
-    PyErr_SetString(PyExc_ValueError, "invalid sign");
-    return 1;
-  }
+      && sign != fixfmt::Number::SIGN_ALWAYS)
+    throw ValueError("invalid sign");
 
   fixfmt::Number::Scale scale = {};
   if (scale_arg == Py_None) 
     ;  // accept default
+  else if (!Sequence::Check(scale_arg))
+    throw ValueError("scale must be a two-item sequence");
   else {
-    auto const arg_len = PyObject_Length(scale_arg);
-    if (arg_len < 0)
-      return 1;
-    if (arg_len != 2) {
-      PyErr_SetString(PyExc_ValueError, "scale must be two-item sequence");
-      return 1;
-    }
-    
-    if (!PyArg_ParseTuple(scale_arg, "ds", &scale.factor, &scale.suffix))
-      return -1;
-    if (!(scale.factor > 0)) {
-      PyErr_SetString(PyExc_ValueError, "invalid scale factor");
-      return 1;
-    }
+    Sequence* scale_seq = cast<Sequence>(scale_arg);
+    if (scale_seq->Length() != 2)
+      throw ValueError("scale must be a two-item sequence");
+    scale.factor = scale_seq->GetItem(0)->double_value();
+    if (!(scale.factor > 0))
+      throw ValueError("invalid scale factor");
+    scale.suffix = scale_seq->GetItem(1)->Str()->as_utf8_string();
   }
 
   new(self) PyNumber;
@@ -80,7 +69,6 @@ static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
       fixfmt::Number::Args{size, precision, 
        .sign=(char) sign, .pad=(char) pad, .point=(char) point, 
        .bad=(char) bad, .nan=nan, .inf=inf, .scale=scale});
-  return 0;
 }
 
 
@@ -212,7 +200,7 @@ Type PyNumber::type_ = PyTypeObject{
   (descrgetfunc)        nullptr,                            // tp_descr_get
   (descrsetfunc)        nullptr,                            // tp_descr_set
   (Py_ssize_t)          0,                                  // tp_dictoffset
-  (initproc)            tp_init,                            // tp_init
+  (initproc)            wrap<PyNumber, tp_init>,            // tp_init
   (allocfunc)           nullptr,                            // tp_alloc
   (newfunc)             PyType_GenericNew,                  // tp_new
   (freefunc)            nullptr,                            // tp_free
