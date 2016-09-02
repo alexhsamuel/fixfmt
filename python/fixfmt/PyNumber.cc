@@ -24,12 +24,10 @@ static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
   char const*   inf             = "inf";
   int           point           = '.';
   int           bad             = '#';
-  double        scale_factor    = fixfmt::Number::Scale{}.factor;
-  char const*   scale_suffix    = "";
+  Object*       scale_arg       = (Object*) Py_None;
   if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "i|O$CCssCC(ds)", (char**) arg_names,
-      &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad,
-      &scale_factor, &scale_suffix)) 
+      args, kw_args, "i|O$CCssCCO", (char**) arg_names,
+      &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad, &scale_arg))
     return -1;
 
   if (size < 0) {
@@ -56,17 +54,32 @@ static int tp_init(PyNumber* self, PyObject* args, PyObject* kw_args)
     PyErr_SetString(PyExc_ValueError, "invalid sign");
     return 1;
   }
-  if (!(scale_factor >= 0)) {
-    PyErr_SetString(PyExc_ValueError, "invalid scale factor");
-    return 1;
+
+  fixfmt::Number::Scale scale = {};
+  if (scale_arg == Py_None) 
+    ;  // accept default
+  else {
+    auto const arg_len = PyObject_Length(scale_arg);
+    if (arg_len < 0)
+      return 1;
+    if (arg_len != 2) {
+      PyErr_SetString(PyExc_ValueError, "scale must be two-item sequence");
+      return 1;
+    }
+    
+    if (!PyArg_ParseTuple(scale_arg, "ds", &scale.factor, &scale.suffix))
+      return -1;
+    if (!(scale.factor > 0)) {
+      PyErr_SetString(PyExc_ValueError, "invalid scale factor");
+      return 1;
+    }
   }
 
   new(self) PyNumber;
   self->fmt_ = std::make_unique<fixfmt::Number>(
       fixfmt::Number::Args{size, precision, 
        .sign=(char) sign, .pad=(char) pad, .point=(char) point, 
-       .bad=(char) bad, .nan=nan, .inf=inf,
-       .scale={scale_factor, scale_suffix}});
+       .bad=(char) bad, .nan=nan, .inf=inf, .scale=scale});
   return 0;
 }
 
