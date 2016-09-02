@@ -125,6 +125,21 @@ ref<Object> get_precision(PyNumber* const self, void* /* closure */)
 }
 
 
+ref<Object>
+get_scale(
+  PyNumber* const self,
+  void* /* closure */)
+{
+  auto const& scale = self->fmt_->get_args().scale;
+  if (scale.enabled())
+    return Tuple::builder 
+      << Float::from(scale.factor) 
+      << Unicode::from(scale.suffix);
+  else
+    return none_ref();
+}
+
+
 ref<Object> get_sign(PyNumber* const self, void* /* closure */)
 {
   return Unicode::from(self->fmt_->get_args().sign);
@@ -150,6 +165,7 @@ auto getsets = GetSets<PyNumber>()
   .add_get<get_pad>         ("pad")
   .add_get<get_point>       ("point")
   .add_get<get_precision>   ("precision")
+  .add_get<get_scale>       ("scale")
   .add_get<get_sign>        ("sign")
   .add_get<get_size>        ("size")
   .add_get<get_width>       ("width")
