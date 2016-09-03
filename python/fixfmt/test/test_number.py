@@ -17,10 +17,10 @@ def test_precision():
 
 
 def test_scale():
-    assert Number(8, scale=Scale.CENTI)(1) == "      100c"
-    assert Number(8, scale=Scale.MICRO)(1) == "  1000000µ"
+    assert Number(8, scale="c")(1) == "      100c"
+    assert Number(8, scale="µ")(1) == "  1000000µ"
 
-    assert Number(5, 2, scale=Scale.KILO)(123456) == "   123.46k"
-    assert Number(5, 2, scale=Scale.KILO)(NAN)    == "   NaN    "
+    assert Number(5, 2, scale="k")(123456) == "   123.46k"
+    assert Number(5, 2, scale="k")(NAN)    == "   NaN    "
 
 

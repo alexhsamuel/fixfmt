@@ -50,6 +50,13 @@ tp_init(
     throw ValueError("invalid sign");
 
   fixfmt::Number::Scale scale = {};
+  auto const aliases = ((Object*) &PyNumber::type_)->GetAttrString("SCALES");
+  std::cerr << "scale_dict = " << aliases << "\n";
+  if (Dict::Check(aliases)) {
+    auto const alias = cast<Dict>(aliases)->GetItem(scale_arg, false);
+    if (alias != nullptr)
+      scale_arg = alias;
+  }
   if (scale_arg == Py_None) 
     ;  // accept default
   else if (!Sequence::Check(scale_arg))

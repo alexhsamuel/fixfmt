@@ -520,6 +520,16 @@ public:
   static bool Check(PyObject* const obj)
     { return PyDict_Check(obj); }
 
+  Object* GetItem(PyObject* const key, bool check=true)
+  {
+    auto result = PyObject_GetItem(this, key);
+    if (check)
+      result = check_not_null(result);
+    else if (result == nullptr)
+      Exception::Clear();
+    return ref<Object>::take(result);
+  }
+
   Object* GetItemString(char const* const key)
   { 
     Object* const value = (Object*) PyDict_GetItemString(this, key);

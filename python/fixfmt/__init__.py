@@ -1,35 +1,27 @@
 from   ._ext import Bool, Number, String, TickTime
 from   ._ext import center, elide, pad, palide, string_length
 
-class Scale:
-    """
-    Container for scale constants.
-    """
+# Populate scale aliases: the keys may be passed as the `scale` to `Number()`.
+Number.SCALES.update({
+    "%"     : (  100, "%"),
+    "‰"     : ( 1000, "‰"),
+    "bps"   : (10000, " bps"),
 
-    # FIXME: These are synchronized manually with the corresponding C++ 
-    # constants in number.cc.
+    "T"     : (1E+12, "T"),
+    "G"     : (1E+9 , "G"),
+    "M"     : (1E+6 , "M"),
+    "k"     : (1E+3 , "k"),
+    "d"     : (1E-1 , "d"),
+    "c"     : (1E-2 , "c"),
+    "m"     : (1E-3 , "m"),
+    "µ"     : (1E-6 , "µ"),
+    "n"     : (1E-9 , "n"),
+    "p"     : (1E-12, "p"),
+    "f"     : (1E-16, "f"),
 
-    NONE        = (float("NaN"), "")
+    "Gi"    : (1 << 30, "Gi"),
+    "Mi"    : (1 << 20, "Mi"),
+    "ki"    : (1 << 10, "ki"),
 
-    PERCENT     = (  100, "%")
-    PER_MILLE   = ( 1000, "‰")
-    BASIS_POINTS= (10000, " bps")
-
-    TERA        = (1E+12, "T")
-    GIGA        = (1E+9 , "G")
-    MEGA        = (1E+6 , "M")
-    KILO        = (1E+3 , "k")
-    DECI        = (1E-1 , "d")
-    CENTI       = (1E-2 , "c")
-    MILLI       = (1E-3 , "m")
-    MICRO       = (1E-6 , "µ")
-    NANO        = (1E-9 , "n")
-    PICO        = (1E-12, "p")
-    FEMTO       = (1E-16, "f")
-
-    GIBI        = (1 << 30, "Gi")
-    MEBI        = (1 << 20, "Mi")
-    KIBI        = (1 << 10, "Ki")
-
-
+})
 

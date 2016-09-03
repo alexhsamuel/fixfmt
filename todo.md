@@ -1,6 +1,5 @@
 Things to do:  (* for MVP) 
 
-- Change `Scale` to a dictionary in `Number`.
 - Add units and currency.
 - Add a casual Python by-row table formatter.
 

@@ -40,6 +40,13 @@ PyInit__ext(void)
     module->add(&PyBool::type_);
 
     PyNumber::type_.Ready();
+    {
+      // Add the 'SCALES' class attribute; this must be done from extension 
+      // code.
+      Dict* const dict = PyNumber::type_.tp_dict;
+      assert(dict != nullptr);
+      dict->SetItemString("SCALES", PyDict_New());
+    }
     module->add(&PyNumber::type_);
 
     PyString::type_.Ready();
