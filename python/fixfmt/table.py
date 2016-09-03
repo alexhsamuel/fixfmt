@@ -5,8 +5,8 @@ import shutil
 import sys
 
 import numpy as np
-from   pln.cfg import Group, Var, Cfg
-from   pln.terminal import ansi
+from   aslib.cfg import Group, Var, Cfg
+from   aslib.terminal import ansi
 
 from   . import *
 from   . import _ext
@@ -543,6 +543,42 @@ class Table:
                 print(table(i))
 
         self._print_bottom()
+
+
+
+#-------------------------------------------------------------------------------
+
+class Simple:  # FIXME
+
+    def __init__(self, columns):
+        def norm(cols):
+            for i, col in enumerate(cols):
+                try:
+                    name, fmt = col
+                except TypeError:
+                    if callable(fmt):
+                        name = getattr(fmt, "name", "col{}".format(i))
+                    else:
+                        raise TypeError(
+                            "column is not a pair or callable: {}".format(col))
+                yield fmt, name
+
+        self.__fmts, self.__names = zip(*norm(columns))
+
+
+    @property
+    def header(self):
+        return " ".join(
+            palide(n, f.width) for f, n in zip(self.__fmts, self.__names))
+
+
+    @property
+    def underline(self):
+        return " ".join( "-" * f.width for f in self.__fmts )
+
+
+    def row(self, *values):
+        return " ".join( f(v) for f, v in zip(self.__fmts, values) )
 
 
 
