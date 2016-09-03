@@ -51,7 +51,6 @@ tp_init(
 
   fixfmt::Number::Scale scale = {};
   auto const aliases = ((Object*) &PyNumber::type_)->GetAttrString("SCALES");
-  std::cerr << "scale_dict = " << aliases << "\n";
   if (Dict::Check(aliases)) {
     auto const alias = cast<Dict>(aliases)->GetItem(scale_arg, false);
     if (alias != nullptr)
