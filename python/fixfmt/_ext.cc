@@ -43,7 +43,7 @@ PyInit__ext(void)
     {
       // Add the 'SCALES' class attribute; this must be done from extension 
       // code.
-      Dict* const dict = PyNumber::type_.tp_dict;
+      Dict* const dict = (Dict*) PyNumber::type_.tp_dict;
       assert(dict != nullptr);
       dict->SetItemString("SCALES", PyDict_New());
     }
