@@ -1,5 +1,9 @@
 Things to do:  (* for MVP) 
 
+- Change `Scale` to a dictionary in `Number`.
+- Add units and currency.
+- Add a casual Python by-row table formatter.
+
 - ** optionally, choose format for visible lines only
 - _cascading_ config for formatters
 - format methods, not just print
