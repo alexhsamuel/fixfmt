@@ -164,18 +164,18 @@ def _colorize(cfg):
     """
     # Color true and false.
     cfg.formatters.bool.true = ansi.style(
-        color=ansi.BLACK, bold=False, light=False)(cfg.formatters.bool.true)
+        fg="black", bold=False)(cfg.formatters.bool.true)
     cfg.formatters.bool.false = ansi.style(
-        color=ansi.BLACK, bold=False, light=True)(cfg.formatters.bool.false)
+        fg="dark_gray", bold=False)(cfg.formatters.bool.false)
 
     # Color Inf and Nan, for visibility.
     cfg.formatters.float.inf = ansi.style(
-        color=ansi.BLUE, bold=True, light=False)(cfg.formatters.float.inf)
+        fg="blue", bold=True)(cfg.formatters.float.inf)
     cfg.formatters.float.nan = ansi.style(
-        color=ansi.GRAY, light=False)(cfg.formatters.float.nan)
+        fg="dark_gray")(cfg.formatters.float.nan)
 
     # Color lines gray.
-    line_style = ansi.style(color=ansi.BLACK, light=True)
+    line_style = ansi.style(fg="light_gray")
     style_line = lambda s: s if s is None else line_style(s)
     for c in (cfg.bottom, cfg.header, cfg.row, cfg.row_ellipsis, cfg.top, 
               cfg.underline, ):
@@ -195,7 +195,7 @@ def _colorize(cfg):
         cfg.header.style.suffix = ansi.RESET
 
     # Color the ellipsis row.
-    cfg.row_ellipsis.format = ansi.style(color=ansi.BLACK, light=True)(
+    cfg.row_ellipsis.format = ansi.style(fg="light_gray")(
         cfg.row_ellipsis.format)
 
 
@@ -297,7 +297,7 @@ def _choose_formatter_datetime64(values, cfg):
 
 
 def _choose_formatter_str(values, cfg):
-    size = np.vectorize(len)(values).max()
+    size = np.vectorize(lambda x: len(str(x)))(values).max()
     size = max(size, cfg.str.min_size, cfg.min_width)
     size = min(size, cfg.str.max_size)
     return String(size)
