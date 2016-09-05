@@ -1,11 +1,11 @@
 import pandas as pd
-import pln.container
+import aslib.container
 
 from   . import table, Bool, Number, String
 
 #-------------------------------------------------------------------------------
 
-def from_dataframe(df, cfg, *, names=pln.container.ALL):
+def from_dataframe(df, cfg, *, names=aslib.container.ALL):
     tbl = table.Table(cfg)
 
     def get_values(series):
@@ -25,7 +25,7 @@ def from_dataframe(df, cfg, *, names=pln.container.ALL):
         else:
             tbl.add_index_column(idx.name, get_values(idx))
 
-    names = pln.container.select_ordered(tuple(df.columns), names)
+    names = aslib.container.select_ordered(tuple(df.columns), names)
     for name in names:
         series = df[name]
         arr = get_values(series)
@@ -35,7 +35,7 @@ def from_dataframe(df, cfg, *, names=pln.container.ALL):
     return tbl
 
 
-def print_dataframe(df, cfg=table.DEFAULT_CFG, *, names=pln.container.ALL):
+def print_dataframe(df, cfg=table.DEFAULT_CFG, *, names=aslib.container.ALL):
     tbl = from_dataframe(df, cfg, names=names)
     tbl.print()
 
@@ -44,7 +44,7 @@ def print_dataframe(df, cfg=table.DEFAULT_CFG, *, names=pln.container.ALL):
 
 def main():
     from   argparse import ArgumentParser
-    from   pln.io import load_pickle
+    from   aslib.io import load_pickle
 
     # FIXME: Add format arguments.
 
