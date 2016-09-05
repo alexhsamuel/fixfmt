@@ -38,12 +38,12 @@ git clone https://github.com/google/googletest
 
 Requires Python 3.4 or later.
 
-Requires the [plynth](https://github.com/alexhsamuel/plynth) library.  Just
-clone it from GitHub and add the clone directory to your `PYTHONPATH`.  You 
-should be able to,
+Requires the [aslib](https://github.com/alexhsamuel/aslib) library.  Just clone
+it from GitHub and add the clone directory to your `PYTHONPATH`.  You should be
+able to,
 
 ```
-$ python3 -c 'import pln'
+$ python3 -c 'import aslib'
 ```
 
 without errors.
