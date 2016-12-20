@@ -5,14 +5,12 @@ import shutil
 import sys
 
 import numpy as np
-from   aslib.cfg import Group, Var, Cfg
-from   aslib.terminal import ansi
 
 from   . import *
 from   . import _ext
+from   .lib import ansi
 
 #-------------------------------------------------------------------------------
-# Configuration
 
 SEPARATOR_CONFIGURATION = Group(
     between                 = " ",

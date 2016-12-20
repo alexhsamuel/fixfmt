@@ -1,9 +1,8 @@
 # FIXME: Merge this with fixfmt.table!
 
 from   . import palide
+from   .lib import ansi, box
 from   .table import _get_header_position  # FIXME
-from   aslib import py
-from   aslib.terminal import ansi, box
 
 #-------------------------------------------------------------------------------
 
@@ -93,7 +92,6 @@ class BoxTable(_Table):
     def __init__(self, columns, config={}):
         super().__init__(columns)
 
-        # FIXME: Use aslib.cfg.
         self.__cfg = dict(self.DEFAULT_CONFIG)
         self.__cfg.update(config)
         
