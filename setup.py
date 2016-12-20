@@ -13,27 +13,16 @@ if sys.platform == "darwin":
   os.environ["MACOSX_DEPLOYMENT_TARGET"] = "10.9"
 
 setup(
-  name="test",
+  name="fixfmt",
   ext_modules=[
     Extension(
       "fixfmt._ext",
-      extra_compile_args=["-std=c++14", ],
-      include_dirs=["../cxx", ],
-      sources=[
-        "fixfmt/PyBool.cc",
-        "fixfmt/PyNumber.cc",
-        "fixfmt/PyString.cc",
-        "fixfmt/PyTable.cc",
-        "fixfmt/_ext.cc",
-        "fixfmt/functions.cc",
-      ],
-      library_dirs=[
-        "../cxx",
-      ],
-      libraries=[
-        "fixfmt",
-      ],
-      depends=glob("*.hh") + glob("../cxx/*.hh"),
+      extra_compile_args    =["-std=c++14", ],
+      include_dirs          =["./cxx", ],
+      sources               =glob("python/fixfmt/*.cc"),
+      library_dirs          =["./cxx",],
+      libraries             =["fixfmt",],
+      depends               =glob("cxx/fixfmt/*.hh") + glob("python/fixfmt/*.hh"),
     ),
 
   ]
