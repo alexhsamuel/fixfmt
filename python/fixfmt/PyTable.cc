@@ -258,7 +258,7 @@ auto getsets = GetSets<PyTable>()
 
 Type PyTable::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
-  (char const*)         "fixfmt.ext_.Table",                // tp_name
+  (char const*)         "fixfmt._ext.Table",                // tp_name
   (Py_ssize_t)          sizeof(PyTable),                    // tp_basicsize
   (Py_ssize_t)          0,                                  // tp_itemsize
   (destructor)          tp_dealloc,                         // tp_dealloc

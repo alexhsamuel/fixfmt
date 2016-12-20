@@ -183,7 +183,7 @@ auto getsets = GetSets<PyNumber>()
 
 Type PyNumber::type_ = PyTypeObject{
   PyVarObject_HEAD_INIT(nullptr, 0)
-  (char const*)         "fixfmt.ext_.Number",               // tp_name
+  (char const*)         "fixfmt._ext.Number",               // tp_name
   (Py_ssize_t)          sizeof(PyNumber),                   // tp_basicsize
   (Py_ssize_t)          0,                                  // tp_itemsize
   (destructor)          nullptr,                            // tp_dealloc
