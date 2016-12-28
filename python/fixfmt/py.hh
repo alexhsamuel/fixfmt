@@ -403,7 +403,11 @@ public:
   auto SetAttrString(char const* name, PyObject* obj)
     { check_not_minus_one(PyObject_SetAttrString(this, name, obj)); }
   auto Str()
+#if PY3K
+    { return take_not_null<Unicode>(PyObject_Str(this)); }
+#else
     { return take_not_null<Unicode>(PyObject_Unicode(this)); }
+#endif
 
   optional<ref<Object>> maybe_get_attr(std::string const& name);
 
