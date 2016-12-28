@@ -32,8 +32,12 @@ def test_bad():
 
 
 def test_scale():
-    assert Number(8, scale="c")(1) == "      100c"
-    assert Number(8, scale="µ")(1) == "  1000000µ"
+    assert Number(8, scale= "%"  )(1) == u"      100%"
+    assert Number(8, scale= "c"  )(1) == u"      100c"
+    assert Number(8, scale= "bps")(1) == u"    10000 bps"
+    assert Number(8, scale=u"µ"  )(1) == u"  1000000µ"
+
+    assert Number(1, 3, scale="Mi")(1000000) == " 0.954Mi"
 
     assert Number(5, 2, scale="k")(123456) == "   123.46k"
     assert Number(5, 2, scale="k")(NAN)    == "   NaN    "
