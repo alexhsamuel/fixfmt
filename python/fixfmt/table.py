@@ -14,15 +14,15 @@ from   .lib.cfg import *
 #-------------------------------------------------------------------------------
 
 SEPARATOR_CONFIGURATION = Group(
-    between                 = " ",
-    end                     = "",
-    index                   = " | ",
-    start                   = "",
+    between                 = u" ",
+    end                     = u"",
+    index                   = u" | ",
+    start                   = u"",
 )
 
 CONFIGURATION = Group(
     bottom = Group(
-        line                        = "-",
+        line                        = u"-",
         separator                   = SEPARATOR_CONFIGURATION,
         show                        = False,
     ),
@@ -33,14 +33,14 @@ CONFIGURATION = Group(
         by_name                     = {},
         by_dtype                    = {},
         bool = Group(
-            true                    = "True",
-            false                   = "False",
+            true                    = u"True",
+            false                   = u"False",
         ),
         float = Group(
-            inf                     = "\u221e",
+            inf                     = u"\u221e",
             max_precision           = 8,
             min_precision           = None,
-            nan                     = "NaN",
+            nan                     = u"NaN",
         ),
         min_width                   = 4,
         str = Group(
@@ -56,14 +56,14 @@ CONFIGURATION = Group(
         elide = Group(
             position                = 0.7,
         ),
-        prefix                      = "",
+        prefix                      = u"",
         separator                   = SEPARATOR_CONFIGURATION,
         show                        = True,
         style = Group(
-            prefix                  = "",
-            suffix                  = "",
+            prefix                  = u"",
+            suffix                  = u"",
         ),
-        suffix                      = "",
+        suffix                      = u"",
     ),
     index = Group(
         show                        = True,
@@ -73,17 +73,17 @@ CONFIGURATION = Group(
     ),
     row_ellipsis = Group(
         separator                   = SEPARATOR_CONFIGURATION,
-        pad                         = " ",
+        pad                         = u" ",
         position                    = 0.85,
-        format                      = "\u2026 skipping {skipped} rows \u2026",
+        format                      = u"\u2026 skipping {skipped} rows \u2026",
     ),
     top = Group(
-        line                        = "-",
+        line                        = u"-",
         separator                   = SEPARATOR_CONFIGURATION,
         show                        = False,
     ),
     underline = Group(
-        line                        = "=",
+        line                        = u"=",
         separator                   = SEPARATOR_CONFIGURATION,
         show                        = True,
     ),
@@ -95,63 +95,63 @@ DEFAULT_CFG = Cfg(CONFIGURATION)
 
 UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
     bottom = dict(
-        line                        = "\u2500",
+        line                        = u"\u2500",
         separator = dict(
-            between                 = "\u2500\u2534\u2500",
-            end                     = "\u2500\u2518",
-            index                   = "\u2500\u2568\u2500",
-            start                   = "\u2514\u2500",
+            between                 = u"\u2500\u2534\u2500",
+            end                     = u"\u2500\u2518",
+            index                   = u"\u2500\u2568\u2500",
+            start                   = u"\u2514\u2500",
         ),
         show                        = True,
     ),
     formatters = dict(
         bool = dict(
-            true                    = "\u2714",
-            false                   = "\u00b7",
+            true                    = u"\u2714",
+            false                   = u"\u00b7",
         ),
         min_width                   = 4,
     ),
     header = dict(
         separator = dict(
-            between                 = " \u2502 ",
-            end                     = " \u2502",
-            index                   = " \u2551 ",
-            start                   = "\u2502 ",
+            between                 = u" \u2502 ",
+            end                     = u" \u2502",
+            index                   = u" \u2551 ",
+            start                   = u"\u2502 ",
         ),
     ),
     row_ellipsis = dict(
         separator = dict(
-            end                     = "\u2561",
-            start                   = "\u255e",
+            end                     = u"\u2561",
+            start                   = u"\u255e",
         ),
-        pad                         = "\u2550",
-        format                      = " skipped {skipped} rows ",
+        pad                         = u"\u2550",
+        format                      = u" skipped {skipped} rows ",
     ),
     row = dict(
         separator = dict(
-            between                 = " \u2502 ",
-            end                     = " \u2502",
-            index                   = " \u2551 ",
-            start                   = "\u2502 ",
+            between                 = u" \u2502 ",
+            end                     = u" \u2502",
+            index                   = u" \u2551 ",
+            start                   = u"\u2502 ",
         ),
     ),
     top = dict(
-        line                        = "\u2500",
+        line                        = u"\u2500",
         separator = dict(
-            between                 = "\u2500\u252c\u2500",
-            end                     = "\u2500\u2510",
-            index                   = "\u2500\u2565\u2500",
-            start                   = "\u250c\u2500",
+            between                 = u"\u2500\u252c\u2500",
+            end                     = u"\u2500\u2510",
+            index                   = u"\u2500\u2565\u2500",
+            start                   = u"\u250c\u2500",
         ),
         show                        = True,
     ),
     underline = dict(
-        line                        = "\u2500",
+        line                        = u"\u2500",
         separator = dict(
-            between                 = "\u2500\u253c\u2500",
-            end                     = "\u2500\u2524",
-            index                   = "\u2500\u256b\u2500",
-            start                   = "\u251c\u2500",
+            between                 = u"\u2500\u253c\u2500",
+            end                     = u"\u2500\u2524",
+            index                   = u"\u2500\u256b\u2500",
+            start                   = u"\u251c\u2500",
         ),
     ),
 )
