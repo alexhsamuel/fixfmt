@@ -17,7 +17,7 @@ namespace {
 
 Methods<Module> methods;
 
-#if IS_PY3K
+#if PY3K
 
 PyModuleDef testmod_module = {
   PyModuleDef_HEAD_INIT,
@@ -34,13 +34,13 @@ PyModuleDef testmod_module = {
 //------------------------------------------------------------------------------
 
 PyMODINIT_FUNC
-#if IS_PY3K
+#if PY3K
 PyInit__ext(void)
 #else
 init_ext(void)
 #endif
 {
-#if IS_PY3K
+#if PY3K
   auto module = Module::Create(&testmod_module);
 #else
   auto module = Module::Init("fixfmt._ext", add_functions(methods));
@@ -69,12 +69,12 @@ init_ext(void)
     PyTickTime::type_.Ready();
     module->add(&PyTickTime::type_);
 
-#if IS_PY3K
+#if PY3K
     return module.release();
 #endif
   }
   catch (Exception) {
-#if IS_PY3K
+#if PY3K
     return nullptr;
 #endif
   }

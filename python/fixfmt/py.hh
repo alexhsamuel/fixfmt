@@ -10,7 +10,7 @@
 #include <Python.h>
 
 #if PY_MAJOR_VERSION >= 3
-#define IS_PY3K
+#define PY3K
 #else
 using Py_hash_t = long;
 #endif
@@ -91,7 +91,7 @@ using TypeError             = ExceptionWrapper<&PyExc_TypeError>;
 using ValueError            = ExceptionWrapper<&PyExc_ValueError>;
 using ZeroDivisionError     = ExceptionWrapper<&PyExc_ZeroDivisionError>;
 
-#if IS_PY3K
+#if PY3K
 using FileExistsError       = ExceptionWrapper<&PyExc_FileExistsError>;
 using FileNotFoundError     = ExceptionWrapper<&PyExc_FileNotFoundError>;
 using InterruptedError      = ExceptionWrapper<&PyExc_InterruptedError>;
@@ -705,7 +705,7 @@ public:
 
   static bool Check(PyObject* obj)
     { return PyModule_Check(obj); }
-#if IS_PY3K
+#if PY3K
   static auto Create(PyModuleDef* def)
     { return ref<Module>::take(PyModule_Create(def)); }
 #else
@@ -717,7 +717,7 @@ public:
   static ref<Module> New(char const* name)
     { return take_not_null<Module>(PyModule_New(name)); }
 
-#if IS_PY3K
+#if PY3K
   void AddFunctions(PyMethodDef* functions) 
     { check_zero(PyModule_AddFunctions(this, functions)); }
 #else
@@ -921,7 +921,7 @@ public:
 
 //------------------------------------------------------------------------------
 
-#if IS_PY3K
+#if PY3K
 
 class StructSequence
   : public Object
@@ -985,7 +985,7 @@ public:
   static auto from(char character)
     { return FromStringAndSize(&character, 1); }
 
-#if IS_PY3K
+#if PY3K
   char* as_utf8() { return PyUnicode_AsUTF8(this); }
 
   std::string as_utf8_string()
@@ -1004,7 +1004,7 @@ public:
 };
 
 
-#if IS_PY3K
+#if PY3K
 
 template<>
 inline std::ostream& operator<<(std::ostream& os, ref<Unicode>& ref)
