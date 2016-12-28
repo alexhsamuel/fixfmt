@@ -5,11 +5,11 @@ fixed-width fields.  Useful for printing tabular data and similar.
 
 - A single formatter formats any value with the same width: useful for 
   formatting tables, arrays, forms, etc.
-- The width is measured in Unicode code points: supports UTF-8 properly
-  (but not combining characters and other fancy features).
+- The width is measured in Unicode code points.
 - [ANSI terminal escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code)
   are ignored when counting width, so they may be used to format output
   for the terminal.
+  
 
 # APIs
 
@@ -44,3 +44,14 @@ Supports Python 2.7, and Python 3.5 or later.
 Requires [pytest](http://pytest.org) to run Python tests.  Invoke,
 
 `py.test test/`
+
+# Limitations
+
+### Unicode
+
+[Counting code points is broken](http://utf8everywhere.org/).
+However, for primarily data-oriented applications that this library targets,
+it does a reasonable job and produces better output than most similar systems.
+If you know a realible way to count grapheme clusters or _invertibly_ determine 
+display width in a fixed-width Linux and OS/X terminal, please contact the author.
+
