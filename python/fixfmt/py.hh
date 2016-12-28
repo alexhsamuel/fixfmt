@@ -9,6 +9,12 @@
 
 #include <Python.h>
 
+#if PY_MAJOR_VERSION >= 3
+#define IS_PY3K
+#else
+using Py_hash_t = long;
+#endif
+
 //------------------------------------------------------------------------------
 
 namespace py {
@@ -69,29 +75,39 @@ public:
 using ArithmeticError       = ExceptionWrapper<&PyExc_ArithmeticError>;
 using AttributeError        = ExceptionWrapper<&PyExc_AttributeError>;
 using EnvironmentError      = ExceptionWrapper<&PyExc_EnvironmentError>;
-using FileExistsError       = ExceptionWrapper<&PyExc_FileExistsError>;
-using FileNotFoundError     = ExceptionWrapper<&PyExc_FileNotFoundError>;
 using IOError               = ExceptionWrapper<&PyExc_IOError>;
 using ImportError           = ExceptionWrapper<&PyExc_ImportError>;
 using IndexError            = ExceptionWrapper<&PyExc_IndexError>;
-using InterruptedError      = ExceptionWrapper<&PyExc_InterruptedError>;
-using IsADirectoryError     = ExceptionWrapper<&PyExc_IsADirectoryError>;
 using KeyError              = ExceptionWrapper<&PyExc_KeyError>;
 using LookupError           = ExceptionWrapper<&PyExc_LookupError>;
 using NameError             = ExceptionWrapper<&PyExc_NameError>;
-using NotADirectoryError    = ExceptionWrapper<&PyExc_NotADirectoryError>;
 using NotImplementedError   = ExceptionWrapper<&PyExc_NotImplementedError>;
 using OverflowError         = ExceptionWrapper<&PyExc_OverflowError>;
-using PermissionError       = ExceptionWrapper<&PyExc_PermissionError>;
 using ReferenceError        = ExceptionWrapper<&PyExc_ReferenceError>;
 using RuntimeError          = ExceptionWrapper<&PyExc_RuntimeError>;
 using StopIteration         = ExceptionWrapper<&PyExc_StopIteration>;
 using SystemExit            = ExceptionWrapper<&PyExc_SystemExit>;
-using TimeoutError          = ExceptionWrapper<&PyExc_TimeoutError>;
 using TypeError             = ExceptionWrapper<&PyExc_TypeError>;
 using ValueError            = ExceptionWrapper<&PyExc_ValueError>;
 using ZeroDivisionError     = ExceptionWrapper<&PyExc_ZeroDivisionError>;
 
+#if IS_PY3K
+using FileExistsError       = ExceptionWrapper<&PyExc_FileExistsError>;
+using FileNotFoundError     = ExceptionWrapper<&PyExc_FileNotFoundError>;
+using InterruptedError      = ExceptionWrapper<&PyExc_InterruptedError>;
+using IsADirectoryError     = ExceptionWrapper<&PyExc_IsADirectoryError>;
+using NotADirectoryError    = ExceptionWrapper<&PyExc_NotADirectoryError>;
+using PermissionError       = ExceptionWrapper<&PyExc_PermissionError>;
+using TimeoutError          = ExceptionWrapper<&PyExc_TimeoutError>;
+#else
+using FileExistsError       = ExceptionWrapper<&PyExc_IOError>;
+using FileNotFoundError     = ExceptionWrapper<&PyExc_IOError>;
+using InterruptedError      = ExceptionWrapper<&PyExc_OSError>;
+using IsADirectoryError     = ExceptionWrapper<&PyExc_IOError>;
+using NotADirectoryError    = ExceptionWrapper<&PyExc_IOError>;
+using PermissionError       = ExceptionWrapper<&PyExc_IOError>;
+using TimeoutError          = ExceptionWrapper<&PyExc_OSError>;
+#endif
 
 /**
  * Raises 'Exception' if value is not zero.
@@ -689,15 +705,23 @@ public:
 
   static bool Check(PyObject* obj)
     { return PyModule_Check(obj); }
+#if IS_PY3K
   static auto Create(PyModuleDef* def)
     { return ref<Module>::take(PyModule_Create(def)); }
+#else
+  static auto Init(char const* const name, PyMethodDef* const methods)
+    { return ref<Module>::take(Py_InitModule(name, methods)); }
+#endif
   static ref<Module> ImportModule(char const* const name)
     { return take_not_null<Module>(PyImport_ImportModule(name)); }
   static ref<Module> New(char const* name)
     { return take_not_null<Module>(PyModule_New(name)); }
 
+#if IS_PY3K
   void AddFunctions(PyMethodDef* functions) 
     { check_zero(PyModule_AddFunctions(this, functions)); }
+#else
+#endif
   void AddObject(char const* name, PyObject* val)
     { check_zero(PyModule_AddObject(this, name, incref(val))); }
   char const* GetName()
@@ -897,6 +921,8 @@ public:
 
 //------------------------------------------------------------------------------
 
+#if IS_PY3K
+
 class StructSequence
   : public Object
 {
@@ -934,6 +960,8 @@ public:
 
 };
 
+#endif
+
 
 //------------------------------------------------------------------------------
 
@@ -957,6 +985,7 @@ public:
   static auto from(char character)
     { return FromStringAndSize(&character, 1); }
 
+#if IS_PY3K
   char* as_utf8() { return PyUnicode_AsUTF8(this); }
 
   std::string as_utf8_string()
@@ -969,8 +998,13 @@ public:
       return std::string(utf8, length);
   }
 
+#else
+#endif
+
 };
 
+
+#if IS_PY3K
 
 template<>
 inline std::ostream& operator<<(std::ostream& os, ref<Unicode>& ref)
@@ -987,6 +1021,8 @@ operator+(
 {
   return str0 + str1.as_utf8_string();
 }
+
+#endif
 
 
 //==============================================================================
