@@ -182,10 +182,19 @@ ref<Object> palide(Module* module, Tuple* args, Dict* kw_args)
 ref<Object> string_length(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = { "string", nullptr };
-  char const* str;
+  char* str;
+
+#if PY3K
   Arg::ParseTupleAndKeywords(args, kw_args, "s", arg_names, &str);
 
   return Long::FromLong(fixfmt::string_length(str));
+#else
+  Arg::ParseTupleAndKeywords(args, kw_args, "et", arg_names, "utf-8", &str);
+
+  auto const length = fixfmt::string_length(str);
+  PyMem_Free(str);
+  return Long::FromLong(length);
+#endif
 }
 
 

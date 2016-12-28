@@ -71,6 +71,8 @@ init_ext(void)
 
 #if PY3K
     return module.release();
+#else
+    module.release();
 #endif
   }
   catch (Exception) {

@@ -173,6 +173,11 @@ Number::operator()(
       // Tack on the scale suffix.
       result.append(args_.scale.suffix);
 
+    if (string_length(result) != width_)
+      std::cerr << "result='" << result 
+                << "' len=" << string_length(result)
+                << " width_=" << width_
+                << "\n";
     assert(string_length(result) == width_);
     return result;
   }

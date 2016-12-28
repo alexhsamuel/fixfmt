@@ -711,7 +711,7 @@ public:
     { return ref<Module>::take(PyModule_Create(def)); }
 #else
   static auto Init(char const* const name, PyMethodDef* const methods)
-    { return ref<Module>::take(Py_InitModule(name, methods)); }
+    { return take_not_null<Module>(Py_InitModule(name, methods)); }
 #endif
   static ref<Module> ImportModule(char const* const name)
     { return take_not_null<Module>(PyImport_ImportModule(name)); }
