@@ -49,7 +49,9 @@ Requires [pytest](http://pytest.org) to run Python tests.  Invoke,
 
 ### Unicode
 
-[Counting code points is broken](http://utf8everywhere.org/).
+[Counting code points is broken](http://utf8everywhere.org/), as is it is not a
+perfect proxy for display width.
+
 However, for primarily data-oriented applications that this library targets,
 it does a reasonable job and produces better output than most similar systems.
 If you know a realible way to count grapheme clusters or _invertibly_ determine 
