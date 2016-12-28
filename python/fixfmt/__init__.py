@@ -1,11 +1,13 @@
+#-*- encoding: utf-8 -*-
+
 from   ._ext import Bool, Number, String, TickTime
 from   ._ext import center, elide, pad, palide, string_length
 
 # Populate scale aliases: the keys may be passed as the `scale` to `Number()`.
 Number.SCALES.update({
-    "%"     : (  100, "%"),
-    "‰"     : ( 1000, "‰"),
-    "bps"   : (10000, " bps"),
+    "%"     : (1E-2, "%"),
+    "‰"     : (1E-3, "‰"),
+    "bps"   : (1E-4, " bps"),
 
     "T"     : (1E+12, "T"),
     "G"     : (1E+9 , "G"),
@@ -14,7 +16,7 @@ Number.SCALES.update({
     "d"     : (1E-1 , "d"),
     "c"     : (1E-2 , "c"),
     "m"     : (1E-3 , "m"),
-    "µ"     : (1E-6 , "µ"),
+   u"µ"     : (1E-6 ,u"µ"),
     "n"     : (1E-9 , "n"),
     "p"     : (1E-12, "p"),
     "f"     : (1E-16, "f"),

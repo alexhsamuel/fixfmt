@@ -21,15 +21,28 @@ tp_init(
 
   int           size;
   Object*       precision_arg   = (Object*) Py_None;
+#if PY3K
   int           pad             = fixfmt::Number::PAD_SPACE;
   int           sign            = fixfmt::Number::SIGN_NEGATIVE;
-  char const*   nan             = "NaN";
-  char const*   inf             = "inf";
   int           point           = '.';
   int           bad             = '#';
+#else
+  char          pad             = fixfmt::Number::PAD_SPACE;
+  char          sign            = fixfmt::Number::SIGN_NEGATIVE;
+  char          point           = '.';
+  char          bad             = '#';
+#endif
+  char const*   nan             = "NaN";
+  char const*   inf             = "inf";
   Object*       scale_arg       = (Object*) Py_None;
   Arg::ParseTupleAndKeywords(
-    args, kw_args, "i|O$CCssCCO", arg_names,
+    args, kw_args, 
+#if PY3K
+    "i|O$CCssCCO",
+#else
+    "i|OccssccO",
+#endif
+    arg_names,
     &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad, &scale_arg);
 
   if (size < 0) 
@@ -48,6 +61,8 @@ tp_init(
       && sign != fixfmt::Number::SIGN_NEGATIVE
       && sign != fixfmt::Number::SIGN_ALWAYS)
     throw ValueError("invalid sign");
+  if (! (pad == fixfmt::Number::PAD_SPACE || pad == fixfmt::Number::PAD_ZERO))
+    throw ValueError("invalid pad");
 
   fixfmt::Number::Scale scale = {};
   auto const aliases = ((Object*) &PyNumber::type_)->GetAttrString("SCALES");
@@ -190,10 +205,10 @@ Type PyNumber::type_ = PyTypeObject{
   (printfunc)           nullptr,                            // tp_print
   (getattrfunc)         nullptr,                            // tp_getattr
   (setattrfunc)         nullptr,                            // tp_setattr
-#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+#if PY3K
   (PyAsyncMethods*)     nullptr,                            // tp_as_async
 #else
-  (void*)               nullptr,                            // tp_reserved
+  (cmpfunc)             nullptr,                            // tp_compare
 #endif
   (reprfunc)            nullptr,                            // tp_repr
   (PyNumberMethods*)    nullptr,                            // tp_as_number
@@ -234,7 +249,9 @@ Type PyNumber::type_ = PyTypeObject{
   (PyObject*)           nullptr,                            // tp_weaklist
   (destructor)          nullptr,                            // tp_del
   (unsigned int)        0,                                  // tp_version_tag
+#if PY3K
   (destructor)          nullptr,                            // tp_finalize
+#endif
 };
 
 

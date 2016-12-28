@@ -17,6 +17,8 @@ namespace {
 
 Methods<Module> methods;
 
+#if PY3K
+
 PyModuleDef testmod_module = {
   PyModuleDef_HEAD_INIT,
   "fixfmt._ext",
@@ -25,15 +27,24 @@ PyModuleDef testmod_module = {
   add_functions(methods)
 };
 
+#endif
 
 }  // anonymous namespace
 
 //------------------------------------------------------------------------------
 
 PyMODINIT_FUNC
+#if PY3K
 PyInit__ext(void)
+#else
+init_ext(void)
+#endif
 {
+#if PY3K
   auto module = Module::Create(&testmod_module);
+#else
+  auto module = Module::Init("fixfmt._ext", add_functions(methods));
+#endif
 
   try {
     PyBool::type_.Ready();
@@ -58,10 +69,16 @@ PyInit__ext(void)
     PyTickTime::type_.Ready();
     module->add(&PyTickTime::type_);
 
+#if PY3K
     return module.release();
+#else
+    module.release();
+#endif
   }
   catch (Exception) {
+#if PY3K
     return nullptr;
+#endif
   }
 }
 
