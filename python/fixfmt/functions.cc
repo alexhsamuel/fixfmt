@@ -106,7 +106,7 @@ ref<Object> center(Module* module, Tuple* args, Dict* kw_args)
   int length;
   char const* pad = " ";
   Arg::ParseTupleAndKeywords(
-      args, kw_args, "sI|sd", arg_names, &str, &length, &pad);
+      args, kw_args, "sI|s", arg_names, &str, &length, &pad);
 
   // FIXME: Validate args.
   if (strlen(pad) == 0)
