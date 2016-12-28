@@ -10,8 +10,9 @@
 #include <Python.h>
 
 #if PY_MAJOR_VERSION >= 3
-#define PY3K
+#define PY3K 1
 #else
+#define PY3K 0
 using Py_hash_t = long;
 #endif
 
@@ -999,6 +1000,13 @@ public:
   }
 
 #else
+  std::string as_utf8_string() {
+    Object* str_obj = check_not_null(PyUnicode_AsUTF8String(this));
+    auto const str = std::string(PyString_AS_STRING(str_obj));
+    Py_DECREF(str_obj);
+    return str;
+  }
+
 #endif
 
 };
