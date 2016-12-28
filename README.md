@@ -36,7 +36,7 @@ git clone https://github.com/google/googletest
 
 ## Python
 
-Requires Python 3.4 or later.
+Supports Python 2.7, and Python 3.5 or later.
 
 
 ## Python unit tests
