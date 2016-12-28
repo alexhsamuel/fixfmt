@@ -6,10 +6,16 @@ See https://en.wikipedia.org/wiki/ANSI_escape_code.
 
 #-------------------------------------------------------------------------------
 
-from   enum import Enum
+from   __future__ import absolute_import, division, print_function
+
+import collections
+import fcntl
 import html.parser
 from   math import floor
+import os
 import re
+import struct
+import termios
 
 #-------------------------------------------------------------------------------
 
@@ -184,7 +190,7 @@ def GRAY_LEVEL(fraction):
     return 231 if index == 24 else 232 + index
 
 
-def sgr(*, fg=None, bg=None, bold=None, underline=None, blink=None,
+def sgr(fg=None, bg=None, bold=None, underline=None, blink=None,
         reverse=None, conceal=None):
     """
     Returns an SGR sequence to set color and text style.
@@ -240,7 +246,7 @@ def sgr(*, fg=None, bg=None, bold=None, underline=None, blink=None,
     return SGR(*codes) if len(codes) > 0 else ""
 
 
-def inverse_sgr(*, fg=None, bg=None, bold=None, underline=None, blink=None,
+def inverse_sgr(fg=None, bg=None, bold=None, underline=None, blink=None,
                 reverse=None, conceal=None):
     if fg is not None:
         fg = "default"
@@ -502,33 +508,55 @@ def convert_markup(text):
     return Parser().feed(text).result
 
 
-#-------------------------------------------------------------------------------
-# For testing purposes.
+try:
+    from shutil import get_terminal_size
 
-def print_colors(print=print):
-    """
-    Prints color samples.
-    """
-    print(underline("Basic Colors"))
-    for color in range(16):
-        print(
-            "    {:2x} ".format(color) + fg(color)("TEST") + "  ", 
-            end="\n" if color % 6 == 5 else "")
-    print()
-    print(underline("RGB Colors"))
-    for r in range(6):
-        for g in range(6):
-            for b in range(6):
-                color = 16 + 36 * r + 6 * g + b
-                print("{}{}{} {:2x} ".format(r, g, b, color)
-                    + fg(color)("TEST") + "  ", 
-                    end="\n" if color % 6 == 3 else "")
-    print(underline("Gray Scale"))
-    for i in range(0, 101, 4):
-        color = get_color("gray{}".format(i))
-        name = "g{:02d}".format(i) if i < 100 else "   "
-        print("{} {:2x} ".format(name, color) + fg(color)("TEST") + "  ", 
-            end="\n" if i % 24 == 20 else "")
-    print()
+except:
+    terminal_size = collections.namedtuple("terminal_size", ("columns", "lines"))
+
+    def get_terminal_size(default=(80, 25)):
+        def win_size(fd):
+            return struct.unpack(
+                "hh", fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
+
+        try:
+            cols = int(os.environ.get("COLUMNS"))
+        except:
+            cols = None
+        try:
+            rows = int(os.environ.get("ROWS"))
+        except:
+            rows = None    
+
+        if cols is not None and rows is not None:
+            return cols, rows
+
+        size = None
+        for fd in (0, 1, 2):
+            try:
+                size = win_size(fd)
+            except IOError:
+                continue
+            else:
+                break
+        else:
+            fd = os.open(os.ctermid(), os.O_RDONLY)
+            try:
+                size = win_size(fd)
+            except:
+                os.close(fd)
+
+        cols = (
+            cols if cols is not None
+            else size[1] if size is not None
+            else default[0]
+        )
+        rows = (
+            rows if rows is not None
+            else size[0] if size is not None
+            else default[1]
+        )
+
+        return terminal_size(cols, rows)
 
 

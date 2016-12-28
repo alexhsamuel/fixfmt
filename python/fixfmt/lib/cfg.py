@@ -6,12 +6,28 @@ Software configuration tool.
 
 #-------------------------------------------------------------------------------
 
+from   __future__ import absolute_import, division, print_function
+
 from   itertools import chain
+import six
 
 #-------------------------------------------------------------------------------
 
+if six.PY3:
+    def is_identifier(name):
+        return name.isidentifier()
+
+else:
+    def is_identifier(name):
+        import re, tokenize, keyword
+        return (
+            re.match(tokenize.Name + "$", name) is not None
+            and not keyword.iskeyword(name)
+        )
+
+
 def _check_name(name):
-    if name.isidentifier():
+    if is_identifier(name):
         return name
     else:
         raise ValueError("invalid name '{}'".format(name))
@@ -46,7 +62,7 @@ def format_ctor(obj, *args, **kw_args):
 
 #-------------------------------------------------------------------------------
 
-class Var:
+class Var(object):
     """
     A configuration variable.
 
@@ -101,7 +117,7 @@ class Var:
 
 
 
-class Group:
+class Group(object):
     """
     A namespace of configuration variables, possibly nested.
 
@@ -142,7 +158,7 @@ class Group:
         try:
             return self.vars[name]
         except KeyError:
-            raise KeyError(name) from None
+            six.raise_from(KeyError(name), None)
 
 
     def update(self, args={}, **kw_args):
@@ -155,7 +171,7 @@ class Group:
 
 #-------------------------------------------------------------------------------
 
-class Cfg:
+class Cfg(object):
     """
     A configuration.
 
@@ -212,7 +228,7 @@ class Cfg:
         try:
             var = self.__group[name]
         except KeyError:
-            raise AttributeError(name) from None
+            raise six.raise_from(AttributeError(name), None)
 
         if isinstance(var, Group):
             try:
@@ -232,13 +248,13 @@ class Cfg:
             try:
                 var = self.__group[name]
             except KeyError:
-                raise AttributeError("no config " + name) from None
+                six.raise_from(AttributeError("no config " + name), None)
             else:
                 try:
                     return var.default
                 except AttributeError:
-                    raise AttributeError(
-                        "no value for config " + name) from None
+                    six.raise_from(
+                        AttributeError("no value for config " + name), None)
 
 
     def __call__(self, args={}, **kw_args):

@@ -1,3 +1,5 @@
+from   __future__ import absolute_import, division, print_function
+
 import pandas as pd
 
 from   . import table, Bool, Number, String
@@ -5,7 +7,7 @@ from   .lib import container
 
 #-------------------------------------------------------------------------------
 
-def from_dataframe(df, cfg, *, names=container.ALL):
+def from_dataframe(df, cfg, names=container.ALL):
     tbl = table.Table(cfg)
 
     def get_values(series):
@@ -35,7 +37,7 @@ def from_dataframe(df, cfg, *, names=container.ALL):
     return tbl
 
 
-def print_dataframe(df, cfg=table.DEFAULT_CFG, *, names=container.ALL):
+def print_dataframe(df, cfg=table.DEFAULT_CFG, names=container.ALL):
     tbl = from_dataframe(df, cfg, names=names)
     tbl.print()
 
@@ -43,7 +45,11 @@ def print_dataframe(df, cfg=table.DEFAULT_CFG, *, names=container.ALL):
 #-------------------------------------------------------------------------------
 
 def main():
-    from   argparse import ArgumentParser
+    from argparse import ArgumentParser
+    try:
+        import cPickle as pickle
+    except ImportError:
+        import pickle
 
     # FIXME: Add format arguments.
 
@@ -59,8 +65,8 @@ def main():
     table._colorize(cfg)
 
     # FIXME: Support "-".
-    with open(args.filename, "rb"):
-        df = load_pickle(file)
+    with open(args.filename, "rb") as file:
+        df = pickle.load(file)
     print_dataframe(df, cfg)
 
 

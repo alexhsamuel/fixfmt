@@ -6,8 +6,13 @@ A container is an object that supports `__contains__`.
 
 #-------------------------------------------------------------------------------
 
-import collections.abc
 import re
+import six
+
+if six.PY3:
+    from collections.abc import Sequence
+else:
+    from collections import Sequence
 
 __all__ = [
     "select",
@@ -19,7 +24,7 @@ __all__ = [
 
 #-------------------------------------------------------------------------------
 
-def select(items, container, *, ctor=None):
+def select(items, container, ctor=None):
     """
     Returns `items` that are in `container`.
 
@@ -33,7 +38,7 @@ def select(items, container, *, ctor=None):
     return ctor( i for i in items if i in container )
 
 
-def select_ordered(items, container, *, ctor=None):
+def select_ordered(items, container, ctor=None):
     """
     Returns `items` that are in `container`.
 
@@ -42,7 +47,7 @@ def select_ordered(items, container, *, ctor=None):
     if ctor is None:
         ctor = type(items)
 
-    if isinstance(container, collections.abc.Sequence):
+    if isinstance(container, Sequence):
         # A frozenset would be more efficient, but there's no guarantee that
         # the items are hashable.
         members = tuple(items)

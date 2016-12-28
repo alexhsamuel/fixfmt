@@ -1,7 +1,7 @@
-from   contextlib import suppress
+from   __future__ import absolute_import, division, print_function
+
 from   math import floor, log10
 import re
-import shutil
 import sys
 
 import numpy as np
@@ -9,6 +9,7 @@ import numpy as np
 from   . import *
 from   . import _ext
 from   .lib import ansi
+from   .lib.cfg import *
 
 #-------------------------------------------------------------------------------
 
@@ -325,10 +326,14 @@ def _get_formatter(name, arr, cfg):
                 return fmt
 
     # Check for the dtype name and kind.
-    with suppress(KeyError):
+    try:
         return cfg.formatters.by_dtype[arr.dtype.name]
-    with suppress(KeyError):
+    except KeyError:
+        pass
+    try:
         return cfg.formatters.by_dtype[arr.dtype.kind]
+    except KeyError:
+        pass
 
     return _get_default_formatter(arr, cfg=cfg)
 
@@ -388,7 +393,7 @@ class Table:
         self.__table.add_string(string)
 
 
-    def add_index_column(self, name, arr, *, fmt=None):
+    def add_index_column(self, name, arr, fmt=None):
         assert self.__num_idx == len(self.__fmts), \
             "can't add index after normal column"
 
@@ -403,7 +408,7 @@ class Table:
         self.__num_idx += 1
 
 
-    def add_column(self, name, arr, *, fmt=None):
+    def add_column(self, name, arr, fmt=None):
         if self.__num_idx > 0 and self.__num_idx == len(self.__fmts):
             self.add_string(self.__cfg.row.separator.index)
         elif len(self.__fmts) > 0:
@@ -498,7 +503,7 @@ class Table:
         max_rows = cfg.data.max_rows
         if max_rows == "terminal":
             # FIXME
-            max_rows = shutil.get_terminal_size().lines - 1
+            max_rows = ansi.get_terminal_size().lines - 1
 
         self._print_top()
         self._print_header()
