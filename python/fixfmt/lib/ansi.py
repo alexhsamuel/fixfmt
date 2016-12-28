@@ -14,6 +14,7 @@ import html.parser
 from   math import floor
 import os
 import re
+import six
 import struct
 import termios
 
@@ -23,7 +24,7 @@ ESC = "\x1b"
 CSI = ESC + "["
 
 def csi(*parts):
-    return CSI + "".join( str(p) for p in parts )
+    return CSI + "".join( six.text_type(p) for p in parts )
 
 
 def to_column(col):
@@ -35,7 +36,7 @@ def to_column(col):
 
 def SGR(*codes):
     assert all( isinstance(c, int) for c in codes )
-    return CSI + ";".join( str(c) for c in codes ) + "m"
+    return CSI + ";".join( six.text_type(c) for c in codes ) + "m"
 
 
 RESET               = SGR(  )  # Same as NORMAL.
@@ -149,7 +150,7 @@ def get_color(value):
         else:
             raise ValueError("color value not between 0 and 255")
 
-    val = str(value)
+    val = six.text_type(value)
 
     if val.startswith("#"):
         r, g, b = parse_rgb_triple(val)
@@ -278,7 +279,7 @@ def style(**kw_args):
     """
     escape = sgr(**kw_args)
     unescape = inverse_sgr(**kw_args)
-    return lambda text: escape + str(text) + unescape
+    return lambda text: escape + six.text_type(text) + unescape
 
 
 # Single-style shortcuts.
