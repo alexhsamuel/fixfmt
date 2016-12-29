@@ -60,7 +60,8 @@ def main():
     args = parser.parse_args()
     
     # FIXME
-    cfg = table.DEFAULT_CFG
+    # cfg = table.DEFAULT_CFG
+    # cfg = table.UNICODE_CFG
     cfg = table.UNICODE_BOX_CFG
     table._colorize(cfg)
 

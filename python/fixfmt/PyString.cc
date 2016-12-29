@@ -17,17 +17,29 @@ int tp_init(PyString* self, PyObject* args, PyObject* kw_args)
   static char const* arg_names[] 
       = {"size", "ellipsis", "pad", "elide_position", "pad_position", nullptr};
 
-  int         size;
-  char const* ellipsis = "\u2026";
-  char const* pad = " ";
-  float       elide_position = 1;
-  float       pad_position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
+  int   size;
+  char* ellipsis = nullptr;
+  char* pad = nullptr;
+  float elide_position = 1;
+  float pad_position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
+#if PY3K
   if (!PyArg_ParseTupleAndKeywords(
       args, kw_args, "i|ssff", (char**) arg_names,
       &size, &ellipsis, &pad, &elide_position, &pad_position)) 
     return -1;
+#else
+  if (!PyArg_ParseTupleAndKeywords(
+      args, kw_args, "i|etetff", (char**) arg_names,
+      &size, "utf-8", &ellipsis, "utf-8", &pad, &elide_position, &pad_position))
+    return -1;
+  PyMemGuard ellipsis_guard(ellipsis);
+  PyMemGuard pad_guard(pad);
+#endif
 
-  // FIXME: Validate args.
+  if (ellipsis == nullptr)
+    ellipsis = (char*) "\u2026";
+  if (pad == nullptr)
+    pad = (char*) " ";
   if (strlen(pad) == 0) {
     PyErr_SetString(PyExc_ValueError, "empty pad");
     return 1;
@@ -45,9 +57,16 @@ PyObject* tp_call(PyString* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {"str", nullptr};
   char* val;
+#if PY3K
   if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "s", (char**) arg_names, &val)) 
+      args, kw_args, "s", (char**) arg_names, &val))
     return nullptr;
+#else
+  if (!PyArg_ParseTupleAndKeywords(
+      args, kw_args, "et", (char**) arg_names, "utf-8", &val))
+    return nullptr;
+  PyMemGuard str_guard(val);
+#endif
 
   return Unicode::from((*self->fmt_)(val)).release();
 }

@@ -37,7 +37,7 @@ CONFIGURATION = Group(
             false                   = u"False",
         ),
         float = Group(
-            inf                     = u"\u221e",
+            inf                     = u"inf",
             max_precision           = 8,
             min_precision           = None,
             nan                     = u"NaN",
@@ -46,6 +46,7 @@ CONFIGURATION = Group(
         str = Group(
             min_size                =  1,
             max_size                = 32,
+            ellipsis                = u"..",
         ),
         time = Group(
             max_precision           = 9,
@@ -55,6 +56,7 @@ CONFIGURATION = Group(
     header = Group(
         elide = Group(
             position                = 0.7,
+            ellipsis                = u"/",
         ),
         prefix                      = u"",
         separator                   = SEPARATOR_CONFIGURATION,
@@ -75,7 +77,7 @@ CONFIGURATION = Group(
         separator                   = SEPARATOR_CONFIGURATION,
         pad                         = u" ",
         position                    = 0.85,
-        format                      = u"\u2026 skipping {skipped} rows \u2026",
+        format                      = u"... skipping {skipped} rows ...",
     ),
     top = Group(
         line                        = u"-",
@@ -93,6 +95,25 @@ CONFIGURATION = Group(
 
 DEFAULT_CFG = Cfg(CONFIGURATION)
 
+UNICODE_CFG = Cfg(CONFIGURATION)(
+    formatters = dict(
+        float = dict(
+            inf                     = u"\u221e",
+        ),
+        str = dict(
+            ellipsis                = u"\u2026",
+        ),
+    ),
+    header = dict(
+        elide = dict(
+            ellipsis                = u"\u2026",
+        ),
+    ),
+    row_ellipsis = dict(
+        format                      = u"\u2026 skipping {skipped} rows \u2026",
+    ),
+)
+
 UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
     bottom = dict(
         line                        = u"\u2500",
@@ -109,9 +130,18 @@ UNICODE_BOX_CFG = Cfg(CONFIGURATION)(
             true                    = u"\u2714",
             false                   = u"\u00b7",
         ),
+        float = dict(
+            inf                     = u"\u221e",
+        ),
         min_width                   = 4,
+        str = dict(
+            ellipsis                = u"\u2026",
+        ),
     ),
     header = dict(
+        elide = dict(
+            ellipsis                = u"\u2026",
+        ),
         separator = dict(
             between                 = u" \u2502 ",
             end                     = u" \u2502",
@@ -299,7 +329,7 @@ def _choose_formatter_str(values, cfg):
     size = np.vectorize(lambda x: len(str(x)))(values).max()
     size = max(size, cfg.str.min_size, cfg.min_width)
     size = min(size, cfg.str.max_size)
-    return String(size)
+    return String(size, ellipsis=cfg.str.ellipsis)
 
 
 def _get_default_formatter(arr, cfg):
@@ -438,7 +468,9 @@ class Table:
                 name = cfg.prefix + name + cfg.suffix
                 pad_position = _get_header_position(fmt)
                 name = palide(
-                    name, fmt.width, elide_position=cfg.elide.position, 
+                    name, fmt.width, 
+                    elide_position=cfg.elide.position, 
+                    ellipsis=cfg.elide.ellipsis,
                     pad_position=pad_position)
                 name = cfg.style.prefix + name + cfg.style.suffix
                 if i > 0:

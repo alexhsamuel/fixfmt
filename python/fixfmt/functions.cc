@@ -102,13 +102,23 @@ ref<Object> center(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
     "string", "length", "pad", nullptr};
-  char const* str;
   int length;
-  char const* pad = " ";
+  char* str;
+  char* pad = nullptr;
+#if PY3
   Arg::ParseTupleAndKeywords(
-      args, kw_args, "sI|s", arg_names, &str, &length, &pad);
+      args, kw_args, 
+      "sI|s", arg_names, &str, &length, &pad);
+#else
+  Arg::ParseTupleAndKeywords(
+      args, kw_args, 
+      "etI|et", arg_names, "utf-8", &str, &length, "utf-8", &pad);
+  PyMemGuard str_guard(str);
+  PyMemGuard pad_guard(pad);
+#endif
 
-  // FIXME: Validate args.
+  if (pad == nullptr)
+    pad = (char*) " ";
   if (strlen(pad) == 0)
     throw ValueError("empty pad");
 
@@ -120,15 +130,26 @@ ref<Object> pad(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
     "string", "length", "pad", "position", nullptr};
-  char const* str;
+  char* str;
   int length;
-  char const* pad = " ";
+  char* pad = nullptr;
   float position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
+#if PY3
   Arg::ParseTupleAndKeywords(
-      args, kw_args, "sI|sf", arg_names, 
-      &str, &length, &pad, &position, nullptr);
+      args, kw_args, 
+      "sI|sf", arg_names, &str, &length, &pad,
+      &position, nullptr);
+#else
+  Arg::ParseTupleAndKeywords(
+      args, kw_args, 
+      "etI|etf", arg_names, "utf-8", &str, &length, "utf-8", &pad,
+      &position, nullptr);
+  PyMemGuard str_guard(str);
+  PyMemGuard pad_guard(pad);
+#endif
 
-  // FIXME: Validate args.
+  if (pad == nullptr)
+    pad = (char*) " ";
   if (strlen(pad) == 0)
     throw ValueError("empty pad");
   if (position < 0 or position > 1)
@@ -142,12 +163,24 @@ ref<Object> elide(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
     "string", "length", "ellipsis", "position", nullptr};
-  char const* str;
+  char* str;
   int length;
-  char const* ellipsis = fixfmt::ELLIPSIS;
+  char* ellipsis = nullptr;
   float position = 1;
+#if PY3
   Arg::ParseTupleAndKeywords(
-    args, kw_args, "sI|sf", arg_names, &str, &length, &ellipsis, &position);
+    args, kw_args, 
+    "sI|sf", arg_names, &str, &length, &ellipsis, &position);
+#else
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, 
+    "etI|etf", arg_names, "utf-8", &str, &length, "utf-8", &ellipsis, &position);
+  PyMemGuard str_guard(str);
+  PyMemGuard ellipsis_guard(ellipsis);
+#endif
+
+  if (ellipsis == nullptr)
+    ellipsis = (char*) fixfmt::ELLIPSIS;
 
   string r = fixfmt::elide(string(str), length, string(ellipsis), position);
   return Unicode::from(r);
@@ -159,23 +192,35 @@ ref<Object> palide(Module* module, Tuple* args, Dict* kw_args)
   static char const* arg_names[] = {
     "string", "length", "ellipsis", "pad", "elide_position", 
     "pad_position", nullptr };
-  char const* str;
+  char* str;
   int length;
-  char const* ellipsis = fixfmt::ELLIPSIS;
-  char const* pad = " ";
+  char* ellipsis = nullptr;
+  char* pad = nullptr;
   float elide_position = 1;
   float pad_position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
+#if PY3K
   Arg::ParseTupleAndKeywords(
     args, kw_args, "sI|ssff", arg_names,
     &str, &length, &ellipsis, &pad, &elide_position, &pad_position);
+#else
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, "etI|etetff", arg_names,
+    "utf-8", &str, &length, "utf-8", &ellipsis, "utf-8", &pad, 
+    &elide_position, &pad_position);
+  PyMemGuard str_guard(str);
+  PyMemGuard ellipsis_guard(ellipsis);
+  PyMemGuard pad_guard(pad);
+#endif
 
-  // FIXME: Validate args.
+  if (ellipsis == nullptr)
+    ellipsis = (char*) fixfmt::ELLIPSIS;
+  if (pad == nullptr)
+    pad = (char*) " ";
   if (strlen(pad) == 0)
     throw ValueError("empty pad");
 
-  string r = fixfmt::palide(
-    string(str), length, string(ellipsis), pad, elide_position, pad_position);
-  return Unicode::from(r);
+  return Unicode::from(fixfmt::palide(
+    string(str), length, string(ellipsis), pad, elide_position, pad_position));
 }
 
 

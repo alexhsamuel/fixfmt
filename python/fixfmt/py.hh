@@ -377,6 +377,30 @@ cast(ref<Object>&& obj)
 }
 
 
+//------------------------------------------------------------------------------
+
+/**
+ * Guard to deallocate memory with PyMem_Free.
+ */
+class PyMemGuard
+{
+private:
+
+  void* ptr_;
+
+public:
+
+  PyMemGuard(void* const ptr) : ptr_(ptr) {}
+  ~PyMemGuard() { PyMem_Free(ptr_); }
+
+  PyMemGuard(PyMemGuard const&) = delete;
+  PyMemGuard(PyMemGuard&&) = delete;
+  void operator=(PyMemGuard const&) = delete;
+  void operator=(PyMemGuard&&) = delete;
+
+};
+
+
 //==============================================================================
 
 class Object

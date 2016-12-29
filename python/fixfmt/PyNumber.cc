@@ -38,12 +38,13 @@ tp_init(
   Arg::ParseTupleAndKeywords(
     args, kw_args, 
 #if PY3K
-    "i|O$CCssCCO",
+    "i|O$CCetetCCO",
 #else
-    "i|OccssccO",
+    "i|OccetetccO",
 #endif
     arg_names,
-    &size, &precision_arg, &pad, &sign, &nan, &inf, &point, &bad, &scale_arg);
+    &size, &precision_arg, &pad, &sign, "utf-8", &nan, "utf-8", &inf, 
+    &point, &bad, &scale_arg);
 
   if (size < 0) 
     throw ValueError("negative size");
