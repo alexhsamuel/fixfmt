@@ -2,7 +2,7 @@ from   __future__ import absolute_import, division, print_function
 
 class Array:
 
-    def __init__(self, fmt, width=None, *, left="", right="", margin=" "):
+    def __init__(self, fmt, width=None, left="", right="", margin=" "):
         self.__fmt = fmt
         self.__width = width
         self.__left = left
