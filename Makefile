@@ -81,10 +81,10 @@ testclean-cxx:
 	rm -f $(TEST_DEPS) $(TEST_OBJS) $(TEST_BINS) $(TEST_OKS)
 
 .PHONY: test-cxx
-test-cxx: $(TEST_OKS)
+test-cxx:   	    	$(TEST_OKS)
 
 .PHONY: install-cxx
-install-cxx: $(LIB) $(TEST_OKS)
+install-cxx: 	    	$(LIB) 
 
 $(LIB):			$(OBJS)
 	ar -r $@ $^
