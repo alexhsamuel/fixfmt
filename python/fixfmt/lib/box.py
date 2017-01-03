@@ -392,8 +392,8 @@ def box(width, height, sides=SINGLE):
             get(0, t, l, 0)
           + get(0, t, 0, t) * width
           + get(0, 0, r, t)
-        , *((row, ) * height)
-        ,   get(l, b, 0, 0)
+        , ) + ((row, ) * height) + (
+            get(l, b, 0, 0)
           + get(0, b, 0, b) * width
           + get(r, 0, 0, b)
         , ""
