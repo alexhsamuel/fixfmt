@@ -1,5 +1,7 @@
 # FIXME: Merge this with fixfmt.table!
 
+from   __future__ import absolute_import, division, print_function
+
 from   . import palide
 from   .lib import ansi, box
 from   .table import _get_header_position  # FIXME
