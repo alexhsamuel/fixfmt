@@ -61,6 +61,9 @@ clean:			clean-cxx clean-python testclean
 .PHONY: testclean
 testclean:		testclean-cxx testclean-python
 
+.PHONY: install
+install:    	    	install-cxx install-python
+
 #-------------------------------------------------------------------------------
 # C++
 
@@ -79,6 +82,9 @@ testclean-cxx:
 
 .PHONY: test-cxx
 test-cxx: $(TEST_OKS)
+
+.PHONY: install-cxx
+install-cxx: $(LIB) $(BINS) $(TEST_OKS)
 
 $(LIB):			$(OBJS)
 	ar -r $@ $^
@@ -110,6 +116,17 @@ python:			$(PY_EXTMOD)
 .PHONY: clean-python
 clean-python:
 	rm -rf $(PY_DEPS) $(PY_OBJS) $(PY_EXTMOD)
+
+SITE_PACKAGES	= $(shell $(PYTHON) -c 'import site; print(site.getsitepackages());')
+PY_PKG_DIR  	= $(SITE_PACKAGES)/fixfmt
+
+install-python:	    	$(PY_EXTMOD)
+	mkdir -p $(PY_PKG_DIR) $(PY_PKG_DIR)/lib
+	cp $(PY_EXTMOD) $(PY_PKG_DIR)
+	cp python/fixfmt/*.py $(PY_PKG_DIR)
+	cp python/fixfmt/lib/*.py $(PY_PKG_DIR)/lib
+	$(PYTHON) -m py_compile $(PY_PKG_DIR)/*.py
+	$(PYTHON) -m py_compile $(PY_PKG_DIR)/lib/*.py
 
 $(PY_DEPS): \
 %.dd: 		    	%.cc
