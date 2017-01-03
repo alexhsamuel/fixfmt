@@ -1,15 +1,15 @@
 package:
-  name: pyinstrument
-  version: "0.13.1"
+  name: fixfmt
+  version: 0.1.0
 
 about:
-  home: https://github.com/joerick/pyinstrument
+  home: https://github.com/alexhsamuel/fixfmt
   license: BSD
   license_file: LICENSE
 
 source:
-  git_rev: v0.13.1
-  git_url: https://github.com/joerick/pyinstrument.git
+  git_rev: 0.1.0
+  git_url: https://github.com/alexhsamuel/fixfmt.git
 
 requirements:
   build:
@@ -19,9 +19,11 @@ requirements:
     - python
 
 build:
+  # For now, build with static libstdc++ to avoid the runtime dependency.
+  # GCC 5.4 has some issues with our code.
   script: CXX=clang++ LDFLAGS=-static-libstdc++ make install
 
 test:
   imports:
-    - pyinstrument
+    - fixfmt
 
