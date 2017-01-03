@@ -87,7 +87,7 @@ Number::operator()(
   double const value) 
   const
 {
-  if (isnan(value))
+  if (std::isnan(value))
     return nan_;
   else if (value < 0 && args_.sign == SIGN_NONE)
     // With SIGN_NONE, we can't render negative numbers.
@@ -96,7 +96,7 @@ Number::operator()(
   // Apply the scale factor, if any.
   double const val = args_.scale.enabled() ? value / args_.scale.factor : value;
 
-  if (isinf(val))
+  if (std::isinf(val))
     // Return the appropriate infinity.
     return val >= 0 ? pos_inf_ : neg_inf_;
 
