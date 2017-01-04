@@ -86,9 +86,9 @@ public:
   
   Number()                              = default;
   Number(Number const&)                 = default;
-  Number(Number&&) noexcept             = default;
+  Number(Number&&)                      = default;
   Number& operator=(Number const&)      = default;
-  Number& operator=(Number&&) noexcept  = default;
+  Number& operator=(Number&&)           = default;
   ~Number() noexcept                    = default;
 
   Number(Args const& args) 
