@@ -32,9 +32,9 @@ public:
 
   Bool()                            = default;
   Bool(Bool const&)                 = default;
-  Bool(Bool&&) noexcept             = default;
+  Bool(Bool&&)                      = default;
   Bool& operator=(Bool const&)      = default;
-  Bool& operator=(Bool&&) noexcept  = default;
+  Bool& operator=(Bool&&)           = default;
   ~Bool() noexcept                  = default;
 
   Bool(Args const& args) 

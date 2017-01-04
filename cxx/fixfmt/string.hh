@@ -32,9 +32,9 @@ public:
 
   String()                              = default;
   String(String const&)                 = default;
-  String(String&&) noexcept             = default;
+  String(String&&)                      = default;
   String& operator=(String const&)      = default;
-  String& operator=(String&&) noexcept  = default;
+  String& operator=(String&&)           = default;
   ~String() noexcept                    = default;
 
   String(Args const& args)          : args_(args) { check(args_); }
