@@ -11,7 +11,6 @@ DEFAULTS = {
     "bool": {
         "true"          : "true",
         "false"         : "false",
-        "size"          : None,
     },
     "number": {
         "size"          : None,
@@ -45,13 +44,9 @@ def num_digits(value):
 
 
 def choose_formatter_bool(arr, min_width=0, cfg=DEFAULTS["bool"]):
-    if default is None:
-        default = DEFAULTS["bool"]
-
     true    = cfg["true"]
     false   = cfg["false"]
     size    = max(
-        cfg["size"],
         min_width,
         string_length(true),
         string_length(false),
@@ -74,7 +69,6 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULTS["number"]):
         analyze = analyze_double if arr.dtype.itemsize == 8 else analyze_float
         (has_nan, has_pos_inf, has_neg_inf, num_vals, min_val, max_val, 
             val_prec) = analyze(arr, max_precision)
-        print(min_val, max_val, val_prec)
     elif arr.dtype.kind == "i":
         has_nan = has_pos_inf = has_neg_inf = False
         num_vals = len(arr)
@@ -161,8 +155,12 @@ def choose_formatter_str(arr, min_width=0, cfg=DEFAULTS["string"]):
     if size is None:
         min_size = cfg["min_size"]
         max_size = cfg["max_size"]
-        # FIXME: Specialize for fixed-length strings.
-        size = np.vectorize(lambda x: string_length(str(x)))(values).max()
+        if arr.dtype.kind == "S":
+            size = arr.dtype.itemsize
+        elif arr.dtype.kind == "U":
+            size = arr.dtype.itemsize // np.dtype("U1").itemsize
+        else:
+            size = np.vectorize(lambda x: string_length(str(x)))(values).max()
         size = max(min_width, min_size, min(size, max_size))
 
     return String(
@@ -178,7 +176,7 @@ def choose_formatter(arr, min_width=0):
         return choose_formatter_number(arr, min_width)
     elif dtype.kind == "M":
         return choose_formatter_datetime64(arr, min_width)
-    elif dtype.kind == "O":  # FIXME: Fixed-length strings.
+    elif dtype.kind in "OSU":
         return choose_formatter_str(arr, min_width)
     else:
         raise TypeError("no default formatter for {}".format(dtype))
