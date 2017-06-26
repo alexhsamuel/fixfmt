@@ -26,8 +26,8 @@ public:
     int     size            = 8;
     string  ellipsis        = ELLIPSIS;
     string  pad             = " ";
-    float   elide_position  = 1;
-    float   pad_position    = 1;
+    float   elide_pos       = 1;
+    float   pad_pos         = 1;
   };
 
   String()                              = default;
@@ -62,8 +62,8 @@ String::check(
   Args const& args)
 {
   assert(args.ellipsis.length() <= (size_t) args.size);
-  assert(0 <= args.elide_position && args.elide_position <= 1);
-  assert(0 <= args.pad_position && args.pad_position <= 1);
+  assert(0 <= args.elide_pos && args.elide_pos <= 1);
+  assert(0 <= args.pad_pos && args.pad_pos <= 1);
 }
 
 
@@ -73,8 +73,7 @@ String::operator()(
   const
 {
   return palide(
-    str, args_.size, args_.ellipsis, args_.pad, args_.elide_position, 
-    args_.pad_position);
+    str, args_.size, args_.ellipsis, args_.pad, args_.elide_pos, args_.pad_pos);
 }
 
 

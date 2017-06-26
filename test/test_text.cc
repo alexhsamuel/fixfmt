@@ -36,14 +36,14 @@ TEST(pad, basic) {
   ASSERT_EQ(pad(s, 14, "~"), "Hello, world!~");
   ASSERT_EQ(pad(s, 20, "~"), "Hello, world!~~~~~~~");
   ASSERT_EQ(
-    pad(s, 20, " ", PAD_POSITION_RIGHT_JUSTIFY), 
+    pad(s, 20, " ", PAD_POS_RIGHT_JUSTIFY), 
     "       Hello, world!");
   ASSERT_EQ(
-    pad(s, 20, "-", PAD_POSITION_RIGHT_JUSTIFY), 
+    pad(s, 20, "-", PAD_POS_RIGHT_JUSTIFY), 
     "-------Hello, world!");
   ASSERT_EQ(pad(s, 20, "-|"), "Hello, world!-|-|-|-");
   ASSERT_EQ(
-    pad(s, 20, "<->", PAD_POSITION_RIGHT_JUSTIFY), 
+    pad(s, 20, "<->", PAD_POS_RIGHT_JUSTIFY), 
     "<-><-><Hello, world!");
   ASSERT_EQ(
     pad(s, 20, "\u2026.", 0),

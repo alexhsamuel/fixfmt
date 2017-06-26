@@ -196,8 +196,8 @@ Number::format_inf_nan(
   // Try to put it in the integer part.
   if (len <= (int) width_)
     result = pad(
-      pad(result, size, " ", PAD_POSITION_RIGHT_JUSTIFY), 
-      width_, " ", PAD_POSITION_LEFT_JUSTIFY);
+      pad(result, size, " ", PAD_POS_RIGHT_JUSTIFY), 
+      width_, " ", PAD_POS_LEFT_JUSTIFY);
   else 
     // Doesn't fit at all.
     string_truncate(result, width_);

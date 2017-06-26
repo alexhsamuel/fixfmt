@@ -15,22 +15,22 @@ namespace {
 int tp_init(PyString* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] 
-      = {"size", "ellipsis", "pad", "elide_position", "pad_position", nullptr};
+      = {"size", "ellipsis", "pad", "elide_pos", "pad_pos", nullptr};
 
   int   size;
   char* ellipsis = nullptr;
   char* pad = nullptr;
-  float elide_position = 1;
-  float pad_position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
+  float elide_pos = 1;
+  float pad_pos = fixfmt::PAD_POS_LEFT_JUSTIFY;
 #if PY3K
   if (!PyArg_ParseTupleAndKeywords(
       args, kw_args, "i|ssff", (char**) arg_names,
-      &size, &ellipsis, &pad, &elide_position, &pad_position)) 
+      &size, &ellipsis, &pad, &elide_pos, &pad_pos)) 
     return -1;
 #else
   if (!PyArg_ParseTupleAndKeywords(
       args, kw_args, "i|etetff", (char**) arg_names,
-      &size, "utf-8", &ellipsis, "utf-8", &pad, &elide_position, &pad_position))
+      &size, "utf-8", &ellipsis, "utf-8", &pad, &elide_pos, &pad_pos))
     return -1;
   PyMemGuard ellipsis_guard(ellipsis);
   PyMemGuard pad_guard(pad);
@@ -48,7 +48,7 @@ int tp_init(PyString* self, PyObject* args, PyObject* kw_args)
   new(self) PyString;
   self->fmt_ = std::make_unique<fixfmt::String>(
     fixfmt::String::Args{
-      size, ellipsis, pad, (float) elide_position, (float) pad_position});
+      size, ellipsis, pad, (float) elide_pos, (float) pad_pos});
   return 0;
 }
 
@@ -88,15 +88,15 @@ ref<Object> get_pad(PyString* const self, void* /* closure */)
 }
 
 
-ref<Object> get_pad_position(PyString* const self, void* /* closure */)
+ref<Object> get_pad_pos(PyString* const self, void* /* closure */)
 {
-  return Float::FromDouble(self->fmt_->get_args().pad_position);
+  return Float::FromDouble(self->fmt_->get_args().pad_pos);
 }
 
 
-ref<Object> get_elide_position(PyString* const self, void* /* closure */)
+ref<Object> get_elide_pos(PyString* const self, void* /* closure */)
 {
-  return Float::FromDouble(self->fmt_->get_args().elide_position);
+  return Float::FromDouble(self->fmt_->get_args().elide_pos);
 }
 
 
@@ -115,8 +115,8 @@ ref<Object> get_width(PyString* const self, void* /* closure */)
 auto getsets = GetSets<PyString>()
   .add_get<get_ellipsis>        ("ellipsis")
   .add_get<get_pad>             ("pad")
-  .add_get<get_pad_position>    ("pad_position")
-  .add_get<get_elide_position>  ("elide_position")
+  .add_get<get_pad_pos>         ("pad_pos")
+  .add_get<get_elide_pos>       ("elide_pos")
   .add_get<get_size>            ("size")
   .add_get<get_width>           ("width")
   ;

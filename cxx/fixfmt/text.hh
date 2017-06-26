@@ -183,9 +183,9 @@ fill(
 }
 
 
-float constexpr PAD_POSITION_LEFT_JUSTIFY   = 1;
-float constexpr PAD_POSITION_RIGHT_JUSTIFY  = 0;
-float constexpr PAD_POSITION_CENTER         = 0.5;
+float constexpr PAD_POS_LEFT_JUSTIFY   = 1.0;
+float constexpr PAD_POS_CENTER         = 0.5;
+float constexpr PAD_POS_RIGHT_JUSTIFY  = 0.0;
 
 
 /**
@@ -200,15 +200,15 @@ pad(
   string const& str,
   size_t const length,
   string const& pad=" ",
-  float position=PAD_POSITION_LEFT_JUSTIFY)
+  float const pos=PAD_POS_LEFT_JUSTIFY)
 {
   assert(string_length(pad) > 0);
-  assert(0 <= position);
-  assert(position <= 1);
+  assert(0 <= pos);
+  assert(pos <= 1);
   size_t const str_len = string_length(str);
   if (str_len < length) {
     size_t const pad_len = length - str_len;
-    size_t const left_len = (size_t) round((1 - position) * pad_len);
+    size_t const left_len = (size_t) round((1 - pos) * pad_len);
     string const result = 
       fill(pad, left_len) + str + fill(pad, pad_len - left_len);
     assert(string_length(result) == length);
@@ -220,7 +220,7 @@ pad(
 
 
 /*
- * Deprecated.  Use `pad(str, len, pad, PAD_POSITION_CENTER)` instead.
+ * Deprecated.  Use `pad(str, len, pad, PAD_POS_CENTER)` instead.
  */
 inline string
 center(
@@ -228,7 +228,7 @@ center(
   size_t const length,
   string const& pad=" ")
 {
-  return fixfmt::pad(str, length, pad, PAD_POSITION_CENTER);
+  return fixfmt::pad(str, length, pad, PAD_POS_CENTER);
 }
 
 
@@ -241,19 +241,19 @@ elide(
   string const& str,
   size_t const max_length,
   string const& ellipsis=ELLIPSIS,
-  float const position=1)
+  float const pos=1)
 {
   size_t const ellipsis_len = string_length(ellipsis);
   assert(max_length >= ellipsis_len);
-  assert(0 <= position);
-  assert(position <= 1);
+  assert(0 <= pos);
+  assert(pos <= 1);
 
   size_t const length = string_length(str);
   if (length <= max_length)
     return str;
   else {
     size_t const keep   = max_length - ellipsis_len;
-    size_t const nleft  = (size_t) round(position * keep);
+    size_t const nleft  = (size_t) round(pos * keep);
     size_t const nright = keep - nleft;
     string elided;
     if (nleft > 0)
@@ -276,11 +276,11 @@ palide(
   size_t const length,
   string const& ellipsis=ELLIPSIS,
   string const& pad=" ",
-  float const elide_position=1,
-  float pad_position=1)
+  float const elide_pos=1,
+  float pad_pos=1)
 {
   return fixfmt::pad(
-    elide(str, length, ellipsis, elide_position), length, pad, pad_position);
+    elide(str, length, ellipsis, elide_pos), length, pad, pad_pos);
 }
 
 

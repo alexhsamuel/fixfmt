@@ -28,10 +28,10 @@ def test_pad_pad():
 
 
 def test_pad_left():
-    assert pad("hello",  4, position=0 ) == "hello"
-    assert pad("hello", 10, position=1 ) == "hello     "
-    assert pad("hello", 10, position=0 ) == "     hello"
-    assert pad("hello", 10, position=0, pad="/") == "/////hello"
+    assert pad("hello",  4, pos=0 ) == "hello"
+    assert pad("hello", 10, pos=1 ) == "hello     "
+    assert pad("hello", 10, pos=0 ) == "     hello"
+    assert pad("hello", 10, pos=0, pad="/") == "/////hello"
 
 
 # FIXME: Test center().
@@ -62,7 +62,7 @@ def test_elide_ellipsis():
     assert elide("Hello, world!", ellipsis="*", length=10) == "Hello, wo*"
 
 
-def test_elide_position():
+def test_elide_pos():
     assert elide("Hello, world!", 10, "...", 1.0) == "Hello, ..."
     assert elide("Hello, world!", 10, "...", 0.7) == "Hello...d!"
     assert elide("Hello, world!", 10, "...", 0.5) == "Hell...ld!"
@@ -70,7 +70,7 @@ def test_elide_position():
     assert elide("Hello, world!", 10, "...", 0.0) == "... world!"
 
     assert elide(
-        "Hello, world!", position=0.4, length=10, ellipsis="..") == "Hel..orld!"
+        "Hello, world!", pos=0.4, length=10, ellipsis="..") == "Hel..orld!"
 
 
 def test_palide_length():
@@ -95,10 +95,10 @@ def test_palide_pad():
     assert palide("Hello, world!", 18, pad="!") == "Hello, world!!!!!!"
 
 
-def test_palide_position():
-    assert palide("Hello, world!", 11, "..", elide_position=0.0) == "..o, world!"
-    assert palide("Hello, world!", 11, "..", elide_position=0.6) == "Hello..rld!"
-    assert palide("Hello, world!", 11, "..", elide_position=0.8) == "Hello, ..d!"
+def test_palide_pos():
+    assert palide("Hello, world!", 11, "..", elide_pos=0.0) == "..o, world!"
+    assert palide("Hello, world!", 11, "..", elide_pos=0.6) == "Hello..rld!"
+    assert palide("Hello, world!", 11, "..", elide_pos=0.8) == "Hello, ..d!"
 
 
 def test_palide_args():
@@ -106,7 +106,7 @@ def test_palide_args():
         ellipsis="-//-", 
         length=20,
         pad="x",
-        elide_position=0.4,
+        elide_pos=0.4,
         string="The quick brown fox jumped over the lazy dogs.",
         ) == "The qu-//-lazy dogs."
 

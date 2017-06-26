@@ -27,7 +27,7 @@ public:
     int     size        = 5;
     string  true_str    = "True";
     string  false_str   = "False";
-    float   position    = PAD_POSITION_LEFT_JUSTIFY;
+    float   pos         = PAD_POS_LEFT_JUSTIFY;
   };
 
   Bool()                            = default;
@@ -78,8 +78,8 @@ private:
 inline void
 Bool::set_up()
 {
-  true_  = palide(args_.true_str,  args_.size, "", " ", 1, args_.position);
-  false_ = palide(args_.false_str, args_.size, "", " ", 1, args_.position);
+  true_  = palide(args_.true_str,  args_.size, "", " ", 1, args_.pos);
+  false_ = palide(args_.false_str, args_.size, "", " ", 1, args_.pos);
 }
 
 

@@ -128,22 +128,21 @@ ref<Object> center(Module* module, Tuple* args, Dict* kw_args)
 
 ref<Object> pad(Module* module, Tuple* args, Dict* kw_args)
 {
-  static char const* arg_names[] = {
-    "string", "length", "pad", "position", nullptr};
+  static char const* arg_names[] = {"string", "length", "pad", "pos", nullptr};
   char* str;
   int length;
   char* pad = nullptr;
-  float position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
+  float pos = fixfmt::PAD_POS_LEFT_JUSTIFY;
 #if PY3
   Arg::ParseTupleAndKeywords(
       args, kw_args, 
       "sI|sf", arg_names, &str, &length, &pad,
-      &position, nullptr);
+      &pos, nullptr);
 #else
   Arg::ParseTupleAndKeywords(
       args, kw_args, 
       "etI|etf", arg_names, "utf-8", &str, &length, "utf-8", &pad,
-      &position, nullptr);
+      &pos, nullptr);
   PyMemGuard str_guard(str);
   PyMemGuard pad_guard(pad);
 #endif
@@ -152,29 +151,29 @@ ref<Object> pad(Module* module, Tuple* args, Dict* kw_args)
     pad = (char*) " ";
   if (strlen(pad) == 0)
     throw ValueError("empty pad");
-  if (position < 0 or position > 1)
-    throw ValueError("position out of range");
+  if (pos < 0 or pos > 1)
+    throw ValueError("pos out of range");
 
-  return Unicode::from(fixfmt::pad(string(str), length, pad, (float) position));
+  return Unicode::from(fixfmt::pad(string(str), length, pad, (float) pos));
 }
 
 
 ref<Object> elide(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
-    "string", "length", "ellipsis", "position", nullptr};
+    "string", "length", "ellipsis", "pos", nullptr};
   char* str;
   int length;
   char* ellipsis = nullptr;
-  float position = 1;
+  float pos = 1;
 #if PY3
   Arg::ParseTupleAndKeywords(
     args, kw_args, 
-    "sI|sf", arg_names, &str, &length, &ellipsis, &position);
+    "sI|sf", arg_names, &str, &length, &ellipsis, &pos);
 #else
   Arg::ParseTupleAndKeywords(
     args, kw_args, 
-    "etI|etf", arg_names, "utf-8", &str, &length, "utf-8", &ellipsis, &position);
+    "etI|etf", arg_names, "utf-8", &str, &length, "utf-8", &ellipsis, &pos);
   PyMemGuard str_guard(str);
   PyMemGuard ellipsis_guard(ellipsis);
 #endif
@@ -182,7 +181,7 @@ ref<Object> elide(Module* module, Tuple* args, Dict* kw_args)
   if (ellipsis == nullptr)
     ellipsis = (char*) fixfmt::ELLIPSIS;
 
-  string r = fixfmt::elide(string(str), length, string(ellipsis), position);
+  string r = fixfmt::elide(string(str), length, string(ellipsis), pos);
   return Unicode::from(r);
 }
 
@@ -190,23 +189,23 @@ ref<Object> elide(Module* module, Tuple* args, Dict* kw_args)
 ref<Object> palide(Module* module, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
-    "string", "length", "ellipsis", "pad", "elide_position", 
-    "pad_position", nullptr };
+    "string", "length", "ellipsis", "pad", "elide_pos", 
+    "pad_pos", nullptr };
   char* str;
   int length;
   char* ellipsis = nullptr;
   char* pad = nullptr;
-  float elide_position = 1;
-  float pad_position = fixfmt::PAD_POSITION_LEFT_JUSTIFY;
+  float elide_pos = 1;
+  float pad_pos = fixfmt::PAD_POS_LEFT_JUSTIFY;
 #if PY3K
   Arg::ParseTupleAndKeywords(
     args, kw_args, "sI|ssff", arg_names,
-    &str, &length, &ellipsis, &pad, &elide_position, &pad_position);
+    &str, &length, &ellipsis, &pad, &elide_pos, &pad_pos);
 #else
   Arg::ParseTupleAndKeywords(
     args, kw_args, "etI|etetff", arg_names,
     "utf-8", &str, &length, "utf-8", &ellipsis, "utf-8", &pad, 
-    &elide_position, &pad_position);
+    &elide_pos, &pad_pos);
   PyMemGuard str_guard(str);
   PyMemGuard ellipsis_guard(ellipsis);
   PyMemGuard pad_guard(pad);
@@ -220,7 +219,7 @@ ref<Object> palide(Module* module, Tuple* args, Dict* kw_args)
     throw ValueError("empty pad");
 
   return Unicode::from(fixfmt::palide(
-    string(str), length, string(ellipsis), pad, elide_position, pad_position));
+    string(str), length, string(ellipsis), pad, elide_pos, pad_pos));
 }
 
 

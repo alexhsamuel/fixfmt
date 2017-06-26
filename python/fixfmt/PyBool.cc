@@ -21,14 +21,14 @@ namespace {
 int tp_init(PyBool* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {
-    "true", "false", "size", "position", nullptr };
+    "true", "false", "size", "pos", nullptr };
   char const*    true_str    = "true";
   char const*    false_str   = "false";
   int            size        = -1;
-  float          position= fixfmt::PAD_POSITION_LEFT_JUSTIFY;
+  float          pos         = fixfmt::PAD_POS_LEFT_JUSTIFY;
   if (!PyArg_ParseTupleAndKeywords(
       args, kw_args, "|ssif", (char**) arg_names,
-      &true_str, &false_str, &size, &position)) 
+      &true_str, &false_str, &size, &pos)) 
     return -1;
 
   if (size < 0)
@@ -37,7 +37,7 @@ int tp_init(PyBool* self, PyObject* args, PyObject* kw_args)
 
   new(self) PyBool;
   self->fmt_ = std::make_unique<fixfmt::Bool>(
-      fixfmt::Bool::Args{size, string(true_str), string(false_str), position});
+      fixfmt::Bool::Args{size, string(true_str), string(false_str), pos});
   return 0;
 }
 
@@ -67,9 +67,9 @@ ref<Object> get_false(PyBool* const self, void* /* closure */)
 }
 
 
-ref<Object> get_position(PyBool* const self, void* /* closure */)
+ref<Object> get_pos(PyBool* const self, void* /* closure */)
 {
-  return Float::FromDouble(self->fmt_->get_args().position);
+  return Float::FromDouble(self->fmt_->get_args().pos);
 }
 
 
@@ -93,7 +93,7 @@ ref<Object> get_width(PyBool* const self, void* /* closure */)
 
 auto getsets = GetSets<PyBool>()
   .add_get<get_false>       ("false")
-  .add_get<get_position>    ("position")
+  .add_get<get_pos>         ("pos")
   .add_get<get_size>        ("size")
   .add_get<get_true>        ("true")
   .add_get<get_width>       ("width")
