@@ -75,13 +75,13 @@ public:
   {
     int     size            = 8;
     int     precision       = PRECISION_NONE;
-    char    sign            = SIGN_NEGATIVE;
     char    pad             = ' ';
+    char    sign            = SIGN_NEGATIVE;
+    Scale   scale           = SCALE_NONE;
     char    point           = '.';
     char    bad             = '#';
     string  nan             = "NaN";
     string  inf             = "inf";
-    Scale   scale           = {};
   };
   
   Number()                              = default;
@@ -103,8 +103,10 @@ public:
   Number(
       int   const size,
       int   const precision =PRECISION_NONE,
-      char  const sign      =SIGN_NEGATIVE)
-  : Number(Args{size, .precision=precision, .sign=sign})
+      char  const pad       =' ',
+      char  const sign      =SIGN_NEGATIVE,
+      Scale const scale     =SCALE_NONE)
+  : Number(Args{size, precision, pad, sign, scale, '.', '#', "NaN", "inf"})
   {
   }
 

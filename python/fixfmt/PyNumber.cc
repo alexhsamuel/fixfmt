@@ -88,9 +88,9 @@ tp_init(
 
   new(self) PyNumber;
   self->fmt_ = std::make_unique<fixfmt::Number>(
-      fixfmt::Number::Args{size, precision, 
-       .sign=(char) sign, .pad=(char) pad, .point=(char) point, 
-       .bad=(char) bad, .nan=nan, .inf=inf, .scale=scale});
+      fixfmt::Number::Args{
+        size, precision, (char) pad, (char) sign, scale, (char) point,
+        (char) bad, nan, inf});
 }
 
 
