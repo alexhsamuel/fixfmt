@@ -1,13 +1,14 @@
 #pragma once
 
 #include <cassert>
-#include <experimental/optional>
 #include <initializer_list>
 #include <iostream>
 #include <string>
 #include <vector>
 
 #include <Python.h>
+
+#include "optional.hh"
 
 #if PY_MAJOR_VERSION >= 3
 #define PY3K 1
@@ -19,8 +20,6 @@ using Py_hash_t = long;
 //------------------------------------------------------------------------------
 
 namespace py {
-
-using std::experimental::optional;
 
 class Float;
 class Long;
