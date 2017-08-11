@@ -84,7 +84,10 @@ testclean-cxx:
 test-cxx:   	    	$(TEST_OKS)
 
 .PHONY: install-cxx
-install-cxx: 	    	$(LIB) 
+install-cxx: 	    	lib-cxx
+
+.PHONY: lib-cxx
+lib-cxx:    	    	$(LIB) 
 
 $(LIB):			$(OBJS)
 	ar -r $@ $^
