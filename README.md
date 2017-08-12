@@ -1,20 +1,6 @@
 A C++ and Python library for formatting values (numbers, strings, etc.) in
 fixed-width fields.  Useful for printing tabular data and similar.
 
-```py
->>> fmt = fixfmt.String(10)
->>> fmt("testing")
-'testing   '
->>> fmt("Hello, world!")
-'Hello, wo…'
-```
-
-```py
->>> fmt = fixfmt.Number(3, 3)
->>> fmt(math.pi)
-'   3.142'
-```
-
 
 # Features
 
@@ -37,8 +23,6 @@ See [`python/README.md`](python/README.md) for an introduction to the Python API
 
 # Setup
 
-## Requirements
-
 Requires a C++14 compiler, GNU Make, and setuptools to build.
 
 Tested with Python 2.7 and Python 3.6 or later.
@@ -60,12 +44,12 @@ git clone https://github.com/google/googletest
 
 Requires [pytest](http://pytest.org) to run Python tests.  Invoke,
 
-`py.test test/`
+```
+py.test test
+```
 
 
 # Limitations
-
-## Unicode
 
 [Counting code points is broken](http://utf8everywhere.org/), as is it is not a
 perfect proxy for display width.
