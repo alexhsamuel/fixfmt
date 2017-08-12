@@ -35,12 +35,28 @@ class Install(setuptools.command.install.install):
 
 #-------------------------------------------------------------------------------
 
+with open("long_description.rst", "rt") as file:
+    long_description = file.read()
+
 setup(
-    cmdclass={
-        "build_ext" : BuildExt,
-        "install"   : Install,
-    },
-    name="fixfmt",
+    name            ="fixfmt",
+    version         ="0.5.0",
+    description     ="fixed-width formatters for C++ and Python",
+    long_description=long_description,
+    url             ="https://github.com/alexhsamuel/fixfmt",
+    author          ="Alex Samuel",
+    author_email    ="alexhsamuel@gmail.com",
+    license         ="Apache 2.0",
+    classifiers     =[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+    ],    
+
     package_dir={"": "python"},
     packages=["fixfmt"],
     ext_modules=[
@@ -53,6 +69,10 @@ setup(
             libraries             =["fixfmt",],
             depends               =glob("cxx/fixfmt/*.hh") + glob("python/fixfmt/*.hh"),
         ),
-    ]
+    ],
+    cmdclass={
+        "build_ext" : BuildExt,
+        "install"   : Install,
+    },
 )
 
