@@ -21,7 +21,7 @@ class BuildExt(setuptools.command.build_ext.build_ext):
 
     def run(self):
         subprocess.check_call(["make", "lib-cxx"])
-        super().run()
+        super(BuildExt, self).run()
 
 
 
@@ -29,7 +29,7 @@ class Install(setuptools.command.install.install):
 
     def run(self):
         subprocess.check_call(["make", "install-cxx"])
-        super().run()
+        super(Install, self).run()
 
 
 
