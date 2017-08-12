@@ -57,7 +57,7 @@ and numbers:
     >>> fmt(math.pi)
     '   3.142'
 
-Includes C++ and Python libraries.  Requires a C++14 compile and GNU Make to
+Includes C++ and Python libraries.  Requires a C++14 compiler and GNU Make to
 build.
 """
 
