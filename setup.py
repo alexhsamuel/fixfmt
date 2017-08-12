@@ -64,13 +64,14 @@ build.
 
 setup(
     name            ="fixfmt",
-    version         ="0.5.5",
+    version         ="0.5.6",
     description     ="fixed-width formatters for C++ and Python",
     long_description=long_description,
     url             ="https://github.com/alexhsamuel/fixfmt",
     author          ="Alex Samuel",
     author_email    ="alexhsamuel@gmail.com",
     license         ="Apache 2.0",
+    keywords        =["formatting", "tables"],
     classifiers     =[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
