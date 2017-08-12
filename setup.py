@@ -64,7 +64,7 @@ build.
 
 setup(
     name            ="fixfmt",
-    version         ="0.5.4",
+    version         ="0.5.5",
     description     ="fixed-width formatters for C++ and Python",
     long_description=long_description,
     url             ="https://github.com/alexhsamuel/fixfmt",
@@ -82,7 +82,8 @@ setup(
     ],    
 
     package_dir={"": "python"},
-    packages=["fixfmt"],
+    packages=["fixfmt", "fixfmt.lib"],
+    package_data={"": ["test/*"]},
     ext_modules=[
         Extension(
             "fixfmt._ext",

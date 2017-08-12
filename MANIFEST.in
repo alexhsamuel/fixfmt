@@ -1,2 +1,8 @@
+include README.md
+include LICENSE
 include Makefile
 recursive-include cxx *.hh *.h *.cc *.md
+recursive-include test *.cc
+recursive-include python *.hh *.md
+recursive-include conda-recipe *
+prune *~
