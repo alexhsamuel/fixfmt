@@ -1,0 +1,2 @@
+include Makefile
+recursive-include cxx *.hh *.h *.cc *.md
