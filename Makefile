@@ -89,6 +89,10 @@ install-cxx: 	    	lib-cxx
 .PHONY: lib-cxx
 lib-cxx:    	    	$(LIB) 
 
+$(OBJS): \
+%.o:	    	    	%.cc
+	$(CXX) --verbose $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
 $(LIB):			$(OBJS)
 	ar -r $@ $^
 

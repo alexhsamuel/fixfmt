@@ -1,15 +1,15 @@
 package:
   name: fixfmt
 
-  version: 0.1.3
+  version: 0.5.7
 
 about:
   home: https://github.com/alexhsamuel/fixfmt
-  license: BSD
+  license: Apache 2.0
   license_file: LICENSE
 
 source:
-  git_rev: 0.1.3
+  git_rev: 0.5.7
   git_url: https://github.com/alexhsamuel/fixfmt.git
 
 requirements:
@@ -20,9 +20,7 @@ requirements:
     - python
 
 build:
-  # For now, build with static libstdc++ to avoid the runtime dependency.
-  # GCC 5.4 has some issues with our code.
-  script: CXX=clang++ LDFLAGS=-static-libstdc++ make install
+  script: python setup.py install
 
 test:
   imports:
