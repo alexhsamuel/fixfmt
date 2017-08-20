@@ -91,7 +91,7 @@ lib-cxx:    	    	$(LIB)
 
 $(OBJS): \
 %.o:	    	    	%.cc
-	$(CXX) --verbose $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 $(LIB):			$(OBJS)
 	ar -r $@ $^
