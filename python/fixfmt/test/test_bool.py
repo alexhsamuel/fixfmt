@@ -41,9 +41,23 @@ def test_setters():
     assert fmt(True ) == "  FO SURE  "
     assert fmt(False) == "    NOT    "
 
+    with pytest.raises(ValueError):
+        fmt.size = -5
+    with pytest.raises(ValueError):
+        fmt.size = "foobar"
+    with pytest.raises(TypeError):
+        fmt.size = None
+
     fmt.pos = 0
     assert fmt.pos == 0
     assert fmt(True ) == "    FO SURE"
     assert fmt(False) == "        NOT"
+
+    with pytest.raises(ValueError):
+        fmt.pos = -1
+    with pytest.raises(ValueError):
+        fmt.pos = 1.1
+    with pytest.raises(TypeError):
+        fmt.pos = None
 
 

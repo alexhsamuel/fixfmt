@@ -83,8 +83,11 @@ ref<Object> get_pos(PyBool* const self, void* /* closure */)
 
 void set_pos(PyBool* const self, Object* val, void* /* closure */)
 {
+  auto const pos = val->double_value();
+  if (pos < 0 || 1 < pos)
+    throw ValueError("pos out of range");
   auto args = self->fmt_->get_args();
-  args.pos = val->long_value();
+  args.pos = pos;
   self->fmt_->set_args(args);
 }
 
@@ -97,8 +100,11 @@ ref<Object> get_size(PyBool* const self, void* /* closure */)
 
 void set_size(PyBool* const self, Object* val, void* /* closure */)
 {
+  auto const size = val->long_value();
+  if (size < 0)
+    throw ValueError("size out of range");
   auto args = self->fmt_->get_args();
-  args.size = val->long_value();
+  args.size = size;
   self->fmt_->set_args(args);
 }
 
