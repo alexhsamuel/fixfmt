@@ -67,9 +67,25 @@ ref<Object> get_false(PyBool* const self, void* /* closure */)
 }
 
 
+void set_false(PyBool* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.false_str = val->Str()->as_utf8();
+  self->fmt_->set_args(args);
+}
+
+
 ref<Object> get_pos(PyBool* const self, void* /* closure */)
 {
   return Float::FromDouble(self->fmt_->get_args().pos);
+}
+
+
+void set_pos(PyBool* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.pos = val->long_value();
+  self->fmt_->set_args(args);
 }
 
 
@@ -79,9 +95,25 @@ ref<Object> get_size(PyBool* const self, void* /* closure */)
 }
 
 
+void set_size(PyBool* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.size = val->long_value();
+  self->fmt_->set_args(args);
+}
+
+
 ref<Object> get_true(PyBool* const self, void* /* closure */)
 {
   return Unicode::from(self->fmt_->get_args().true_str);
+}
+
+
+void set_true(PyBool* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.true_str = val->Str()->as_utf8();
+  self->fmt_->set_args(args);
 }
 
 
@@ -92,11 +124,11 @@ ref<Object> get_width(PyBool* const self, void* /* closure */)
 
 
 auto getsets = GetSets<PyBool>()
-  .add_get<get_false>       ("false")
-  .add_get<get_pos>         ("pos")
-  .add_get<get_size>        ("size")
-  .add_get<get_true>        ("true")
-  .add_get<get_width>       ("width")
+  .add_getset<get_false, set_false> ("false")
+  .add_getset<get_pos, set_pos>     ("pos")
+  .add_getset<get_size, set_size>   ("size")
+  .add_getset<get_true, set_true>   ("true")
+  .add_get<get_width>               ("width")
   ;
 
 

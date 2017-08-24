@@ -1765,6 +1765,33 @@ PyObject* wrap_get(PyObject* self, void* closure)
 
 
 template<class CLASS>
+using SetPtr = void (*)(CLASS* self, Object* val, void* closure);
+
+
+template<class CLASS, SetPtr<CLASS> METHOD>
+int wrap_set(PyObject* self, PyObject* val, void* closure)
+{
+  try {
+    try {
+      METHOD(
+        reinterpret_cast<CLASS*>(self), reinterpret_cast<Object*>(val),
+        closure);
+    }
+    catch (Exception) {
+      return 1;
+    }
+    catch (...) {
+      ExceptionTranslator::translate();
+    }
+  }
+  catch (Exception) {
+    return 1;
+  }
+  return 0;
+}
+
+
+template<class CLASS>
 class GetSets
 {
 public:
@@ -1781,6 +1808,22 @@ public:
       (char*)   name,
       (getter)  wrap_get<CLASS, METHOD>,
       (setter)  nullptr,
+      (char*)   doc,
+      (void*)   closure,
+    });
+    return *this;
+  }
+
+  template<GetPtr<CLASS> GET, SetPtr<CLASS> SET>
+  GetSets& add_getset(char const* name, char const* doc=nullptr,
+                      void* closure=nullptr)
+  {
+    assert(name != nullptr);
+    assert(!done_);
+    getsets_.push_back({
+      (char*)   name,
+      (getter)  wrap_get<CLASS, GET>,
+      (setter)  wrap_set<CLASS, SET>,
       (char*)   doc,
       (void*)   closure,
     });

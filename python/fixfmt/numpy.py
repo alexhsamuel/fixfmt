@@ -2,8 +2,10 @@ from   __future__ import absolute_import, division, print_function
 
 from   math import floor, log10
 import numpy as np
+import re
 
-from   ._ext import *
+from   ._ext import Bool, Number, String, TickTime
+from   ._ext import string_length, analyze_double, analyze_float
 
 #-------------------------------------------------------------------------------
 
@@ -31,8 +33,8 @@ DEFAULTS = {
         "max_size"      : 64,
         "ellipsis"      : "\u2026",
         "pad"           : " ",
-        "elide_position": 1.0,
-        "pad_position"  : 1.0,
+        "elide_pos"     : 1.0,
+        "pad_pos"       : 1.0,
     },
 }
 
@@ -83,6 +85,7 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULTS["number"]):
     special_width = max(
         string_length(nan) if has_nan else 0,
         string_length(inf) if has_pos_inf or has_neg_inf else 0)
+    min_width = max(min_width, special_width)
 
     sign = cfg["sign"]
     if sign is None:
@@ -160,12 +163,12 @@ def choose_formatter_str(arr, min_width=0, cfg=DEFAULTS["string"]):
         elif arr.dtype.kind == "U":
             size = arr.dtype.itemsize // np.dtype("U1").itemsize
         else:
-            size = np.vectorize(lambda x: string_length(str(x)))(values).max()
+            size = np.vectorize(lambda x: string_length(str(x)))(arr).max()
         size = max(min_width, min_size, min(size, max_size))
 
     return String(
         size, ellipsis=cfg["ellipsis"], pad=cfg["pad"],
-        elide_position=cfg["elide_position"], pad_position=cfg["pad_position"])
+        elide_pos=cfg["elide_pos"], pad_pos=cfg["pad_pos"])
 
 
 def choose_formatter(arr, min_width=0):
