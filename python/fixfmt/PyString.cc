@@ -56,19 +56,12 @@ int tp_init(PyString* self, PyObject* args, PyObject* kw_args)
 PyObject* tp_call(PyString* self, PyObject* args, PyObject* kw_args)
 {
   static char const* arg_names[] = {"str", nullptr};
-  char* val;
-#if PY3K
+  Object* val;
   if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "s", (char**) arg_names, &val))
+      args, kw_args, "O", (char**) arg_names, &val))
     return nullptr;
-#else
-  if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "et", (char**) arg_names, "utf-8", &val))
-    return nullptr;
-  PyMemGuard str_guard(val);
-#endif
 
-  return Unicode::from((*self->fmt_)(val)).release();
+  return Unicode::from((*self->fmt_)(val->Str()->as_utf8())).release();
 }
 
 
