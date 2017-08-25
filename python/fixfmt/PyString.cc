@@ -76,9 +76,31 @@ auto methods = Methods<PyString>()
 ;
 
 
+ref<Object> get_elide_pos(PyString* const self, void* /* closure */)
+{
+  return Float::FromDouble(self->fmt_->get_args().elide_pos);
+}
+
+
+void set_elide_pos(PyString* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.elide_pos = val->double_value();
+  self->fmt_->set_args(args);
+}
+
+
 ref<Object> get_ellipsis(PyString* const self, void* /* closure */)
 {
   return Unicode::from(self->fmt_->get_args().ellipsis);
+}
+
+
+void set_ellipsis(PyString* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.ellipsis = val->Str()->as_utf8();
+  self->fmt_->set_args(args);
 }
 
 
@@ -88,21 +110,45 @@ ref<Object> get_pad(PyString* const self, void* /* closure */)
 }
 
 
+void set_pad(PyString* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.pad = val->Str()->as_utf8();
+  self->fmt_->set_args(args);
+}
+
+
 ref<Object> get_pad_pos(PyString* const self, void* /* closure */)
 {
   return Float::FromDouble(self->fmt_->get_args().pad_pos);
 }
 
 
-ref<Object> get_elide_pos(PyString* const self, void* /* closure */)
+void set_pad_pos(PyString* const self, Object* val, void* /* closure */)
 {
-  return Float::FromDouble(self->fmt_->get_args().elide_pos);
+  auto const pos = val->double_value();
+  if (pos < 0 || 1 < pos)
+    throw ValueError("pos out of range");
+  auto args = self->fmt_->get_args();
+  args.pad_pos = pos;
+  self->fmt_->set_args(args);
 }
 
 
 ref<Object> get_size(PyString* const self, void* /* closure */)
 {
   return Long::FromLong(self->fmt_->get_args().size);
+}
+
+
+void set_size(PyString* const self, Object* val, void* /* closure */)
+{
+  auto const size = val->long_value();
+  if (size < 0)
+    throw ValueError("size out of range");
+  auto args = self->fmt_->get_args();
+  args.size = size;
+  self->fmt_->set_args(args);
 }
 
 
@@ -113,12 +159,12 @@ ref<Object> get_width(PyString* const self, void* /* closure */)
 
 
 auto getsets = GetSets<PyString>()
-  .add_get<get_ellipsis>        ("ellipsis")
-  .add_get<get_pad>             ("pad")
-  .add_get<get_pad_pos>         ("pad_pos")
-  .add_get<get_elide_pos>       ("elide_pos")
-  .add_get<get_size>            ("size")
-  .add_get<get_width>           ("width")
+  .add_getset<get_elide_pos , set_elide_pos >("elide_pos")
+  .add_getset<get_ellipsis  , set_ellipsis  >("ellipsis")
+  .add_getset<get_pad       , set_pad       >("pad")
+  .add_getset<get_pad_pos   , set_pad_pos   >("pad_pos")
+  .add_getset<get_size      , set_size      >("size")
+  .add_get   <get_width                     >("width")
   ;
 
 
