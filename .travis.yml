@@ -9,3 +9,10 @@ install:
 
 script: py.test python
 
+addons:
+    apt:
+        sources:
+            - llvm-toolchain-precise
+        packages:
+            - clang-3.7
+
