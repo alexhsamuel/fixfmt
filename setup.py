@@ -1,3 +1,5 @@
+#-*- encoding: utf-8 -*-
+
 from   glob import glob
 import os
 from   setuptools import setup, Extension
