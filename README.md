@@ -1,6 +1,8 @@
 A C++ and Python library for formatting values (numbers, strings, etc.) in
 fixed-width fields.  Useful for printing tabular data and similar.
 
+[![Build Status](https://travis-ci.org/alexhsamuel/fixfmt.svg?branch=master)](https://travis-ci.org/alexhsamuel/fixfmt)
+
 
 # Features
 
