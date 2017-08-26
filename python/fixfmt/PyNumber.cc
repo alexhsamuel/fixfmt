@@ -7,6 +7,50 @@ using std::unique_ptr;
 
 namespace {
 
+int
+get_precision(
+  Object* arg)
+{
+  int precision;
+  if (arg == Py_None)
+    precision = fixfmt::Number::PRECISION_NONE;
+  else {
+    precision = arg->long_value();
+    if (precision < 0)
+      precision = fixfmt::Number::PRECISION_NONE;
+  }
+  return precision;
+}
+
+
+fixfmt::Number::Scale
+get_scale(
+  Object* arg)
+{
+  fixfmt::Number::Scale scale = {};
+  auto const aliases = ((Object*) &PyNumber::type_)->GetAttrString("SCALES");
+  if (Dict::Check(aliases)) {
+    auto const alias = cast<Dict>(aliases)->GetItem(arg, false);
+    if (alias != nullptr)
+      arg = alias;
+  }
+  if (arg == Py_None) 
+    ;  // accept default
+  else if (!Sequence::Check(arg))
+    throw ValueError("scale must be a two-item sequence");
+  else {
+    Sequence* scale_seq = cast<Sequence>(arg);
+    if (scale_seq->Length() != 2)
+      throw ValueError("scale must be a two-item sequence");
+    scale.factor = scale_seq->GetItem(0)->double_value();
+    if (!(scale.factor > 0))
+      throw ValueError("invalid scale factor");
+    scale.suffix = scale_seq->GetItem(1)->Str()->as_utf8_string();
+  }
+  return scale;
+}
+
+
 // FIXME: Accept sign=None.
 static void
 tp_init(
@@ -48,16 +92,7 @@ tp_init(
 
   if (size < 0) 
     throw ValueError("negative size");
-  int precision;
-  if (precision_arg == Py_None)
-    precision = fixfmt::Number::PRECISION_NONE;
-  else {
-    precision = precision_arg->long_value();
-    if (precision < 0)
-      precision = fixfmt::Number::PRECISION_NONE;
-  }
-  if (!(size > 0 || precision > 0))
-    throw ValueError("no digits to show");
+  auto const precision = get_precision(precision_arg);
   if (   sign != fixfmt::Number::SIGN_NONE
       && sign != fixfmt::Number::SIGN_NEGATIVE
       && sign != fixfmt::Number::SIGN_ALWAYS)
@@ -65,26 +100,7 @@ tp_init(
   if (! (pad == fixfmt::Number::PAD_SPACE || pad == fixfmt::Number::PAD_ZERO))
     throw ValueError("invalid pad");
 
-  fixfmt::Number::Scale scale = {};
-  auto const aliases = ((Object*) &PyNumber::type_)->GetAttrString("SCALES");
-  if (Dict::Check(aliases)) {
-    auto const alias = cast<Dict>(aliases)->GetItem(scale_arg, false);
-    if (alias != nullptr)
-      scale_arg = alias;
-  }
-  if (scale_arg == Py_None) 
-    ;  // accept default
-  else if (!Sequence::Check(scale_arg))
-    throw ValueError("scale must be a two-item sequence");
-  else {
-    Sequence* scale_seq = cast<Sequence>(scale_arg);
-    if (scale_seq->Length() != 2)
-      throw ValueError("scale must be a two-item sequence");
-    scale.factor = scale_seq->GetItem(0)->double_value();
-    if (!(scale.factor > 0))
-      throw ValueError("invalid scale factor");
-    scale.suffix = scale_seq->GetItem(1)->Str()->as_utf8_string();
-  }
+  auto const scale = get_scale(scale_arg);
 
   new(self) PyNumber;
   self->fmt_ = std::make_unique<fixfmt::Number>(
@@ -114,9 +130,30 @@ ref<Object> get_bad(PyNumber* const self, void* /* closure */)
 }
 
 
+void set_bad(PyNumber* const self, Object* val, void* /* closure */)
+{
+  auto const bad_str = val->Str();
+  if (bad_str->Length() != 1)
+    throw ValueError("invalid bad");
+
+  auto args = self->fmt_->get_args();
+  // FIXME: Wrong for multibyte characters.
+  args.bad = bad_str->as_utf8()[0];
+  self->fmt_->set_args(args);
+}
+
+
 ref<Object> get_inf(PyNumber* const self, void* /* closure */)
 {
   return Unicode::from(self->fmt_->get_args().inf);
+}
+
+
+void set_inf(PyNumber* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.inf = val->Str()->as_utf8();
+  self->fmt_->set_args(args);
 }
 
 
@@ -126,9 +163,34 @@ ref<Object> get_nan(PyNumber* const self, void* /* closure */)
 }
 
 
+void set_nan(PyNumber* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.nan = val->Str()->as_utf8();
+  self->fmt_->set_args(args);
+}
+
+
 ref<Object> get_pad(PyNumber* const self, void* /* closure */)
 {
   return Unicode::from(self->fmt_->get_args().pad);
+}
+
+
+void set_pad(PyNumber* const self, Object* val, void* /* closure */)
+{
+  auto const pad_str = val->Str();
+  if (pad_str->Length() != 1)
+    throw ValueError("invalid pad");
+  // FIXME: Wrong for multibyte characters.
+  auto const pad = pad_str->as_utf8()[0];
+  if (   pad != fixfmt::Number::PAD_SPACE
+      && pad != fixfmt::Number::PAD_ZERO)
+    throw ValueError("invalid pad");
+
+  auto args = self->fmt_->get_args();
+  args.pad = pad;
+  self->fmt_->set_args(args);
 }
 
 
@@ -138,12 +200,33 @@ ref<Object> get_point(PyNumber* const self, void* /* closure */)
 }
 
 
+void set_point(PyNumber* const self, Object* val, void* /* closure */)
+{
+  auto const point_str = val->Str();
+  if (point_str->Length() != 1)
+    throw ValueError("invalid point");
+
+  auto args = self->fmt_->get_args();
+  // FIXME: Wrong for multibyte characters.
+  args.point = point_str->as_utf8()[0];
+  self->fmt_->set_args(args);
+}
+
+
 ref<Object> get_precision(PyNumber* const self, void* /* closure */)
 {
   int const precision = self->fmt_->get_args().precision;
   return 
     precision == fixfmt::Number::PRECISION_NONE ? none_ref()
     : (ref<Object>) Long::FromLong(precision);
+}
+
+
+void set_precision(PyNumber* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.precision = get_precision(val);
+  self->fmt_->set_args(args);
 }
 
 
@@ -162,15 +245,51 @@ get_scale(
 }
 
 
+void set_scale(PyNumber* const self, Object* val, void* /* closure */)
+{
+  auto args = self->fmt_->get_args();
+  args.scale = get_scale(val);
+  self->fmt_->set_args(args);
+}
+
+
 ref<Object> get_sign(PyNumber* const self, void* /* closure */)
 {
   return Unicode::from(self->fmt_->get_args().sign);
 }
 
 
+void set_sign(PyNumber* const self, Object* const val, void* /* closure */)
+{
+  auto const sign_str = val->Str();
+  if (sign_str->Length() != 1)
+    throw ValueError("invalid sign");
+  auto const sign = sign_str->as_utf8()[0];
+  if (   sign != fixfmt::Number::SIGN_NONE
+      && sign != fixfmt::Number::SIGN_NEGATIVE
+      && sign != fixfmt::Number::SIGN_ALWAYS)
+    throw ValueError("invalid sign");
+
+  auto args = self->fmt_->get_args();
+  args.sign = sign;
+  self->fmt_->set_args(args);
+}
+
+
 ref<Object> get_size(PyNumber* const self, void* /* closure */)
 {
   return Long::FromLong(self->fmt_->get_args().size);
+}
+
+
+void set_size(PyNumber* const self, Object* val, void* /* closure */)
+{
+  auto const size = val->long_value();
+  if (size < 0)
+    throw ValueError("size out of range");
+  auto args = self->fmt_->get_args();
+  args.size = size;
+  self->fmt_->set_args(args);
 }
 
 
@@ -181,16 +300,16 @@ ref<Object> get_width(PyNumber* const self, void* /* closure */)
 
 
 auto getsets = GetSets<PyNumber>()
-  .add_get<get_bad>         ("bad")
-  .add_get<get_inf>         ("inf")
-  .add_get<get_nan>         ("nan")
-  .add_get<get_pad>         ("pad")
-  .add_get<get_point>       ("point")
-  .add_get<get_precision>   ("precision")
-  .add_get<get_scale>       ("scale")
-  .add_get<get_sign>        ("sign")
-  .add_get<get_size>        ("size")
-  .add_get<get_width>       ("width")
+  .add_getset<get_bad       , set_bad       >("bad")
+  .add_getset<get_inf       , set_inf       >("inf")
+  .add_getset<get_nan       , set_nan       >("nan")
+  .add_getset<get_pad       , set_pad       >("pad")
+  .add_getset<get_point     , set_point     >("point")
+  .add_getset<get_precision , set_precision >("precision")
+  .add_getset<get_scale     , set_scale     >("scale")
+  .add_getset<get_sign      , set_sign      >("sign")
+  .add_getset<get_size      , set_size      >("size")
+  .add_get<get_width>                        ("width")
   ;
 
 
