@@ -5,6 +5,8 @@ python:
 
 install: 
 # - pip install -r requirements.txt
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 90
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90
   - python setup.py install
 
 script: py.test python
@@ -16,10 +18,6 @@ addons:
         packages:
             - g++-5
             - gcc-5
-
-install: 
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 90
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90
 
 env:
     CXX=g++-5
