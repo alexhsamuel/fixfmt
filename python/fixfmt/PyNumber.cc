@@ -114,6 +114,7 @@ ref<Object> tp_call(PyNumber* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {"value", nullptr};
   double val;
+  // FIXME: Handle integer types separately.
   Arg::ParseTupleAndKeywords(args, kw_args, "d", arg_names, &val);
 
   return Unicode::from((*self->fmt_)(val));

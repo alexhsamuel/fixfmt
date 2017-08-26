@@ -156,7 +156,7 @@ Number::operator()(
 
     if (args_.precision != PRECISION_NONE) {
       // Add the decimal point.
-      result.push_back('.');
+      result.push_back(args_.point);
       
       // Pad with zeros after the decimal point if needed.
       if (decimal_pos < 0)
