@@ -16,3 +16,6 @@ addons:
         packages:
             - clang-3.7
 
+env:
+    CXX=clang++
+
