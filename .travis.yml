@@ -12,10 +12,8 @@ script: py.test python
 addons:
     apt:
         sources:
-            - llvm-toolchain-precise
+            - ubuntu-toolchain-r-test
         packages:
-            - clang-3.7
-
-env:
-    CXX=clang++
+            - g++-5
+            - gcc-5
 
