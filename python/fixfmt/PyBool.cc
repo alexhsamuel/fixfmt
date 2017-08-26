@@ -70,7 +70,7 @@ ref<Object> get_false(PyBool* const self, void* /* closure */)
 void set_false(PyBool* const self, Object* val, void* /* closure */)
 {
   auto args = self->fmt_->get_args();
-  args.false_str = val->Str()->as_utf8();
+  args.false_str = val->Str()->as_utf8_string();
   self->fmt_->set_args(args);
 }
 
@@ -118,7 +118,7 @@ ref<Object> get_true(PyBool* const self, void* /* closure */)
 void set_true(PyBool* const self, Object* val, void* /* closure */)
 {
   auto args = self->fmt_->get_args();
-  args.true_str = val->Str()->as_utf8();
+  args.true_str = val->Str()->as_utf8_string();
   self->fmt_->set_args(args);
 }
 

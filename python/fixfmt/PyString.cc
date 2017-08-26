@@ -61,7 +61,7 @@ PyObject* tp_call(PyString* self, PyObject* args, PyObject* kw_args)
       args, kw_args, "O", (char**) arg_names, &val))
     return nullptr;
 
-  return Unicode::from((*self->fmt_)(val->Str()->as_utf8())).release();
+  return Unicode::from((*self->fmt_)(val->Str()->as_utf8_string())).release();
 }
 
 
@@ -92,7 +92,7 @@ ref<Object> get_ellipsis(PyString* const self, void* /* closure */)
 void set_ellipsis(PyString* const self, Object* val, void* /* closure */)
 {
   auto args = self->fmt_->get_args();
-  args.ellipsis = val->Str()->as_utf8();
+  args.ellipsis = val->Str()->as_utf8_string();
   self->fmt_->set_args(args);
 }
 
@@ -106,7 +106,7 @@ ref<Object> get_pad(PyString* const self, void* /* closure */)
 void set_pad(PyString* const self, Object* val, void* /* closure */)
 {
   auto args = self->fmt_->get_args();
-  args.pad = val->Str()->as_utf8();
+  args.pad = val->Str()->as_utf8_string();
   self->fmt_->set_args(args);
 }
 

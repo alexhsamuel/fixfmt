@@ -92,7 +92,7 @@ def test_set_inf():
     assert f(-99.9999) == "-99.9999"
     assert f(100     ) == "########"
     assert f(NAN     ) == "NaN     "
-    assert f(INF     ) == "  ∞     "
+    assert f(INF     ) ==u"  ∞     "
 
 
 def test_set_nan():

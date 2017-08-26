@@ -139,7 +139,7 @@ void set_bad(PyNumber* const self, Object* val, void* /* closure */)
 
   auto args = self->fmt_->get_args();
   // FIXME: Wrong for multibyte characters.
-  args.bad = bad_str->as_utf8()[0];
+  args.bad = bad_str->as_utf8_string()[0];
   self->fmt_->set_args(args);
 }
 
@@ -153,7 +153,7 @@ ref<Object> get_inf(PyNumber* const self, void* /* closure */)
 void set_inf(PyNumber* const self, Object* val, void* /* closure */)
 {
   auto args = self->fmt_->get_args();
-  args.inf = val->Str()->as_utf8();
+  args.inf = val->Str()->as_utf8_string().c_str();
   self->fmt_->set_args(args);
 }
 
@@ -167,7 +167,7 @@ ref<Object> get_nan(PyNumber* const self, void* /* closure */)
 void set_nan(PyNumber* const self, Object* val, void* /* closure */)
 {
   auto args = self->fmt_->get_args();
-  args.nan = val->Str()->as_utf8();
+  args.nan = val->Str()->as_utf8_string().c_str();
   self->fmt_->set_args(args);
 }
 
@@ -184,7 +184,7 @@ void set_pad(PyNumber* const self, Object* val, void* /* closure */)
   if (pad_str->Length() != 1)
     throw ValueError("invalid pad");
   // FIXME: Wrong for multibyte characters.
-  auto const pad = pad_str->as_utf8()[0];
+  auto const pad = pad_str->as_utf8_string()[0];
   if (   pad != fixfmt::Number::PAD_SPACE
       && pad != fixfmt::Number::PAD_ZERO)
     throw ValueError("invalid pad");
@@ -209,7 +209,7 @@ void set_point(PyNumber* const self, Object* val, void* /* closure */)
 
   auto args = self->fmt_->get_args();
   // FIXME: Wrong for multibyte characters.
-  args.point = point_str->as_utf8()[0];
+  args.point = point_str->as_utf8_string()[0];
   self->fmt_->set_args(args);
 }
 
@@ -265,7 +265,7 @@ void set_sign(PyNumber* const self, Object* const val, void* /* closure */)
   auto const sign_str = val->Str();
   if (sign_str->Length() != 1)
     throw ValueError("invalid sign");
-  auto const sign = sign_str->as_utf8()[0];
+  auto const sign = sign_str->as_utf8_string()[0];
   if (   sign != fixfmt::Number::SIGN_NONE
       && sign != fixfmt::Number::SIGN_NEGATIVE
       && sign != fixfmt::Number::SIGN_ALWAYS)
