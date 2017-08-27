@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "PyNumber.hh"
 
 using namespace py;
@@ -6,6 +8,18 @@ using std::unique_ptr;
 //------------------------------------------------------------------------------
 
 namespace {
+
+ref<Unicode> tp_repr(PyNumber* self)
+{
+  auto const& args = self->fmt_->get_args();
+  std::stringstream ss;
+  ss << "String(" << args.size << ", " << args.precision 
+     << ", pad='" << args.pad << "', sign='" << args.sign 
+     << ", nan='" << args.nan << "', inf='" << args.inf
+     << "', point='" << args.point << "', bad='" << args.bad << "')";
+  return Unicode::from(ss.str());
+}
+
 
 int
 get_precision(
@@ -331,7 +345,7 @@ Type PyNumber::type_ = PyTypeObject{
 #else
   (cmpfunc)             nullptr,                            // tp_compare
 #endif
-  (reprfunc)            nullptr,                            // tp_repr
+  (reprfunc)            wrap<PyNumber, tp_repr>,            // tp_repr
   (PyNumberMethods*)    nullptr,                            // tp_as_number
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping

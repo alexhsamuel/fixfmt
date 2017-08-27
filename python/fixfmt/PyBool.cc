@@ -1,6 +1,7 @@
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -17,6 +18,16 @@ using std::unique_ptr;
 //------------------------------------------------------------------------------
 
 namespace {
+
+ref<Unicode> tp_repr(PyBool* self)
+{
+  auto const& args = self->fmt_->get_args();
+  std::stringstream ss;
+  ss << "Bool('" << args.true_str << "', '" << args.false_str
+     << "', size=" << args.size << ", pos=" << args.pos << ")";
+  return Unicode::from(ss.str());
+}
+
 
 int tp_init(PyBool* self, PyObject* args, PyObject* kw_args)
 {
@@ -155,7 +166,7 @@ Type PyBool::type_ = PyTypeObject{
 #else
   (cmpfunc)             nullptr,                            // tp_compare
 #endif
-  (reprfunc)            nullptr,                            // tp_repr
+  (reprfunc)            wrap<PyBool, tp_repr>,              // tp_repr
   (PyNumberMethods*)    nullptr,                            // tp_as_number
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping

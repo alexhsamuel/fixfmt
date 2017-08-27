@@ -1,4 +1,5 @@
 #include <memory>
+#include <sstream>
 #include <utility>
 
 #include <Python.h>
@@ -11,6 +12,17 @@ using std::unique_ptr;
 //------------------------------------------------------------------------------
 
 namespace {
+
+ref<Unicode> tp_repr(PyString* self)
+{
+  auto const& args = self->fmt_->get_args();
+  std::stringstream ss;
+  ss << "String(" << args.size << ", ellipsis='" << args.ellipsis
+     << "', pad='" << args.pad << ", elide_pos=" << args.elide_pos
+     << ", pad_pos=" << args.pad_pos << ")";
+  return Unicode::from(ss.str());
+}
+
 
 int tp_init(PyString* self, PyObject* args, PyObject* kw_args)
 {
@@ -178,7 +190,7 @@ Type PyString::type_ = PyTypeObject{
 #else
   (cmpfunc)             nullptr,                            // tp_compare
 #endif
-  (reprfunc)            nullptr,                            // tp_repr
+  (reprfunc)            wrap<PyString, tp_repr>,            // tp_repr
   (PyNumberMethods*)    nullptr,                            // tp_as_number
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping
