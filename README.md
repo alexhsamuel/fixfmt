@@ -23,7 +23,22 @@ See [`cxx/README.md`](cxx/README.md) for an introduction to the C++ API.
 See [`python/README.md`](python/README.md) for an introduction to the Python API.
 
 
-# Setup
+# Installing
+
+With conda (binary packages for Linux and OS/X, Python 2.7 and 3.6):
+
+```
+conda install -c alexhsamuel fixfmt
+```
+
+From PyPI (a requires C++14 compiler and GNU make):
+
+```
+pip install fixfmt
+```
+
+
+# Building
 
 Requires a C++14 compiler, GNU Make, and setuptools to build.
 
