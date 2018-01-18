@@ -36,6 +36,10 @@ DEFAULTS = {
         "elide_pos"     : 1.0,
         "pad_pos"       : 1.0,
     },
+    "time": {
+        "max_precision" : None,
+        "min_precision" : None,
+    },
 }
 
 def num_digits(value):
@@ -124,8 +128,7 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULTS["number"]):
     return fmt
 
 
-# FIXME
-def choose_formatter_datetime64(values, cfg):
+def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULTS["time"]):
     # FIXME: Is this really the right way to extract the datetime64 tick scale??
     match = re.match(r"datetime64\[(.*)\]$", values.dtype.name)
     assert match is not None
@@ -141,9 +144,11 @@ def choose_formatter_datetime64(values, cfg):
             "no default formatter for datetime64 scale {}".format(scale))
 
     # FIXME: Accelerate this with an extension module.
-    values = values.astype("long")
-    max_prec = min(scale, cfg.time.max_precision)
-    min_prec = 0 if cfg.time.min_precision is None else cfg.time.min_precision
+    values = values.astype("int64")
+    max_prec = cfg["max_precision"]
+    max_prec = min(scale, 9 if max_prec is None else max_prec)
+    min_prec = cfg["min_precision"]
+    min_prec = 0 if min_prec is None else min_prec
     for precision in range(max_prec, min_prec, -1):
         if not (values % (10 ** (scale - precision + 1)) == 0).all():
             break

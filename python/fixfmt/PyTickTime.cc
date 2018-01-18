@@ -21,7 +21,7 @@ int tp_init(PyTickTime* self, PyObject* args, PyObject* kw_args)
   long scale = fixfmt::TickTime::SCALE_SEC;
   int precision = fixfmt::TickTime::PRECISION_NONE;
   if (!PyArg_ParseTupleAndKeywords(
-    args, kw_args, "|il", (char**) arg_names,
+    args, kw_args, "|li", (char**) arg_names,
     &scale, &precision))
     return -1;
 
