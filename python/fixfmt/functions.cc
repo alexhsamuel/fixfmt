@@ -75,13 +75,13 @@ ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
     // digits, up to the maximum specified precision.
     while (precision < max_precision) {
       TYPE const scaled = std::abs(val) * precision_scale;
-      TYPE const remainder = scaled - (long) (scaled + tolerance);
+      TYPE const remainder = (scaled - (long) (scaled + tolerance));
       if (remainder < tolerance) 
         break;
       else {
         ++precision;
         precision_scale *= 10;
-        tolerance *= 10;
+        tolerance *= 100;
       }
     }
   }

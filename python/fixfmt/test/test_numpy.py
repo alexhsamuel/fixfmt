@@ -13,12 +13,28 @@ def test_choose_formatter_int():
     assert fmt.precision is None
 
 
-def test_choose_formatter_float():
+def test_choose_formatter_float0():
     arr = np.arange(1001) * 0.01
     fmt = fixfmt.numpy.choose_formatter(arr)
     assert isinstance(fmt, fixfmt.Number)
     assert fmt.size == 2
     assert fmt.precision == 2
+
+
+def test_choose_formatter_float1():
+    arr = np.arange(1001) * 0.00001
+    fmt = fixfmt.numpy.choose_formatter(arr)
+    assert isinstance(fmt, fixfmt.Number)
+    assert fmt.size == 1
+    assert fmt.precision == 5
+
+
+def test_choose_formatter_float2():
+    arr = np.arange(2e8, 3e8, 1234500) * 1e-8
+    fmt = fixfmt.numpy.choose_formatter(arr)
+    assert isinstance(fmt, fixfmt.Number)
+    assert fmt.size == 1
+    assert fmt.precision == 6
 
 
 def test_choose_formatter_datetime1():
