@@ -32,6 +32,15 @@ int tp_init(PyTickTime* self, PyObject* args, PyObject* kw_args)
 }
 
 
+ref<Unicode> tp_repr(PyTickTime* self)
+{
+  auto const& fmt = self->fmt_;
+  std::stringstream ss;
+  ss << "TickTime(" << fmt->get_scale() << ", " << fmt->get_precision() << ")";
+  return Unicode::from(ss.str());
+}
+
+
 ref<Object> tp_call(PyTickTime* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = { "value", nullptr };
@@ -87,7 +96,7 @@ Type PyTickTime::type_ = PyTypeObject{
 #else
   (cmpfunc)             nullptr,                            // tp_compare
 #endif
-  (reprfunc)            nullptr,                            // tp_repr
+  (reprfunc)            wrap<PyTickTime, tp_repr>,          // tp_repr
   (PyNumberMethods*)    nullptr,                            // tp_as_number
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping
