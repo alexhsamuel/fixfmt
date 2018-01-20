@@ -2,7 +2,7 @@ from   __future__ import absolute_import, division, print_function
 
 import pandas as pd
 
-from   . import table, Bool, Number, String
+from   . import table
 from   .lib import container
 
 #-------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ def from_dataframe(df, cfg, names=container.ALL):
         else:
             return series.values
 
-    if cfg.index.show:
+    if cfg["index"]["show"]:
         idx = df.index
         if isinstance(idx, pd.core.index.MultiIndex):
             for name, labels, levels in zip(idx.names, idx.labels, idx.levels):

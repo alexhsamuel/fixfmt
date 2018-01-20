@@ -5,6 +5,21 @@ from   __future__ import absolute_import, division, print_function
 from   ._ext import Bool, Number, String, TickTime
 from   ._ext import center, elide, pad, palide, string_length
 
+__all__ = (
+    "Bool",
+    "center",
+    "elide",
+    "is_fmt",
+    "Number",
+    "pad",
+    "palide",
+    "String",
+    "string_length",
+    "TickTime",
+)
+
+#-------------------------------------------------------------------------------
+
 # Populate scale aliases: the keys may be passed as the `scale` to `Number()`.
 Number.SCALES.update({
     "%"     : (1E-2, "%"),
@@ -28,4 +43,11 @@ Number.SCALES.update({
     "ki"    : (1 << 10, "ki"),
 
 })
+
+def is_fmt(obj):
+    """
+    Returns true iff `obj` is a formatter instance.
+    """
+    return callable(obj) and hasattr(obj, "width")
+
 
