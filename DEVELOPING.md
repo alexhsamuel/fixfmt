@@ -1,7 +1,7 @@
 # Releases
 
 1. Update version in `setup.py`.
-1. Update version in `conda-recipe/meta.yaml`.
+1. Update version in `conda-recipe/meta.yaml` (two places).
 1. Commit and push.
 1. `git push`.
 1. Create a release in GitHub.
