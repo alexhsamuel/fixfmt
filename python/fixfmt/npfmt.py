@@ -15,7 +15,7 @@ from   ._ext import string_length, analyze_double, analyze_float
 
 #-------------------------------------------------------------------------------
 
-DEFAULTS = {
+DEFAULT_CFG = {
     "bool": {
         "true"          : "true",
         "false"         : "false",
@@ -55,7 +55,7 @@ def num_digits(value):
     return 1 if value == 0 else max(int(floor(log10(abs(value)) + 1)), 1)
 
 
-def choose_formatter_bool(arr, min_width=0, cfg=DEFAULTS["bool"]):
+def choose_formatter_bool(arr, min_width=0, cfg=DEFAULT_CFG["bool"]):
     true    = cfg["true"]
     false   = cfg["false"]
     size    = max(
@@ -66,7 +66,7 @@ def choose_formatter_bool(arr, min_width=0, cfg=DEFAULTS["bool"]):
     return Bool(true, false, size=size)
 
 
-def choose_formatter_number(arr, min_width=0, cfg=DEFAULTS["number"]):
+def choose_formatter_number(arr, min_width=0, cfg=DEFAULT_CFG["number"]):
     # Analyze the array to determine relevant properties.
     scale = cfg["scale"]
     if scale is not None:
@@ -134,7 +134,7 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULTS["number"]):
     return fmt
 
 
-def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULTS["time"]):
+def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
     # FIXME: Is this really the right way to extract the datetime64 tick scale??
     match = re.match(r"datetime64\[(.*)\]$", values.dtype.name)
     assert match is not None
@@ -164,7 +164,7 @@ def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULTS["time"]):
     return TickTime(10 ** scale, precision)
 
 
-def choose_formatter_str(arr, min_width=0, cfg=DEFAULTS["string"]):
+def choose_formatter_str(arr, min_width=0, cfg=DEFAULT_CFG["string"]):
     size = cfg["size"]
     if size is None:
         min_size = cfg["min_size"]
@@ -182,7 +182,7 @@ def choose_formatter_str(arr, min_width=0, cfg=DEFAULTS["string"]):
         elide_pos=cfg["elide_pos"], pad_pos=cfg["pad_pos"])
 
 
-def choose_formatter(arr, min_width=0, cfg=DEFAULTS):
+def choose_formatter(arr, min_width=0, cfg=DEFAULT_CFG):
     dtype = arr.dtype
     if dtype.kind == "b":
         return choose_formatter_bool(arr, min_width, cfg=cfg["bool"])
