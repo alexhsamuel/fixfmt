@@ -97,6 +97,9 @@ UNICODE_CFG = update_cfg(DEFAULT_CFG, {
     "row_ellipsis": {
         "format"                    : u"\u2026 skipping {skipped} rows \u2026",
     },
+    "underline": {
+        "line"                      : u"\u2550",
+    },
 })
 
 
@@ -466,5 +469,24 @@ class Table:
 
         self._print_bottom(print)
 
+
+
+def table_from_arrays(arrs, cfg=DEFAULT_CFG):
+    """
+    Constructs a table from arrays.
+
+    :param arrs:
+      A dict or iterable of items from name to array.
+    """
+    try:
+        arrs = arrs.items()
+    except AttributeError:
+        pass
+
+    tbl = Table(cfg)
+    for name, arr in arrs:
+        tbl.add_column(name, arr)
+    tbl.finish()
+    return tbl
 
 
