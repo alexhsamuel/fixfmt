@@ -13,7 +13,7 @@ ref<Unicode> tp_repr(PyNumber* self)
 {
   auto const& args = self->fmt_->get_args();
   std::stringstream ss;
-  ss << "String(" << args.size << ", " << args.precision 
+  ss << "Number(" << args.size << ", " << args.precision 
      << ", pad='" << args.pad << "', sign='" << args.sign 
      << ", nan='" << args.nan << "', inf='" << args.inf
      << "', point='" << args.point << "', bad='" << args.bad << "')";
