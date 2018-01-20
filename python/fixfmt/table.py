@@ -2,7 +2,6 @@ from   __future__ import absolute_import, division, print_function
 
 from   math import floor, log10
 import re
-import sys
 
 import numpy as np
 
