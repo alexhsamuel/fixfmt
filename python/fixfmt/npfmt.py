@@ -1,3 +1,9 @@
+"""
+Formatting for numpy arrays.
+"""
+
+#-------------------------------------------------------------------------------
+
 from   __future__ import absolute_import, division, print_function
 
 from   math import floor, log10
@@ -176,16 +182,16 @@ def choose_formatter_str(arr, min_width=0, cfg=DEFAULTS["string"]):
         elide_pos=cfg["elide_pos"], pad_pos=cfg["pad_pos"])
 
 
-def choose_formatter(arr, min_width=0):
+def choose_formatter(arr, min_width=0, cfg=DEFAULTS):
     dtype = arr.dtype
     if dtype.kind == "b":
-        return choose_formatter_bool(arr, min_width)
+        return choose_formatter_bool(arr, min_width, cfg=cfg["string"])
     elif dtype.kind in "fi":
-        return choose_formatter_number(arr, min_width)
+        return choose_formatter_number(arr, min_width, cfg=cfg["number"])
     elif dtype.kind == "M":
-        return choose_formatter_datetime64(arr, min_width)
+        return choose_formatter_datetime64(arr, min_width, cfg=cfg["time"])
     elif dtype.kind in "OSU":
-        return choose_formatter_str(arr, min_width)
+        return choose_formatter_str(arr, min_width, cfg=cfg["string"])
     else:
         raise TypeError("no default formatter for {}".format(dtype))
 
