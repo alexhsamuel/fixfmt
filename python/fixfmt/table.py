@@ -274,7 +274,7 @@ def _get_header_position(fmt):
 
 class Table:
 
-    def __init__(self, cfg):
+    def __init__(self, cfg=DEFAULT_CFG):
         # The configuration.
         self.__cfg      = cfg
         # Column names and formatters.
@@ -342,7 +342,7 @@ class Table:
         self.add_string(self.__cfg["row"]["separator"]["end"])
 
 
-    def _print_header(self):
+    def _print_header(self, print):
         cfg = self.__cfg["header"]
         assert string_length(cfg["style"]["prefix"]) == 0
         assert string_length(cfg["style"]["suffix"]) == 0
@@ -374,7 +374,7 @@ class Table:
             print(header)
 
 
-    def _print_line(self, cfg):
+    def _print_line(self, cfg, print):
         if cfg["show"]:
             # FIXME: Relax this.
             if string_length(cfg["line"]) != 1:
@@ -394,22 +394,22 @@ class Table:
             )
 
 
-    def _print_top(self):
-        self._print_line(self.__cfg["top"])
+    def _print_top(self, print):
+        self._print_line(self.__cfg["top"], print)
 
 
-    def _print_underline(self):
-        self._print_line(self.__cfg["underline"])
+    def _print_underline(self, print):
+        self._print_line(self.__cfg["underline"], print)
 
 
-    def _print_bottom(self):
-        self._print_line(self.__cfg["bottom"])
+    def _print_bottom(self, print):
+        self._print_line(self.__cfg["bottom"], print)
 
 
     # FIXME: By screen (repeating header?)
     # FIXME: Do what when it's too wide???
 
-    def print(self):
+    def print(self, print=print):
         cfg = self.__cfg
 
         num_extra_rows  = sum([
@@ -424,9 +424,9 @@ class Table:
             # FIXME
             max_rows = ansi.get_terminal_size().lines - 1
 
-        self._print_top()
-        self._print_header()
-        self._print_underline()
+        self._print_top(print)
+        self._print_header(print)
+        self._print_underline(print)
 
         table = self.__table
         num_rows = len(table)
@@ -464,7 +464,7 @@ class Table:
             for i in range(num_rows - num_rows_bottom, num_rows):
                 print(table(i))
 
-        self._print_bottom()
+        self._print_bottom(print)
 
 
 
