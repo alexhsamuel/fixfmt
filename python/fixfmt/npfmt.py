@@ -84,10 +84,12 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULT_CFG["number"]):
         arr /= scale_factor
 
     if arr.dtype.kind == "f":
+        # analyze_*() require arguments to support the buffer C API;
+        # noncontiguous arrays do not seem to.  FIXME: Not sure why not.
+        arr = np.ascontiguousarray(arr)
         max_precision = cfg["max_precision"]
         if max_precision is None:
             max_precision = 16 if arr.dtype.itemsize == 8 else 8
-        # FIXME: Push down type check into C++.
         analyze = analyze_double if arr.dtype.itemsize == 8 else analyze_float
         (has_nan, has_pos_inf, has_neg_inf, num_vals, min_val, max_val, 
             val_prec) = analyze(arr, max_precision)
