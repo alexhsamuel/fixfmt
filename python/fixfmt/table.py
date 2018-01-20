@@ -81,6 +81,10 @@ DEFAULT_CFG = {
 UNICODE_CFG = update_cfg(DEFAULT_CFG, {
     "formatters": {
         "default": {
+            "bool": {
+                "true"                  : u"\u2714",
+                "false"                 : u"\u00b7",
+            },
             "number": {
                 "inf"                   : u"\u221e",
             },
@@ -116,10 +120,6 @@ UNICODE_BOX_CFG = update_cfg(DEFAULT_CFG, {
     },
     "formatters": {
         "default": {
-            "bool": {
-                "true"                  : u"\u2714",
-                "false"                 : u"\u00b7",
-            },
             "number": {
                 "inf"                   : u"\u221e",
             },
