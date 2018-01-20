@@ -183,8 +183,8 @@ def _colorize(cfg):
     # Color true and false.
     c = fmt_cfg["bool"]
     c.update({
-        "true"  : ansi.style(fg="black",     bold=False)(c["true"]),
-        "false" : ansi.style(fg="dark_gray", bold=False)(c["false"]),
+        "true"  : ansi.style(fg="black"    )(c["true"]),
+        "false" : ansi.style(fg="dark_gray")(c["false"]),
     })
 
     # Color Inf and Nan, for visibility.
