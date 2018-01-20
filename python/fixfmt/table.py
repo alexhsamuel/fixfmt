@@ -5,10 +5,10 @@ import re
 
 import numpy as np
 
-from   . import *
+from   . import string_length, palide, center, Bool, Number, String, TickTime
 from   . import _ext
 from   .lib import ansi
-from   .lib.cfg import *
+from   .lib.cfg import Group, Var, Cfg
 
 #-------------------------------------------------------------------------------
 
