@@ -485,6 +485,10 @@ def table_from_arrays(arrs, cfg=DEFAULT_CFG):
 
     tbl = Table(cfg)
     for name, arr in arrs:
+        # FIXME: Since Table doesn't support S and U arrays, convert these
+        # to objects for now.
+        if arr.dtype.kind in "SU":
+            arr = arr.astype(object)
         tbl.add_column(name, arr)
     tbl.finish()
     return tbl
