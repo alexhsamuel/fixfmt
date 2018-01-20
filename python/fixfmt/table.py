@@ -471,7 +471,7 @@ class Table:
 
 
 
-def table_from_arrays(arrs, cfg=DEFAULT_CFG):
+def from_arrays(arrs, cfg=DEFAULT_CFG):
     """
     Constructs a table from arrays.
 
