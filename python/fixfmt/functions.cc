@@ -86,6 +86,7 @@ ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
     }
   }
 
+  // FIXME-PY3: Use a StructSequenceType.
   return (ref<Tuple>) (Tuple::builder
     << Bool::from(has_nan)
     << Bool::from(has_pos_inf)
