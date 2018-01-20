@@ -975,17 +975,6 @@ public:
   static void InitType(StructSequenceType* type, PyStructSequence_Desc* desc)
     { check_zero(PyStructSequence_InitType2(type, desc)); }
 
-#if 0
-  static StructSequenceType* NewType(PyStructSequence_Desc* desc)
-    { return (StructSequenceType*) check_not_null(PyStructSequence_NewType(desc)); }
-#endif
-
-  // FIXME: Doesn't work; see https://bugs.python.org/issue20066.  We can't
-  // just set TPFLAGS_HEAPTYPE, as the returned type object doesn't have the
-  // layout that implies.
-  ref<StructSequence> New()
-    { return ref<StructSequence>::take(check_not_null((PyObject*) PyStructSequence_New((PyTypeObject*) this))); }
-
 };
 
 #endif
