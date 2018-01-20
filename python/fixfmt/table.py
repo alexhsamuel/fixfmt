@@ -1,11 +1,6 @@
 from   __future__ import absolute_import, division, print_function
 
-from   math import floor, log10
-import re
-
-import numpy as np
-
-from   . import string_length, palide, center, Bool, Number, String, TickTime
+from   . import string_length, palide, center, Bool, Number, String
 from   . import _ext
 from   . import npfmt
 from   .lib import ansi
@@ -229,124 +224,6 @@ def _colorize(cfg):
 
 
 #-------------------------------------------------------------------------------
-
-def _get_num_digits(value):
-    """
-    Returns the number of digits required to represent a value.
-    """
-    return 1 if value == 0 else max(int(floor(log10(abs(value)) + 1)), 1)
-
-
-def _choose_formatter_bool(values, cfg):
-    true    = cfg.bool.true
-    false   = cfg.bool.false
-    size    = max(
-        cfg.min_width,
-        string_length(true),
-        string_length(false),
-    )
-    return Bool(true, false, size=size)
-
-
-def _choose_formatter_float(values, cfg):
-    # Analyze the array to determine relevant properties.
-    # FIXME: Push down type check into C++.
-    analyze = (     _ext.analyze_double if values.dtype.itemsize == 8
-               else _ext.analyze_float)
-    has_nan, has_pos_inf, has_neg_inf, num_vals, min_val, max_val, precision = \
-      analyze(values, cfg.float.max_precision)
-
-    inf = cfg.float.inf
-    nan = cfg.float.nan
-    special_width = max(
-        string_length(nan) if has_nan else 0,
-        string_length(inf) if has_pos_inf or has_neg_inf else 0)
-
-    if num_vals == 0:
-        # No values left.
-        return Number(max(1, special_width))
-
-    sign    = "-" if has_neg_inf or min_val < 0 else " "
-    size    = _get_num_digits(max(abs(min_val), abs(max_val)))
-    if cfg.float.min_precision is None:
-        precision = None if precision == 0 else precision
-    else:
-        precision = max(cfg.float.min_precision, precision)
-
-    # Make the formatter.
-    fmt = Number(size, precision, sign=sign, nan=nan, inf=inf)
-
-    if fmt.width < cfg.min_width:
-        # Expand size to achieve minimum width.
-        size += cfg.min_width - fmt.width
-        fmt = Number(size, precision, sign=sign, nan=nan, inf=inf)
-
-    return fmt
-
-
-def _choose_formatter_int(values, cfg):
-    if len(values) == 0:
-        return Number(1, None, sign=" ")
-
-    min_val = values.min()
-    max_val = values.max()
-    sign    = " " if min_val >= 0 else "-"
-    size    = _get_num_digits(max(abs(min_val), abs(max_val)))
-    size    = max(size, cfg.min_width - (sign != " "))
-
-    return Number(size, sign=sign)
-
-
-def _choose_formatter_datetime64(values, cfg):
-    # FIXME: Is this really the right way to extract the datetime64 tick scale??
-    match = re.match(r"datetime64\[(.*)\]$", values.dtype.name)
-    assert match is not None
-    try:
-        scale = {
-            "s"     : 0,
-            "ms"    : 3,
-            "us"    : 6,
-            "ns"    : 9,
-        }[match.group(1)]
-    except KeyError:
-        raise TypeError(
-            "no default formatter for datetime64 scale {}".format(scale))
-
-    # FIXME: Accelerate this with an extension module.
-    values = values.astype("long")
-    max_prec = min(scale, cfg.time.max_precision)
-    min_prec = 0 if cfg.time.min_precision is None else cfg.time.min_precision
-    for precision in range(max_prec, min_prec, -1):
-        if not (values % (10 ** (scale - precision + 1)) == 0).all():
-            break
-    else:
-        precision = cfg.time.min_precision
-
-    return TickTime(10 ** scale, precision)
-
-
-def _choose_formatter_str(values, cfg):
-    size = np.vectorize(lambda x: len(str(x)))(values).max()
-    size = max(size, cfg.str.min_size, cfg.min_width)
-    size = min(size, cfg.str.max_size)
-    return String(size, ellipsis=cfg.str.ellipsis)
-
-
-def _get_default_formatter(arr, cfg):
-    dtype = arr.dtype
-    if dtype.kind == "b":
-        return _choose_formatter_bool(arr, cfg=cfg.formatters)
-    elif dtype.kind == "f":
-        return _choose_formatter_float(arr, cfg=cfg.formatters)
-    elif dtype.kind == "i":
-        return _choose_formatter_int(arr, cfg=cfg.formatters)
-    elif dtype.kind == "M":
-        return _choose_formatter_datetime64(arr, cfg=cfg.formatters)
-    elif dtype.kind == "O":
-        return _choose_formatter_str(arr, cfg=cfg.formatters)
-    else:
-        raise TypeError("no default formatter for {}".format(dtype))
-
 
 def _get_formatter(name, arr, cfg):
     if name is not None:
