@@ -17,10 +17,12 @@ from   ._ext import string_length, analyze_double, analyze_float
 
 DEFAULT_CFG = {
     "bool": {
+        "min_width"     : 0,
         "true"          : "true",
         "false"         : "false",
     },
     "number": {
+        "min_width"     : 0,
         "size"          : None,
         "precision"     : None,
         "min_precision" : None,
@@ -34,6 +36,7 @@ DEFAULT_CFG = {
         "scale"         : None,
     },
     "string": {
+        "min_width"     : 0,
         "size"          : None,
         "min_size"      : 0,
         "max_size"      : 64,
@@ -43,6 +46,7 @@ DEFAULT_CFG = {
         "pad_pos"       : 1.0,
     },
     "time": {
+        "min_width"     : 0,
         "max_precision" : None,
         "min_precision" : None,
     },
@@ -52,13 +56,17 @@ def num_digits(value):
     """
     Returns the number of decimal digits required to represent a value.
     """
-    return 1 if value == 0 else max(int(floor(log10(abs(value)) + 1)), 1)
+    return (
+        1 if value == 0 or np.isnan(value) or np.isinf(value)
+        else max(int(floor(log10(abs(value)) + 1)), 1)
+    )
 
 
 def choose_formatter_bool(arr, min_width=0, cfg=DEFAULT_CFG["bool"]):
-    true    = cfg["true"]
-    false   = cfg["false"]
-    size    = max(
+    min_width   = max(min_width, cfg["min_width"])
+    true        = cfg["true"]
+    false       = cfg["false"]
+    size        = max(
         min_width,
         string_length(true),
         string_length(false),
@@ -67,6 +75,8 @@ def choose_formatter_bool(arr, min_width=0, cfg=DEFAULT_CFG["bool"]):
 
 
 def choose_formatter_number(arr, min_width=0, cfg=DEFAULT_CFG["number"]):
+    min_width   = max(min_width, cfg["min_width"])
+
     # Analyze the array to determine relevant properties.
     scale = cfg["scale"]
     if scale is not None:
@@ -103,7 +113,7 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULT_CFG["number"]):
 
     size = cfg["size"]
     if size is None:
-        size = num_digits(max(abs(min_val), abs(max_val)))
+        size = 1 if num_vals == 0 else num_digits(max(abs(min_val), abs(max_val)))
 
     precision = cfg["precision"]
     if precision is None:
@@ -135,6 +145,8 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULT_CFG["number"]):
 
 
 def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
+    min_width   = max(min_width, cfg["min_width"])
+
     # FIXME: Is this really the right way to extract the datetime64 tick scale??
     match = re.match(r"datetime64\[(.*)\]$", values.dtype.name)
     assert match is not None
@@ -165,6 +177,8 @@ def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
 
 
 def choose_formatter_str(arr, min_width=0, cfg=DEFAULT_CFG["string"]):
+    min_width   = max(min_width, cfg["min_width"])
+
     size = cfg["size"]
     if size is None:
         min_size = cfg["min_size"]
