@@ -7,6 +7,7 @@ import numpy as np
 
 from   . import string_length, palide, center, Bool, Number, String, TickTime
 from   . import _ext
+from   . import npfmt
 from   .lib import ansi
 from   .lib.cfg import Group, Var, Cfg
 
@@ -364,7 +365,8 @@ def _get_formatter(name, arr, cfg):
     except KeyError:
         pass
 
-    return _get_default_formatter(arr, cfg=cfg)
+    # FIXME: Use cfg.
+    return npfmt.choose_formatter(arr)
 
 
 def _get_header_position(fmt):
@@ -372,11 +374,11 @@ def _get_header_position(fmt):
     Returns the pad position for justifying the header.
     """
     if isinstance(fmt, Bool):
-        return fmt.pad_position
+        return fmt.pos
     elif isinstance(fmt, Number):
         return 0  # FIXME: Constant.
     elif isinstance(fmt, String):
-        return fmt.pad_position
+        return fmt.pad_pos
     else:
         # Assume everythign else is left-justified.
         return 1  # FIXME: Constant.
@@ -465,12 +467,12 @@ class Table:
             def format_name(i, name, fmt):
                 name = name or ""
                 name = cfg.prefix + name + cfg.suffix
-                pad_position = _get_header_position(fmt)
+                pad_pos = _get_header_position(fmt)
                 name = palide(
                     name, fmt.width, 
-                    elide_position=cfg.elide.position, 
+                    elide_pos=cfg.elide.position, 
                     ellipsis=cfg.elide.ellipsis,
-                    pad_position=pad_position)
+                    pad_pos=pad_pos)
                 name = cfg.style.prefix + name + cfg.style.suffix
                 if i > 0:
                     if i == self.__num_idx:

@@ -185,7 +185,7 @@ def choose_formatter_str(arr, min_width=0, cfg=DEFAULTS["string"]):
 def choose_formatter(arr, min_width=0, cfg=DEFAULTS):
     dtype = arr.dtype
     if dtype.kind == "b":
-        return choose_formatter_bool(arr, min_width, cfg=cfg["string"])
+        return choose_formatter_bool(arr, min_width, cfg=cfg["bool"])
     elif dtype.kind in "fi":
         return choose_formatter_number(arr, min_width, cfg=cfg["number"])
     elif dtype.kind == "M":
