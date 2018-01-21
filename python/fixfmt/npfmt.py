@@ -173,7 +173,7 @@ def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
         if not (values % (10 ** (scale - precision + 1)) == 0).all():
             break
     else:
-        precision = cfg.time.min_precision
+        precision = min_prec
 
     return TickTime(10 ** scale, precision)
 
