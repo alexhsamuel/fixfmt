@@ -433,7 +433,7 @@ class Table:
 
         table = self.__table
         num_rows = len(table)
-        if num_rows <= max_rows - num_extra_rows:
+        if max_rows is None or num_rows <= max_rows - num_extra_rows:
             for i in range(len(table)):
                 print(table(i))
         else:
