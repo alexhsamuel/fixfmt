@@ -16,6 +16,7 @@ from   ._ext import string_length, analyze_double, analyze_float
 #-------------------------------------------------------------------------------
 
 DEFAULT_CFG = {
+    "min_width"         : 0,
     "bool": {
         "min_width"     : 0,
         "true"          : "true",
@@ -175,11 +176,12 @@ def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
     else:
         precision = min_prec
 
+    precision = -1 if precision < 1 else precision
     return TickTime(10 ** scale, precision)
 
 
 def choose_formatter_str(arr, min_width=0, cfg=DEFAULT_CFG["string"]):
-    min_width   = max(min_width, cfg["min_width"])
+    min_width = max(min_width, cfg["min_width"])
 
     size = cfg["size"]
     if size is None:
@@ -199,6 +201,8 @@ def choose_formatter_str(arr, min_width=0, cfg=DEFAULT_CFG["string"]):
 
 
 def choose_formatter(arr, min_width=0, cfg=DEFAULT_CFG):
+    min_width = max(min_width, cfg["min_width"])
+
     dtype = arr.dtype
     if dtype.kind == "b":
         return choose_formatter_bool(arr, min_width, cfg=cfg["bool"])

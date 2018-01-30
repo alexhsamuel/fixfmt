@@ -46,7 +46,7 @@ def test_non_contiguous():
 
     fmt = choose_formatter(arr.time)
     assert isinstance(fmt, fixfmt.TickTime)
-    assert fmt.precision == 0
+    assert fmt.precision == -1
 
     fmt = choose_formatter(arr.fast)
     assert isinstance(fmt, fixfmt.TickTime)

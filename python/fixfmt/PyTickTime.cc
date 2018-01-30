@@ -101,7 +101,7 @@ Type PyTickTime::type_ = PyTypeObject{
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
   (PyMappingMethods*)   nullptr,                            // tp_as_mapping
   (hashfunc)            nullptr,                            // tp_hash
-  (ternaryfunc)         tp_call,                            // tp_call
+  (ternaryfunc)         wrap<PyTickTime, tp_call>,          // tp_call
   (reprfunc)            nullptr,                            // tp_str
   (getattrofunc)        nullptr,                            // tp_getattro
   (setattrofunc)        nullptr,                            // tp_setattro
