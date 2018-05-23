@@ -1,4 +1,4 @@
-from   __future__ import absolute_import, division, print_function
+import numpy as np
 
 from   . import string_length, palide, center, Bool, Number, String, is_fmt
 from   . import _ext
@@ -227,6 +227,8 @@ def _colorize(cfg):
         "format": ansi.style(fg="light_gray")(c["format"]),
     })
 
+    return cfg
+
 
 #-------------------------------------------------------------------------------
 
@@ -255,7 +257,11 @@ def _get_formatter(name, arr, cfg):
             else:
                 fmt_cfg = update_cfg(fmt_cfg, val)
 
-    return npfmt.choose_formatter(arr, cfg=fmt_cfg)
+    min_width = fmt_cfg["min_width"]
+    if fmt_cfg["name_width"]:
+        min_width = max(min_width, string_length(name))
+
+    return npfmt.choose_formatter(arr, min_width=min_width, cfg=fmt_cfg)
 
 
 def _get_header_position(fmt):
@@ -492,5 +498,176 @@ def from_arrays(arrs, cfg=DEFAULT_CFG):
         tbl.add_column(name, arr)
     tbl.finish()
     return tbl
+
+
+#-------------------------------------------------------------------------------
+
+class RowTable:
+    """
+    :ivar names:
+      List of column names to show.  T
+    """
+
+    DEFAULT_CFG = _colorize(update_cfg(UNICODE_CFG, {
+        "header": {
+            "separator": {
+                "between": "  ",
+            },
+            "style": {
+                "prefix": ansi.sgr(bold=True),
+                "suffix": ansi.sgr(bold=False),
+            },
+        },
+        "formatters": {
+            "default": {
+                "name_width": True,
+            },
+        },
+        "row": {
+            "separator": {
+                "between": "  ",
+            },
+        },
+        "underline": {
+            "separator": {
+                "between": "  ",
+            },
+        },
+    }))
+
+    LINE = object()
+
+
+    def __init__(self, cfg=DEFAULT_CFG):
+        self.cfg        = cfg
+        self.names      = []
+        self.rows       = []
+        self.fmts       = {}
+        self.defaults   = {}
+        self.titles     = {}
+
+
+    def append(self, **fields):
+        self.rows.append(fields)
+        for name in fields:
+            if name not in self.names:
+                self.names.append(name)
+
+
+    def extend(self, rows):
+        for row in rows:
+            self.append(**row)
+
+
+    def line(self):
+        self.rows.append(self.LINE)
+
+
+    def order(self, names):
+        old_names = list(names)
+        self.names.clear()
+        for name in names:
+            if name in old_names:
+                self.names.append(name)
+        for name in old_names:
+            if name not in self.names:
+                self.names.append(name)
+
+
+    def set_fmts(self):
+        cfg = self.cfg["formatters"]
+        for name in self.names:
+            if name not in self.fmts:
+                # FIXME: Do better.
+                arr = np.array([
+                    r[name] for r in self.rows
+                    if r is not self.LINE and name in r
+                ])
+                self.fmts[name] = _get_formatter(name, arr, cfg=cfg)
+
+
+    def __line(self, fmts, cfg):
+        if not cfg["show"]:
+            return
+
+        sep = cfg["separator"]
+        yield (
+              sep["start"]
+            + "".join( 
+                  (sep["between"] if i > 0 else "")
+                + cfg["line"] * f.width 
+                for i, f in enumerate(fmts)
+            )
+            + sep["end"]
+        )
+
+
+    def __header(self, names, fmts, cfg):
+        if not cfg["show"]:
+            return
+
+        assert string_length(cfg["style"]["prefix"]) == 0
+        assert string_length(cfg["style"]["suffix"]) == 0
+
+        sep = cfg["separator"]
+
+        def format_name(name, fmt):
+            name = name or ""
+            name = cfg["prefix"] + name + cfg["suffix"]
+            pad_pos = _get_header_position(fmt)
+            name = palide(
+                name, 
+                fmt.width, 
+                elide_pos   =cfg["elide"]["position"], 
+                ellipsis    =cfg["elide"]["ellipsis"],
+                pad_pos     =pad_pos
+            )
+            name = cfg["style"]["prefix"] + name + cfg["style"]["suffix"]
+            return name
+
+        yield sep["start"] + sep["between"].join(
+            format_name(n, f) 
+            for n, f in zip(names, fmts)
+        ) + sep["end"]
+
+
+    def __row(self, names, fmts, vals, cfg):
+        sep = cfg["separator"]
+        vals = ( 
+            " " * f.width if v is None else f(v)
+            for f, v in zip(fmts, vals)
+        )
+        yield (
+              sep["start"]
+            + sep["between"].join(vals)
+            + sep["end"]
+        )
+
+
+    def __iter__(self):
+        self.set_fmts()
+
+        names = self.names
+        fmts = [ self.fmts.get(n, None) for n in names ]
+
+        yield from self.__line(fmts, self.cfg["top"])
+        yield from self.__header(names, fmts, self.cfg["header"])
+        yield from self.__line(fmts, self.cfg["underline"])
+                                 
+        defs = [ self.defaults.get(n, None) for n in names ]
+
+        for row in self.rows:
+            if row is self.LINE:
+                yield from self.__line()
+            else:
+                vals = ( row.get(n, d) for n, d in zip(names, defs) )
+                yield from self.__row(names, fmts, vals, self.cfg["row"])
+
+        yield from self.__line(fmts, self.cfg["bottom"])
+                        
+                    
+    def print(self, print=print):
+        for line in self:
+            print(line)
 
 

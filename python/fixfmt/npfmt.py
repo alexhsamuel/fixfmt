@@ -17,6 +17,7 @@ from   ._ext import string_length, analyze_double, analyze_float
 
 DEFAULT_CFG = {
     "min_width"         : 0,
+    "name_width"        : False,
     "bool": {
         "min_width"     : 0,
         "true"          : "true",
