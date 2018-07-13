@@ -188,12 +188,7 @@ def choose_formatter_str(arr, min_width=0, cfg=DEFAULT_CFG["string"]):
     if size is None:
         min_size = cfg["min_size"]
         max_size = cfg["max_size"]
-        if arr.dtype.kind == "S":
-            size = arr.dtype.itemsize
-        elif arr.dtype.kind == "U":
-            size = arr.dtype.itemsize // np.dtype("U1").itemsize
-        else:
-            size = np.vectorize(lambda x: string_length(str(x)))(arr).max()
+        size = np.vectorize(lambda x: string_length(str(x)))(arr).max()
         size = max(min_width, min_size, min(size, max_size))
 
     return String(
