@@ -682,3 +682,108 @@ class RowTable:
             print(line)
 
 
+
+#-------------------------------------------------------------------------------
+
+class RowFormatter:
+
+    DEFAULT_CFG = _colorize(update_cfg(UNICODE_CFG, {
+        "header": {
+            "separator": {
+                "between": "  ",
+            },
+            "style": {
+                "prefix": ansi.sgr(bold=True),
+                "suffix": ansi.sgr(bold=False),
+            },
+        },
+        "formatters": {
+            "default": {
+                "name_width": True,
+            },
+        },
+        "row": {
+            "separator": {
+                "between": "  ",
+            },
+        },
+        "underline": {
+            "separator": {
+                "between": "  ",
+            },
+        },
+    }))
+
+    LINE = object()
+
+
+    def __init__(self, fmts, *, cfg=DEFAULT_CFG, print=print):
+        self.fmts   = {}
+        self.print  = print
+        self.cfg    = cfg
+
+
+    def print_line(self, type):
+        cfg = self.cfg[type]
+
+        if not cfg["show"]:
+            return
+
+        sep = cfg["separator"]
+        self.print(
+              sep["start"]
+            + "".join( 
+                  (sep["between"] if i > 0 else "")
+                + cfg["line"] * f.width 
+                for i, f in enumerate(self.fmts.values())
+            )
+            + sep["end"]
+        )
+
+
+    def print_header(self):
+        cfg = self.cfg["header"]
+
+        if not cfg["show"]:
+            return
+
+        assert string_length(cfg["style"]["prefix"]) == 0
+        assert string_length(cfg["style"]["suffix"]) == 0
+
+        sep = cfg["separator"]
+
+        def format_name(name, fmt):
+            name = name or ""
+            name = cfg["prefix"] + name + cfg["suffix"]
+            pad_pos = _get_header_position(fmt)
+            name = palide(
+                name, 
+                fmt.width, 
+                elide_pos   =cfg["elide"]["position"], 
+                ellipsis    =cfg["elide"]["ellipsis"],
+                pad_pos     =pad_pos
+            )
+            name = cfg["style"]["prefix"] + name + cfg["style"]["suffix"]
+            return name
+
+        self.print(
+            sep["start"] 
+            + sep["between"].join(
+                format_name(n, f) 
+                for n, f in self.fmts.items()
+            ) + sep["end"]
+        )
+
+
+    def print_row(self, vals):
+        sep = self.cfg["separator"]
+        vals = ( (f, vals[n]) for n, f in self.fmts.items() )
+        vals = ( " " * f.width if v is None else f(v) for f, v in vals )
+        self.print(
+              sep["start"]
+            + sep["between"].join(vals)
+            + sep["end"]
+        )
+
+
+
