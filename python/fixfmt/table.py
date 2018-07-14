@@ -559,8 +559,17 @@ class RowTable:
             self.append(**row)
 
 
+    @property
+    def num_rows(self):
+        return len(self.rows)
+
+
     def line(self):
         self.rows.append(self.LINE)
+
+
+    def text(self, text):
+        self.rows.append(text)
 
 
     def order(self, names):
@@ -659,6 +668,8 @@ class RowTable:
         for row in self.rows:
             if row is self.LINE:
                 yield from self.__line()
+            elif isinstance(row, str):
+                yield row
             else:
                 vals = ( row.get(n, d) for n, d in zip(names, defs) )
                 yield from self.__row(names, fmts, vals, self.cfg["row"])
