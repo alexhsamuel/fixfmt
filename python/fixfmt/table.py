@@ -590,7 +590,9 @@ class RowTable:
                 # FIXME: Do better.
                 arr = np.array([
                     r[name] for r in self.rows
-                    if r is not self.LINE and name in r
+                    if r is not self.LINE 
+                    and name in r 
+                    and r[name] is not None
                 ])
                 self.fmts[name] = _get_formatter(name, arr, cfg=cfg)
 
