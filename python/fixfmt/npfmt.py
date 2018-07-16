@@ -154,13 +154,14 @@ def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
     # FIXME: Is this really the right way to extract the datetime64 tick scale??
     match = re.match(r"datetime64\[(.*)\]$", values.dtype.name)
     assert match is not None
+    scale = match.group(1)
     try:
         scale = {
             "s"     : 0,
             "ms"    : 3,
             "us"    : 6,
             "ns"    : 9,
-        }[match.group(1)]
+        }[scale]
     except KeyError:
         raise TypeError(
             "no default formatter for datetime64 scale {}".format(scale))
