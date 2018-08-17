@@ -6,13 +6,8 @@ A container is an object that supports `__contains__`.
 
 #-------------------------------------------------------------------------------
 
+from collections.abc import Sequence
 import re
-import six
-
-if six.PY3:
-    from collections.abc import Sequence
-else:
-    from collections import Sequence
 
 __all__ = [
     "select",
