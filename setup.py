@@ -1,5 +1,3 @@
-#-*- encoding: utf-8 -*-
-
 from   glob import glob
 import os
 from   setuptools import setup, Extension
@@ -78,8 +76,6 @@ setup(
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
     ],    

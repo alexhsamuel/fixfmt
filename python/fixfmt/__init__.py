@@ -1,7 +1,3 @@
-#-*- encoding: utf-8 -*-
-
-from   __future__ import absolute_import, division, print_function
-
 from   ._ext import Bool, Number, String, TickTime
 from   ._ext import center, elide, pad, palide, string_length
 

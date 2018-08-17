@@ -4,8 +4,6 @@ Formatting for numpy arrays.
 
 #-------------------------------------------------------------------------------
 
-from   __future__ import absolute_import, division, print_function
-
 from   math import floor, log10
 import numpy as np
 import re

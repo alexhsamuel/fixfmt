@@ -6,8 +6,6 @@ See https://en.wikipedia.org/wiki/ANSI_escape_code.
 
 #-------------------------------------------------------------------------------
 
-from   __future__ import absolute_import, division, print_function
-
 import collections
 import fcntl
 import html.parser
