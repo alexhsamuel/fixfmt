@@ -8,14 +8,24 @@ $ make
 
 # Releases
 
-1. Update version in `setup.py`
-1. Update version in `conda-recipe/meta.yaml` (two places)
-1. Commit and push
-1. Create a release in GitHub
-1. `python setup.py sdist upload`
-1. `python setup.py bdist_wheel upload`
-1. `conda build conda-recipe`
-1. `anaconda upload PKG`
+Source:
+```
+bumpversion patch  # or minor, major
+git push --tags
+git push
+python setup.py sdist upload
+```
+
+Binary wheel:
+```
+python setup.py bdist_wheel upload
+```
+
+Conda:
+```
+conda build conda-recipe
+anaconda upload PKG
+```
 
 Repeat wheel and conda packages on other architectures.
 
