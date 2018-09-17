@@ -122,6 +122,11 @@ TEST(Number, rounding) {
   ASSERT_EQ("-0.62", fmt2(-0.625));
   ASSERT_EQ(" 0.88", fmt2( 0.875));
   ASSERT_EQ("-0.88", fmt2(-0.875));
+
+  Number fmt3{3, 0};
+  ASSERT_EQ("   9.", fmt3( 8.9));
+  ASSERT_EQ("  10.", fmt3( 9.9));
+  ASSERT_EQ("  11.", fmt3(10.9));
 }
 
 // FIXME: Re-enable.

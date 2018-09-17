@@ -148,7 +148,13 @@ Number::operator()(
       result.append(args_.size - int_digits, '0');
 
     // Add digits for the integral part.
-    if (decimal_pos > 0)
+    if (decimal_pos > length) {
+      // The integral part needs to be zero-padded.
+      result.append(buf, length);
+      result.append(decimal_pos - length, '0');
+      length = decimal_pos;
+    }
+    else if (decimal_pos > 0)
       result.append(buf, decimal_pos);
     else if (args_.size > 0)
       // Show at least one zero.
