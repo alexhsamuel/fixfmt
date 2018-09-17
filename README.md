@@ -25,7 +25,7 @@ See [`python/README.md`](python/README.md) for an introduction to the Python API
 
 # Installing
 
-With conda (binary packages for Linux and OS/X, Python 2.7 and 3.6):
+With conda (binary packages for Linux and OS/X, Python 3.6):
 
 ```
 conda install -c alexhsamuel fixfmt
@@ -42,7 +42,7 @@ pip install fixfmt
 
 Requires a C++14 compiler, GNU Make, and setuptools to build.
 
-Tested with Python 2.7 and Python 3.6 or later.
+Tested with Python 3.6.
 
 
 ## C++ unit tests
