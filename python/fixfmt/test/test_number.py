@@ -63,6 +63,8 @@ def test_basic():
     assert f(NAN     ) == "NaN     "
     assert f(INF     ) == " inf    "
 
+    assert Number(3, 0)(9.9) == "  10."
+
 
 def test_set_bad():
     f = Number(2, 4)
