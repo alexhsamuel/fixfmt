@@ -64,7 +64,7 @@ build.
 
 setup(
     name            ="fixfmt",
-    version         ="0.8.2",
+    version         ="0.8.3",
     description     ="fixed-width formatters for C++ and Python",
     long_description=long_description,
     url             ="https://github.com/alexhsamuel/fixfmt",
