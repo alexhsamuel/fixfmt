@@ -79,27 +79,16 @@ tp_init(
 
   int           size;
   Object*       precision_arg   = (Object*) Py_None;
-#if PY3K
   int           pad             = fixfmt::Number::PAD_SPACE;
   int           sign            = fixfmt::Number::SIGN_NEGATIVE;
   int           point           = '.';
   int           bad             = '#';
-#else
-  char          pad             = fixfmt::Number::PAD_SPACE;
-  char          sign            = fixfmt::Number::SIGN_NEGATIVE;
-  char          point           = '.';
-  char          bad             = '#';
-#endif
   char const*   nan             = "NaN";
   char const*   inf             = "inf";
   Object*       scale_arg       = (Object*) Py_None;
   Arg::ParseTupleAndKeywords(
     args, kw_args, 
-#if PY3K
     "i|O$CCetetCCO",
-#else
-    "i|OccetetccO",
-#endif
     arg_names,
     &size, &precision_arg, &pad, &sign, "utf-8", &nan, "utf-8", &inf, 
     &point, &bad, &scale_arg);
@@ -340,11 +329,7 @@ Type PyNumber::type_ = PyTypeObject{
   (printfunc)           nullptr,                            // tp_print
   (getattrfunc)         nullptr,                            // tp_getattr
   (setattrfunc)         nullptr,                            // tp_setattr
-#if PY3K
   (PyAsyncMethods*)     nullptr,                            // tp_as_async
-#else
-  (cmpfunc)             nullptr,                            // tp_compare
-#endif
   (reprfunc)            wrap<PyNumber, tp_repr>,            // tp_repr
   (PyNumberMethods*)    nullptr,                            // tp_as_number
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
@@ -384,9 +369,7 @@ Type PyNumber::type_ = PyTypeObject{
   (PyObject*)           nullptr,                            // tp_weaklist
   (destructor)          nullptr,                            // tp_del
   (unsigned int)        0,                                  // tp_version_tag
-#if PY3K
   (destructor)          nullptr,                            // tp_finalize
-#endif
 };
 
 

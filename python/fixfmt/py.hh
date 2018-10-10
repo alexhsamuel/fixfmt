@@ -10,13 +10,6 @@
 
 #include "optional.hh"
 
-#if PY_MAJOR_VERSION >= 3
-#define PY3K 1
-#else
-#define PY3K 0
-using Py_hash_t = long;
-#endif
-
 //------------------------------------------------------------------------------
 
 namespace py {
@@ -91,7 +84,6 @@ using TypeError             = ExceptionWrapper<&PyExc_TypeError>;
 using ValueError            = ExceptionWrapper<&PyExc_ValueError>;
 using ZeroDivisionError     = ExceptionWrapper<&PyExc_ZeroDivisionError>;
 
-#if PY3K
 using FileExistsError       = ExceptionWrapper<&PyExc_FileExistsError>;
 using FileNotFoundError     = ExceptionWrapper<&PyExc_FileNotFoundError>;
 using InterruptedError      = ExceptionWrapper<&PyExc_InterruptedError>;
@@ -99,15 +91,6 @@ using IsADirectoryError     = ExceptionWrapper<&PyExc_IsADirectoryError>;
 using NotADirectoryError    = ExceptionWrapper<&PyExc_NotADirectoryError>;
 using PermissionError       = ExceptionWrapper<&PyExc_PermissionError>;
 using TimeoutError          = ExceptionWrapper<&PyExc_TimeoutError>;
-#else
-using FileExistsError       = ExceptionWrapper<&PyExc_IOError>;
-using FileNotFoundError     = ExceptionWrapper<&PyExc_IOError>;
-using InterruptedError      = ExceptionWrapper<&PyExc_OSError>;
-using IsADirectoryError     = ExceptionWrapper<&PyExc_IOError>;
-using NotADirectoryError    = ExceptionWrapper<&PyExc_IOError>;
-using PermissionError       = ExceptionWrapper<&PyExc_IOError>;
-using TimeoutError          = ExceptionWrapper<&PyExc_OSError>;
-#endif
 
 /**
  * Raises 'Exception' if value is not zero.
@@ -426,11 +409,7 @@ public:
   auto SetAttrString(char const* name, PyObject* obj)
     { check_not_minus_one(PyObject_SetAttrString(this, name, obj)); }
   auto Str()
-#if PY3K
     { return take_not_null<Unicode>(PyObject_Str(this)); }
-#else
-    { return take_not_null<Unicode>(PyObject_Unicode(this)); }
-#endif
 
   optional<ref<Object>> maybe_get_attr(std::string const& name);
 
@@ -733,23 +712,15 @@ public:
 
   static bool Check(PyObject* obj)
     { return PyModule_Check(obj); }
-#if PY3K
   static auto Create(PyModuleDef* def)
     { return ref<Module>::take(PyModule_Create(def)); }
-#else
-  static auto Init(char const* const name, PyMethodDef* const methods)
-    { return take_not_null<Module>(Py_InitModule(name, methods)); }
-#endif
   static ref<Module> ImportModule(char const* const name)
     { return take_not_null<Module>(PyImport_ImportModule(name)); }
   static ref<Module> New(char const* name)
     { return take_not_null<Module>(PyModule_New(name)); }
 
-#if PY3K
   void AddFunctions(PyMethodDef* functions) 
     { check_zero(PyModule_AddFunctions(this, functions)); }
-#else
-#endif
   void AddObject(char const* name, PyObject* val)
     { check_zero(PyModule_AddObject(this, name, incref(val))); }
   char const* GetName()
@@ -949,8 +920,6 @@ public:
 
 //------------------------------------------------------------------------------
 
-#if PY3K
-
 class StructSequence
   : public Object
 {
@@ -977,8 +946,6 @@ public:
 
 };
 
-#endif
-
 
 //------------------------------------------------------------------------------
 
@@ -1002,7 +969,6 @@ public:
   static auto from(char character)
     { return FromStringAndSize(&character, 1); }
 
-#if PY3K
   char* as_utf8() { return PyUnicode_AsUTF8(this); }
 
   std::string as_utf8_string()
@@ -1015,20 +981,8 @@ public:
       return std::string(utf8, length);
   }
 
-#else
-  std::string as_utf8_string() {
-    Object* str_obj = check_not_null(PyUnicode_AsUTF8String(this));
-    auto const str = std::string(PyString_AS_STRING(str_obj));
-    Py_DECREF(str_obj);
-    return str;
-  }
-
-#endif
-
 };
 
-
-#if PY3K
 
 template<>
 inline std::ostream& operator<<(std::ostream& os, ref<Unicode>& ref)
@@ -1045,8 +999,6 @@ operator+(
 {
   return str0 + str1.as_utf8_string();
 }
-
-#endif
 
 
 //==============================================================================

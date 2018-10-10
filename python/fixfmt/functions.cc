@@ -198,19 +198,9 @@ ref<Object> palide(Module* module, Tuple* args, Dict* kw_args)
   char* pad = nullptr;
   float elide_pos = 1;
   float pad_pos = fixfmt::PAD_POS_LEFT_JUSTIFY;
-#if PY3K
   Arg::ParseTupleAndKeywords(
     args, kw_args, "sI|ssff", arg_names,
     &str, &length, &ellipsis, &pad, &elide_pos, &pad_pos);
-#else
-  Arg::ParseTupleAndKeywords(
-    args, kw_args, "etI|etetff", arg_names,
-    "utf-8", &str, &length, "utf-8", &ellipsis, "utf-8", &pad, 
-    &elide_pos, &pad_pos);
-  PyMemGuard str_guard(str);
-  PyMemGuard ellipsis_guard(ellipsis);
-  PyMemGuard pad_guard(pad);
-#endif
 
   if (ellipsis == nullptr)
     ellipsis = (char*) fixfmt::ELLIPSIS;
@@ -229,17 +219,9 @@ ref<Object> string_length(Module* module, Tuple* args, Dict* kw_args)
   static char const* arg_names[] = { "string", nullptr };
   char* str;
 
-#if PY3K
   Arg::ParseTupleAndKeywords(args, kw_args, "s", arg_names, &str);
 
   return Long::FromLong(fixfmt::string_length(str));
-#else
-  Arg::ParseTupleAndKeywords(args, kw_args, "et", arg_names, "utf-8", &str);
-
-  auto const length = fixfmt::string_length(str);
-  PyMem_Free(str);
-  return Long::FromLong(length);
-#endif
 }
 
 

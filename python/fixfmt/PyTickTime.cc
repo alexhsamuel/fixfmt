@@ -91,11 +91,7 @@ Type PyTickTime::type_ = PyTypeObject{
   (printfunc)           nullptr,                            // tp_print
   (getattrfunc)         nullptr,                            // tp_getattr
   (setattrfunc)         nullptr,                            // tp_setattr
-#if PY3K
   (PyAsyncMethods*)     nullptr,                            // tp_as_async
-#else
-  (cmpfunc)             nullptr,                            // tp_compare
-#endif
   (reprfunc)            wrap<PyTickTime, tp_repr>,          // tp_repr
   (PyNumberMethods*)    nullptr,                            // tp_as_number
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
@@ -135,9 +131,7 @@ Type PyTickTime::type_ = PyTypeObject{
   (PyObject*)           nullptr,                            // tp_weaklist
   (destructor)          nullptr,                            // tp_del
   (unsigned int)        0,                                  // tp_version_tag
-#if PY3K
   (destructor)          nullptr,                            // tp_finalize
-#endif
 };
 
 

@@ -34,19 +34,10 @@ int tp_init(PyString* self, PyObject* args, PyObject* kw_args)
   char* pad = nullptr;
   float elide_pos = 1;
   float pad_pos = fixfmt::PAD_POS_LEFT_JUSTIFY;
-#if PY3K
   if (!PyArg_ParseTupleAndKeywords(
       args, kw_args, "i|ssff", (char**) arg_names,
       &size, &ellipsis, &pad, &elide_pos, &pad_pos)) 
     return -1;
-#else
-  if (!PyArg_ParseTupleAndKeywords(
-      args, kw_args, "i|etetff", (char**) arg_names,
-      &size, "utf-8", &ellipsis, "utf-8", &pad, &elide_pos, &pad_pos))
-    return -1;
-  PyMemGuard ellipsis_guard(ellipsis);
-  PyMemGuard pad_guard(pad);
-#endif
 
   if (ellipsis == nullptr)
     ellipsis = (char*) "\u2026";
@@ -185,11 +176,7 @@ Type PyString::type_ = PyTypeObject{
   (printfunc)           nullptr,                            // tp_print
   (getattrfunc)         nullptr,                            // tp_getattr
   (setattrfunc)         nullptr,                            // tp_setattr
-#if PY3K
   (PyAsyncMethods*)     nullptr,                            // tp_as_async
-#else
-  (cmpfunc)             nullptr,                            // tp_compare
-#endif
   (reprfunc)            wrap<PyString, tp_repr>,            // tp_repr
   (PyNumberMethods*)    nullptr,                            // tp_as_number
   (PySequenceMethods*)  nullptr,                            // tp_as_sequence
@@ -229,9 +216,7 @@ Type PyString::type_ = PyTypeObject{
   (PyObject*)           nullptr,                            // tp_weaklist
   (destructor)          nullptr,                            // tp_del
   (unsigned int)        0,                                  // tp_version_tag
-#if PY3K
   (destructor)          nullptr,                            // tp_finalize
-#endif
 };
 
 
