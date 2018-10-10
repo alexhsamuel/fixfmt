@@ -57,3 +57,13 @@ def test_choose_formatter_datetime2():
     assert fmt.precision == 2
 
 
+def test_choose_formatter_date():
+    t0 = np.datetime64("2018-01-01")
+    t1 = np.datetime64("2019-01-01")
+    arr = np.arange(t0, t1, np.timedelta64(1, "D"))
+    fmt = fixfmt.npfmt.choose_formatter(arr)
+    assert isinstance(fmt, fixfmt.TickDate)
+    assert fmt(t0.astype(int)) == "2018-01-01"
+    assert fmt.width == len(fmt(t1.astype(int)))
+
+

@@ -5,6 +5,7 @@
 #include "PyString.hh"
 #include "PyTable.hh"
 #include "PyTickTime.hh"
+#include "PyTickDate.hh"
 #include "py.hh"
 
 using namespace py;
@@ -56,6 +57,9 @@ PyInit__ext(void)
 
     PyTickTime::type_.Ready();
     module->add(&PyTickTime::type_);
+
+    PyTickDate::type_.Ready();
+    module->add(&PyTickDate::type_);
 
     return module.release();
   }

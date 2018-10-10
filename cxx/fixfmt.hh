@@ -5,4 +5,5 @@
 #include "fixfmt/number.hh"
 #include "fixfmt/string.hh"
 #include "fixfmt/time.hh"
+#include "fixfmt/date.hh"
 

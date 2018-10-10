@@ -8,7 +8,7 @@ from   math import floor, log10
 import numpy as np
 import re
 
-from   ._ext import Bool, Number, String, TickTime
+from   ._ext import Bool, Number, String, TickTime, TickDate
 from   ._ext import string_length, analyze_double, analyze_float
 
 #-------------------------------------------------------------------------------
@@ -153,6 +153,8 @@ def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
     match = re.match(r"datetime64\[(.*)\]$", values.dtype.name)
     assert match is not None
     scale = match.group(1)
+    if scale == "D":
+        return TickDate()
     try:
         scale = {
             "s"     : 0,
@@ -161,8 +163,7 @@ def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
             "ns"    : 9,
         }[scale]
     except KeyError:
-        raise TypeError(
-            "no default formatter for datetime64 scale {}".format(scale))
+        raise TypeError(f"no default formatter for datetime64 scale {scale}")
 
     # FIXME: Accelerate this with an extension module.
     values = values.astype("int64")
