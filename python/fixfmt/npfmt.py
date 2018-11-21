@@ -104,10 +104,12 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULT_CFG["number"]):
 
     inf = cfg["inf"]
     nan = cfg["nan"]
-    special_width = max(
+    min_width = max(
+        min_width, 
         string_length(nan) if has_nan else 0,
-        string_length(inf) if has_pos_inf or has_neg_inf else 0)
-    min_width = max(min_width, special_width)
+        string_length(inf) if has_pos_inf else 0,
+        string_length(inf) + 1 if has_neg_inf else 0
+    )
 
     sign = cfg["sign"]
     if sign is None:

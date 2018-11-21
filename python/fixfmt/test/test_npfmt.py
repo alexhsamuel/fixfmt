@@ -29,6 +29,24 @@ def test_choose_formatter_float1():
     assert fmt.precision == 5
 
 
+def test_choose_formatter_inf():
+    arr = np.array([3, 4, 5, np.inf])
+    fmt = fixfmt.npfmt.choose_formatter(arr)
+    assert isinstance(fmt, fixfmt.Number)
+    assert fmt.width >= 3
+    for val in arr:
+        assert float(fmt(val)) == val
+
+
+def test_choose_formatter_neginf():
+    arr = np.array([3, 4, 5, -np.inf])
+    fmt = fixfmt.npfmt.choose_formatter(arr)
+    assert isinstance(fmt, fixfmt.Number)
+    assert fmt.width >= 4
+    for val in arr:
+        assert float(fmt(val)) == val
+
+
 def test_choose_formatter_float2():
     arr = np.arange(2e8, 3e8, 1234500) * 1e-8
     fmt = fixfmt.npfmt.choose_formatter(arr)
