@@ -60,8 +60,13 @@ TickTime::operator()(
     pos += precision;
   }
 
-  // UTC ('Zulu') time.
-  result[pos++] = 'Z';
+  // UTC offset.
+  result[pos++] = '+';
+  result[pos++] = '0';
+  result[pos++] = '0';
+  result[pos++] = ':';
+  result[pos++] = '0';
+  result[pos++] = '0';
 
   assert(pos == width_);
   return result;
