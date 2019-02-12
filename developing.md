@@ -3,7 +3,7 @@
 ```
 $ git clone https://github.com/google/googletest.git
 $ cd googletest/googletest/make
-$ make
+$ CXXFLAGS=-std=c++14 make
 ```
 
 # Releases
