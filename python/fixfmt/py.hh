@@ -813,19 +813,26 @@ class Tuple::Builder
 {
 public:
 
-  Builder(Builder<LEN - 1> last, baseref&& ref) 
-    : last_(last),
-      obj_(ref.release()) 
+  Builder(Builder<LEN - 1>&& last, baseref&& ref) 
+    : last_(std::move(last))
+    , obj_(ref.release()) 
   {}
+
+  Builder(Builder&& other)
+    : last_(std::move(other.last_))
+    , obj_(other.obj_)
+  {
+    other.obj_ = nullptr;
+  }
 
   ~Builder() { assert(obj_ == nullptr); }
 
   /**
    * Takes 'ref' to append the end of the tuple.
    */
-  auto operator<<(baseref&& ref) const
+  auto operator<<(baseref&& ref)
   {
-    return Builder<LEN + 1>(*this, std::move(ref));
+    return Builder<LEN + 1>(std::move(*this), std::move(ref));
   }
 
   /**
@@ -866,9 +873,9 @@ public:
 
   Builder() {}
 
-  auto operator<<(baseref&& ref) const 
+  auto operator<<(baseref&& ref) const
   { 
-    return Builder<1>(*this, std::move(ref)); 
+    return Builder<1>(Builder<0>(), std::move(ref)); 
   }
 
   operator ref<Tuple>() const 
