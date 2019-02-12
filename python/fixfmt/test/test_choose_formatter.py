@@ -6,17 +6,10 @@ from   fixfmt.npfmt import choose_formatter
 
 #-------------------------------------------------------------------------------
 
-def test_number_0():
-    a = np.array([5.20934, 0, -2.1209, 100, 92.823])
-    fmt = choose_formatter(a)
-    assert isinstance(fmt, fixfmt.Number)
-    assert fmt.size == 3
-    assert fmt.precision == 5
-
-
 @pytest.mark.parametrize(
     "arr,size,precision",
     [
+        ([5.20934, 0, -2.1209, 100, 92.823], 3, 5),
         ([1, 23, 456, 7890, 12345, 678901, 2345678], 7, None),
         ([0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9], 1, 1),
         (np.arange(100) / 100, 1, 2),
