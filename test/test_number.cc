@@ -180,6 +180,7 @@ TEST(Number, precision1) {
 }
 
 TEST(Number, precision2) {
+  ASSERT_EQ(" 0.4477981" , Number(1, 7)(0.4477981));
   ASSERT_EQ(" 0.33007791", Number(1, 8)(0.33007791));
 }
 
