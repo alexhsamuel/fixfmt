@@ -45,7 +45,8 @@ PY_LDLIBS	=
 PY_SOURCES   	= $(wildcard python/fixfmt/*.cc)
 PY_DEPS	    	= $(PY_SOURCES:%.cc=%.dd)
 PY_OBJS	    	= $(PY_SOURCES:%.cc=%.o)
-PY_EXTMOD	= python/fixfmt/_ext.so
+PY_EXTSUFFIX    = $(shell python -c 'from importlib.machinery import EXTENSION_SUFFIXES; print(EXTENSION_SUFFIXES[0])')
+PY_EXTMOD       = python/fixfmt/_ext$(PY_EXTSUFFIX)
 
 #-------------------------------------------------------------------------------
 
