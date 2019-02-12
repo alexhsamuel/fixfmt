@@ -733,7 +733,7 @@ public:
     std::string const mod_name = PyModule_GetName(this);
     auto dot = qualname.find_last_of('.');
     assert(dot != std::string::npos);
-    assert(qualname.compare(0, dot, mod_name) == 1);
+    assert(qualname.compare(0, dot, mod_name) == 0);
     // Add it, under its unqualified name.
     AddObject(qualname.substr(dot + 1).c_str(), (PyObject*) type);
   }
