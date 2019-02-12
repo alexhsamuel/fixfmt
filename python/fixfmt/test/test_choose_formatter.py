@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 import fixfmt.npfmt
 from   fixfmt.npfmt import choose_formatter
@@ -11,6 +12,27 @@ def test_number_0():
     assert isinstance(fmt, fixfmt.Number)
     assert fmt.size == 3
     assert fmt.precision == 5
+
+
+@pytest.mark.parametrize(
+    "arr,size,precision",
+    [
+        ([1, 23, 456, 7890, 12345, 678901, 2345678], 7, None),
+        ([0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9], 1, 1),
+        (np.arange(100) / 100, 1, 2),
+        (np.arange(1000) / 1000, 1, 3),
+        (np.arange(0, 100000, 23) / 100000, 1, 5),
+        (np.arange(0, 100000000, 7919) / 100000000, 1, 8),
+        (np.arange(0, 1000000000, 16127) / 1000000000, 1, 9),
+        ([0.123456789, 0.000000001, 0.999999999], 1, 9),
+    ]
+)
+def test_precision(arr, size, precision):
+    arr = np.array(arr)
+    fmt = choose_formatter(arr)
+    assert isinstance(fmt, fixfmt.Number)
+    assert fmt.size == size
+    assert fmt.precision == precision
 
 
 def test_non_contiguous():

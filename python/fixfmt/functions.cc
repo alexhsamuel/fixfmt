@@ -1,19 +1,26 @@
 #include <cassert>
 #include <cmath>
+#include <iomanip>
 #include <limits>
 #include <string>
 
+#include "fixfmt/double-conversion/double-conversion.h"
+#include "fixfmt/double-conversion/fast-dtoa.h"
 #include "fixfmt/text.hh"
 #include "py.hh"
 
 using namespace py;
 using std::string;
+using DTSC = fixfmt::double_conversion::DoubleToStringConverter;
 
 //------------------------------------------------------------------------------
 
 // FIXME: Add docstrings.
 
 namespace {
+
+template<typename TYPE> constexpr auto MODE = DTSC::SHORTEST;
+template<> constexpr auto MODE<float> = DTSC::SHORTEST_SINGLE;
 
 template<typename TYPE>
 ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
@@ -44,7 +51,6 @@ ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
   // FIXME: Might not be correct for long double.
   int precision = 0;
   TYPE precision_scale = 1;
-  TYPE tolerance = fixfmt::pow10(-max_precision) / 2;
 
   // Note: Weird.  LLVM 6.1.0 on OSX vectorizes this loop only if the precision
   // logic is _present_, with the result that it runs _faster_ than without.
@@ -71,17 +77,32 @@ ref<Object> analyze_float(Module* module, Tuple* args, Dict* kw_args)
       min = val;
     if (val > max)
       max = val;
-    // Expand precision if necessary to accommodate additional fractional 
-    // digits, up to the maximum specified precision.
-    while (precision < max_precision) {
-      TYPE const scaled = std::abs(val) * precision_scale;
-      TYPE const remainder = (scaled - (long) (scaled + tolerance));
-      if (remainder < tolerance) 
-        break;
+
+    if (precision == max_precision)
+      // At max precision; no need to check further.
+      ;
+    else {
+      // We need to check if this value requires additional precision to format
+      // accurately.  Start with a naive check.
+      double const scaled = val * precision_scale;
+      if (long(std::round(scaled)) == scaled)
+        // Good to go.
+        ;
       else {
-        ++precision;
-        precision_scale *= 10;
-        tolerance *= 100;
+        // Might need more precision.  We need to do full-blown formatting.
+        char buf[384];  // Enough room for DBL_MAX.
+        bool sign;
+        int length;
+        int decimal_pos;
+        DTSC::DoubleToAscii(
+          std::abs(val), MODE<TYPE>, 0,
+          buf, sizeof(buf), &sign, &length, &decimal_pos);
+
+        auto const prec = std::min(length - decimal_pos, max_precision);
+        if (prec > precision) {
+          precision = prec;
+          precision_scale = fixfmt::pow10(precision);
+        }
       }
     }
   }

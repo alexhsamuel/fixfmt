@@ -14,7 +14,7 @@ def test_choose_formatter_int():
 
 
 def test_choose_formatter_float0():
-    arr = np.arange(1001) * 0.01
+    arr = np.arange(1001) / 100
     fmt = fixfmt.npfmt.choose_formatter(arr)
     assert isinstance(fmt, fixfmt.Number)
     assert fmt.size == 2
@@ -22,7 +22,7 @@ def test_choose_formatter_float0():
 
 
 def test_choose_formatter_float1():
-    arr = np.arange(1001) * 0.00001
+    arr = np.arange(1001) / 100000
     fmt = fixfmt.npfmt.choose_formatter(arr)
     assert isinstance(fmt, fixfmt.Number)
     assert fmt.size == 1
@@ -48,7 +48,7 @@ def test_choose_formatter_neginf():
 
 
 def test_choose_formatter_float2():
-    arr = np.arange(2e8, 3e8, 1234500) * 1e-8
+    arr = np.arange(2e8, 3e8, 1234500) / 100000000
     fmt = fixfmt.npfmt.choose_formatter(arr)
     assert isinstance(fmt, fixfmt.Number)
     assert fmt.size == 1
