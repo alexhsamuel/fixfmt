@@ -179,6 +179,10 @@ TEST(Number, precision1) {
   ASSERT_EQ(" 0.66831442603700", Number(1, 14)(n0));
 }
 
+TEST(Number, precision2) {
+  ASSERT_EQ(" 0.33007791", Number(1, 8)(0.33007791));
+}
+
 TEST(Number, precision_scan) {
   for (auto precision = 1; precision < 15; ++precision) {
     auto const scale = pow10(precision);
