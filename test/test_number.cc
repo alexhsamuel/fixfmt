@@ -298,7 +298,7 @@ TEST(Number, scale_m) {
   Number::Args args{3, 1};
   args.scale = {1e6, "M"};
   Number fmt(args);
-  ASSERT_EQ(7, fmt.get_width());
+  ASSERT_EQ(7u, fmt.get_width());
   ASSERT_EQ(" 100.0M", fmt(         1E+8  ));
   ASSERT_EQ("  12.3M", fmt(  12345678     ));
   ASSERT_EQ("  12.3M", fmt(  12345678.0   ));
