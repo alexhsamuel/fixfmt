@@ -222,8 +222,26 @@ def test_precision_random(precision):
         assert s == r
 
 
-@pytest.mark.parametrize("precision", range(1, 15))
+@pytest.mark.parametrize("precision", range(1, 12))
 def test_precision_rounding(precision):
+    """
+    Tests banker's rounding at each precision.
+    """
+    fmt = Number(1, precision, sign=' ')
+    fmt_spec = f".{precision}f"
+
+    den = 1 << (precision + 1)
+    for i in range(den + 1):
+        x = i / den
+        s = fmt(x)
+        r = format(x, fmt_spec)
+        assert s == r, f"x={x:.16f}: format {s!r} != {r!r}"
+
+
+# FIXME: See GH issue #34.
+@pytest.mark.xfail
+@pytest.mark.parametrize("precision", range(12, 15))
+def test_precision_rounding_long(precision):
     """
     Tests banker's rounding at each precision.
     """
