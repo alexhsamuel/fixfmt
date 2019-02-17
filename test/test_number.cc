@@ -184,25 +184,37 @@ TEST(Number, precision2) {
   ASSERT_EQ(" 0.33007791", Number(1, 8)(0.33007791));
 }
 
-TEST(Number, precision_scan) {
-  for (auto precision = 1; precision < 15; ++precision) {
-    auto const scale = pow10(precision);
-    auto const fmt = Number(1, precision);
-    auto const step = 1.0 / (std::min(100000, (int) pow10(precision)) + 1);
+void precision_scan(size_t const precision) {
+  auto const scale = pow10(precision);
+  auto const fmt = Number(1, precision);
+  auto const step = 1.0 / (pow10(std::min(precision, 5ul)) + 17);
 
-    for (double x = 0; x < 1.0; x += step) {
-      x = fixfmt::round(x * scale) / scale;
-
-      auto const s = fmt(x);
-      auto const y = atof(s.c_str());
-      if (y != x)
-        std::cerr << std::setprecision(precision)
-                  << "precision=" << precision << " "
-                  << x << " -> '" << s << "' -> " << y << "\n";
-      ASSERT_EQ(y, x);
-    }
+  for (double x = 0; x < 1.0; x += step) {
+    auto const z = fixfmt::round(x * scale) / scale;
+    auto const s = fmt(z);
+    auto const y = atof(s.c_str());
+    if (y != z)
+      std::cerr << std::setprecision(precision)
+                << "precision=" << precision << " "
+                << z << " -> '" << s << "' -> " << y << "\n";
+    ASSERT_EQ(y, z);
   }
 }
+
+TEST(Number, precision_scan1 ) { precision_scan( 1u); }
+TEST(Number, precision_scan2 ) { precision_scan( 2u); }
+TEST(Number, precision_scan3 ) { precision_scan( 3u); }
+TEST(Number, precision_scan4 ) { precision_scan( 4u); }
+TEST(Number, precision_scan5 ) { precision_scan( 5u); }
+TEST(Number, precision_scan6 ) { precision_scan( 6u); }
+TEST(Number, precision_scan7 ) { precision_scan( 7u); }
+TEST(Number, precision_scan8 ) { precision_scan( 8u); }
+TEST(Number, precision_scan9 ) { precision_scan( 9u); }
+TEST(Number, precision_scan10) { precision_scan(10u); }
+TEST(Number, precision_scan11) { precision_scan(11u); }
+TEST(Number, precision_scan12) { precision_scan(12u); }
+TEST(Number, precision_scan13) { precision_scan(13u); }
+TEST(Number, precision_scan14) { precision_scan(14u); }
 
 TEST(Number, pad) {
   ASSERT_EQ("  42.", Number(3, 0, ' ')( 42));
@@ -298,7 +310,7 @@ TEST(Number, scale_m) {
   Number::Args args{3, 1};
   args.scale = {1e6, "M"};
   Number fmt(args);
-  ASSERT_EQ(7, fmt.get_width());
+  ASSERT_EQ(7u, fmt.get_width());
   ASSERT_EQ(" 100.0M", fmt(         1E+8  ));
   ASSERT_EQ("  12.3M", fmt(  12345678     ));
   ASSERT_EQ("  12.3M", fmt(  12345678.0   ));

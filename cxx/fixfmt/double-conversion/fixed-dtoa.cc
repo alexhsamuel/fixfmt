@@ -265,7 +265,7 @@ static void FillFractionals(uint64_t fractionals, int exponent,
       // ... the lead bit is one,
       ((fractionals >> (point - 1)) & 1) == 1  
       // ... and either some other bits are set,
-      && ((fractionals & ((1l << point) - 1)) > 0  
+      && ((fractionals & ((1l << (point - 1)) - 1)) > 0  
           // ... or else there is a previous digit (no digit means 0),
           || (*length > 0   
               // ... and that digit is odd.
