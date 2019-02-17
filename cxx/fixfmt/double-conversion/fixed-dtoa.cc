@@ -265,11 +265,19 @@ static void FillFractionals(uint64_t fractionals, int exponent,
       // ... the lead bit is one,
       ((fractionals >> (point - 1)) & 1) == 1  
       // ... and either some other bits are set,
-      && ((fractionals & ((1l << point) - 1)) > 0  
+      && ((fractionals & ((1l << (point - 1)) - 1)) > 0  
           // ... or else there is a previous digit (no digit means 0),
           || (*length > 0   
               // ... and that digit is odd.
               && (buffer[*length - 1] - '0') % 2 == 1));
+    // std::cerr 
+    //   << std::hex
+    //   << "fractionals=" << fractionals
+    //   << " point=" << point
+    //   << " leadbit=" << (((fractionals >> (point - 1)) & 1) == 1)
+    //   << " mask=" << ((1l << (point - 1)) - 1)
+    //   << " masked=" << ((fractionals & ((1l << (point - 1)) - 1)))
+    //   << " round_up=" << round_up << "\n";
     if (round_up) {  
       RoundUp(buffer, length, decimal_point);
     }
