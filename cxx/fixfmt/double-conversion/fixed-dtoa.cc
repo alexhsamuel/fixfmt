@@ -270,14 +270,6 @@ static void FillFractionals(uint64_t fractionals, int exponent,
           || (*length > 0   
               // ... and that digit is odd.
               && (buffer[*length - 1] - '0') % 2 == 1));
-    // std::cerr 
-    //   << std::hex
-    //   << "fractionals=" << fractionals
-    //   << " point=" << point
-    //   << " leadbit=" << (((fractionals >> (point - 1)) & 1) == 1)
-    //   << " mask=" << ((1l << (point - 1)) - 1)
-    //   << " masked=" << ((fractionals & ((1l << (point - 1)) - 1)))
-    //   << " round_up=" << round_up << "\n";
     if (round_up) {  
       RoundUp(buffer, length, decimal_point);
     }
