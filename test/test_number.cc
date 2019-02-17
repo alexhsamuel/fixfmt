@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdlib>
 
 #include "fixfmt.hh"
 #include "gtest/gtest.h"
@@ -166,6 +167,41 @@ TEST(Number, precision) {
   ASSERT_EQ("-123.457"  , Number(3, 3)(-123.45678));
   ASSERT_EQ("-123.4568" , Number(3, 4)(-123.45678));
   ASSERT_EQ("-123.45678", Number(3, 5)(-123.45678));
+}
+
+TEST(Number, precision1) {
+  double const n0 = 0.668314426037;
+  ASSERT_EQ(" 0.668314426"     , Number(1,  9)(n0));
+  ASSERT_EQ(" 0.6683144260"    , Number(1, 10)(n0));
+  ASSERT_EQ(" 0.66831442604"   , Number(1, 11)(n0));
+  ASSERT_EQ(" 0.668314426037"  , Number(1, 12)(n0));
+  ASSERT_EQ(" 0.6683144260370" , Number(1, 13)(n0));
+  ASSERT_EQ(" 0.66831442603700", Number(1, 14)(n0));
+}
+
+TEST(Number, precision2) {
+  ASSERT_EQ(" 0.4477981" , Number(1, 7)(0.4477981));
+  ASSERT_EQ(" 0.33007791", Number(1, 8)(0.33007791));
+}
+
+TEST(Number, precision_scan) {
+  for (auto precision = 1; precision < 15; ++precision) {
+    auto const scale = pow10(precision);
+    auto const fmt = Number(1, precision);
+    auto const step = 1.0 / (std::min(100000, (int) pow10(precision)) + 1);
+
+    for (double x = 0; x < 1.0; x += step) {
+      x = fixfmt::round(x * scale) / scale;
+
+      auto const s = fmt(x);
+      auto const y = atof(s.c_str());
+      if (y != x)
+        std::cerr << std::setprecision(precision)
+                  << "precision=" << precision << " "
+                  << x << " -> '" << s << "' -> " << y << "\n";
+      ASSERT_EQ(y, x);
+    }
+  }
 }
 
 TEST(Number, pad) {
