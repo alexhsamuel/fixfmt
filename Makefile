@@ -6,7 +6,7 @@ endif
 
 GTEST_DIR       = ./googletest/googletest
 GTEST_INCDIR    = $(GTEST_DIR)/include
-GTEST_LIB       = $(GTEST_DIR)/make/gtest_main.a
+GTEST_LIB       = $(GTEST_DIR)/make/libgtest_main.a
 
 CXX            := $(CXX) -std=c++14
 CPPFLAGS        = -I./cxx
