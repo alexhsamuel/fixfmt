@@ -190,7 +190,14 @@ def choose_formatter_str(arr, min_width=0, cfg=DEFAULT_CFG["string"]):
     if size is None:
         min_size = cfg["min_size"]
         max_size = cfg["max_size"]
-        size = np.vectorize(lambda x: string_length(str(x)))(arr).max()
+        if arr.dtype.kind == "O":
+            size = lambda x: string_length(str(x))
+        elif arr.dtype.kind == "S":
+            # FIXME: For now we assume default-encoded strings.
+            size = lambda x: string_length(x.decode())
+        elif arr.dtype.kind == "U":
+            size = string_length
+        size = np.vectorize(size)(arr).max()
         size = max(min_width, min_size, min(size, max_size))
 
     return String(

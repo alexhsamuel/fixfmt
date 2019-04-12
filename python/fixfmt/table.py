@@ -310,6 +310,10 @@ class Table:
             getattr(table, "add_" + name)(arr, fmt)
         elif name == "object":
             table.add_str_object(arr, fmt)
+        elif arr.dtype.kind in "U":
+            table.add_ucs32(arr.dtype.itemsize, arr, fmt)
+        elif arr.dtype.kind in "S":
+            table.add_utf8(arr.dtype.itemsize, arr, fmt)
         elif name.startswith("datetime64"):  # FIXME: Sloppy.
             table.add_tick_time(arr.astype("int64"), fmt)
         else:

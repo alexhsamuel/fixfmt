@@ -124,6 +124,92 @@ ref<Object> add_column(PyTable* self, Tuple* args, Dict* kw_args)
 
 
 /**
+ * Column of fixed-size UTF-8 strings.
+ */
+class UTF8Column
+  : public fixfmt::Column
+{
+public:
+
+  UTF8Column(
+    size_t const itemsize, char* const values, long const length,
+    fixfmt::String format)
+  : itemsize_(itemsize),
+    values_(values),
+    length_(length),
+    format_(std::move(format))
+  {
+  }
+
+  virtual ~UTF8Column() override {}
+
+  virtual int get_width() const override { return format_.get_width(); }
+
+  virtual long get_length() const override { return length_; }
+
+  virtual std::string operator()(long const index) const override {
+    // Skip NUL padding on the right.
+    auto const ptr = values_ + index * itemsize_;
+    return format_(std::string(ptr, strnlen(ptr, itemsize_)));
+  }
+
+private:
+
+  size_t const itemsize_;
+  char* const values_;
+  long const length_;
+  fixfmt::String const format_;
+
+};
+
+
+/**
+ * Column of fixed-size UCS-32 strings.
+ */
+class UCS32Column
+  : public fixfmt::Column
+{
+public:
+
+  UCS32Column(
+    size_t const itemsize, char* const values, long const length,
+    fixfmt::String format)
+  : itemsize_(itemsize),
+    values_(values),
+    length_(length),
+    format_(std::move(format))
+  {
+  }
+
+  virtual ~UCS32Column() override {}
+
+  virtual int get_width() const override { return format_.get_width(); }
+
+  virtual long get_length() const override { return length_; }
+
+  virtual std::string operator()(long const index) const override {
+    auto const ptr = values_ + index * itemsize_;
+    // FIXME: This is wrong.  Convert UCS-32 to UTF-8 properly.
+    std::string s;
+    for (size_t i = 0; i < itemsize_; i += 4)
+      if (ptr[i])
+        s.push_back(ptr[i]);
+      else
+        break;
+    return format_(s);
+  }
+
+private:
+
+  size_t const itemsize_;
+  char* const values_;
+  long const length_;
+  fixfmt::String const format_;
+
+};
+
+
+/**
  * Column of Python object pointers, with an object first converted with 'str()'
  * and then formatted as a string.
  */
@@ -192,6 +278,64 @@ ref<Object> add_tick_time_column(PyTable* self, Tuple* args, Dict* kw_args)
 }
 
 
+ref<Object> add_utf8_column(PyTable* self, Tuple* args, Dict* kw_args)
+{
+  // Parse args.
+  static char const* arg_names[] = {"itemsize", "buf", "format", nullptr};
+  int itemsize;  // FIXME
+  PyObject* array;
+  PyString* format;
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, "iOO!", arg_names,
+    &itemsize, &array, &PyString::type_, &format);
+
+  // Validate args.
+  BufferRef buffer(array, PyBUF_ND);
+  if (buffer->ndim != 1)
+    throw TypeError("not a one-dimensional array");
+
+  // Add the column.
+  self->table_->add_column(std::make_unique<UTF8Column>(
+    itemsize,            
+    reinterpret_cast<char*>(buffer->buf),
+    buffer->shape[0], 
+    *format->fmt_));
+  // Hold on to the buffer ref.
+  self->buffers_.emplace_back(std::move(buffer));
+
+  return none_ref();
+}
+
+
+ref<Object> add_ucs32_column(PyTable* self, Tuple* args, Dict* kw_args)
+{
+  // Parse args.
+  static char const* arg_names[] = {"itemsize", "buf", "format", nullptr};
+  int itemsize;  // FIXME
+  PyObject* array;
+  PyString* format;
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, "iOO!", arg_names,
+    &itemsize, &array, &PyString::type_, &format);
+
+  // Validate args.
+  BufferRef buffer(array, PyBUF_ND);
+  if (buffer->ndim != 1)
+    throw TypeError("not a one-dimensional array");
+
+  // Add the column.
+  self->table_->add_column(std::make_unique<UCS32Column>(
+    itemsize,            
+    reinterpret_cast<char*>(buffer->buf),
+    buffer->shape[0], 
+    *format->fmt_));
+  // Hold on to the buffer ref.
+  self->buffers_.emplace_back(std::move(buffer));
+
+  return none_ref();
+}
+
+
 ref<Object> add_str_object_column(PyTable* self, Tuple* args, Dict* kw_args)
 {
   // Parse args.
@@ -235,6 +379,8 @@ auto methods = Methods<PyTable>()
   .add<add_column<float,            PyNumber>>  ("add_float32")
   .add<add_column<double,           PyNumber>>  ("add_float64")
   .add<add_tick_time_column>                    ("add_tick_time")
+  .add<add_utf8_column>                         ("add_utf8")
+  .add<add_ucs32_column>                        ("add_ucs32")
   .add<add_str_object_column>                   ("add_str_object")
 ;
 
