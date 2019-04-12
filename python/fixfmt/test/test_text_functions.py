@@ -35,7 +35,7 @@ def test_pad_left():
 # FIXME: Test center().
 
 def test_elide_default():
-    assert elide("I am a duck.",  8) == u"I am a \u2026"
+    assert elide("I am a duck.",  8) == "I am a \u2026"
     assert elide("I am a duck.", 14) == "I am a duck."
 
 
@@ -110,22 +110,22 @@ def test_palide_args():
 
 
 def test_palide_default():
-    assert palide("I am a duck.",  8) == u"I am a \u2026"
+    assert palide("I am a duck.",  8) == "I am a \u2026"
     assert palide("I am a duck.", 14) == "I am a duck.  "
 
 
 def test_string_length():
-    assert string_length(u"") == 0
-    assert string_length(u"x") == 1
-    assert string_length(u"xxx") == 3
-    assert string_length(u"-x-x-x-x-x-") == 11
-    assert string_length(u"\u2026") == 1
-    assert string_length(u"x\u2026x") == 3
-    assert string_length(u"\u2026...\u2026\u2026") == 6
-    assert string_length(u"\x1b[m") == 0
-    assert string_length(u"\x1b[32m\u2502") == 1
-    assert string_length(u"\u2502\x1b[m") == 1
-    assert string_length(u"\x1b[32m\u2502\x1b[m") == 1
-    assert string_length(u" \x1b[32m\u2502\x1b[m ") == 3
+    assert string_length("") == 0
+    assert string_length("x") == 1
+    assert string_length("xxx") == 3
+    assert string_length("-x-x-x-x-x-") == 11
+    assert string_length("\u2026") == 1
+    assert string_length("x\u2026x") == 3
+    assert string_length("\u2026...\u2026\u2026") == 6
+    assert string_length("\x1b[m") == 0
+    assert string_length("\x1b[32m\u2502") == 1
+    assert string_length("\u2502\x1b[m") == 1
+    assert string_length("\x1b[32m\u2502\x1b[m") == 1
+    assert string_length(" \x1b[32m\u2502\x1b[m ") == 3
 
 
