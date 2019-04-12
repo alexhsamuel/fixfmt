@@ -356,7 +356,7 @@ class Table:
         self.add_string(self.__cfg["row"]["separator"]["end"])
 
 
-    def _print_header(self, print):
+    def _fmt_header(self):
         cfg = self.__cfg["header"]
         assert string_length(cfg["style"]["prefix"]) == 0
         assert string_length(cfg["style"]["suffix"]) == 0
@@ -385,17 +385,17 @@ class Table:
                 format_name(i, n, f) 
                 for i, (n, f) in enumerate(zip(self.__names, self.__fmts))
             ) + sep["end"]
-            print(header)
+            return header
 
 
-    def _print_line(self, cfg, print):
+    def _fmt_line(self, cfg):
         if cfg["show"]:
             # FIXME: Relax this.
             if string_length(cfg["line"]) != 1:
                 raise ValueError("line must be one character")
 
             sep = cfg["separator"]
-            print(
+            return (
                   sep["start"]
                 + "".join( 
                       (sep["index"] if i > 0 and i == self.__num_idx
@@ -408,22 +408,22 @@ class Table:
             )
 
 
-    def _print_top(self, print):
-        self._print_line(self.__cfg["top"], print)
+    def _fmt_top(self):
+        return self._fmt_line(self.__cfg["top"])
 
 
-    def _print_underline(self, print):
-        self._print_line(self.__cfg["underline"], print)
+    def _fmt_underline(self):
+        return self._fmt_line(self.__cfg["underline"])
 
 
-    def _print_bottom(self, print):
-        self._print_line(self.__cfg["bottom"], print)
+    def _fmt_bottom(self):
+        return self._fmt_line(self.__cfg["bottom"])
 
 
     # FIXME: By screen (repeating header?)
     # FIXME: Do what when it's too wide???
 
-    def print(self, print=print):
+    def _format(self):
         cfg = self.__cfg
 
         num_extra_rows  = sum([
@@ -438,15 +438,15 @@ class Table:
             # FIXME
             max_rows = ansi.get_terminal_size().lines - 1
 
-        self._print_top(print)
-        self._print_header(print)
-        self._print_underline(print)
+        yield self._fmt_top()
+        yield self._fmt_header()
+        yield self._fmt_underline()
 
         table = self.__table
         num_rows = len(table)
         if max_rows is None or num_rows <= max_rows - num_extra_rows:
             for i in range(len(table)):
-                print(table(i))
+                yield table(i)
         else:
             cfg_ell             = cfg["row_ellipsis"]
             num_rows_top        = int(cfg_ell["position"] * max_rows)
@@ -455,7 +455,7 @@ class Table:
 
             # Print rows from the top.
             for i in range(num_rows_top):
-                print(table(i))
+                yield table(i)
 
             # Print the row ellipsis.
             ell = cfg_ell["format"].format(
@@ -472,13 +472,22 @@ class Table:
                 - string_length(ell_start) 
                 - string_length(ell_end))
             ell         = center(ell, ell_width, ell_pad)
-            print(ell_start + ell + ell_end)
+            yield ell_start + ell + ell_end
 
             # Print rows from the bottom.
             for i in range(num_rows - num_rows_bottom, num_rows):
-                print(table(i))
+                yield table(i)
 
-        self._print_bottom(print)
+        yield self._fmt_bottom()
+
+
+    def format(self):
+        yield from filter(None, self._format())
+
+
+    def print(self, print=print):
+        for line in self.format():
+            print(line)
 
 
 
