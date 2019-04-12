@@ -304,6 +304,7 @@ class Table:
         name = arr.dtype.name
         if name in {
             "int8", "int16", "int32", "int64", 
+            "uint8", "uint16", "uint32", "uint64", 
             "float32", "float64", "bool"
         }:
             getattr(table, "add_" + name)(arr, fmt)

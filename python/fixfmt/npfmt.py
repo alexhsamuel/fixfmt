@@ -93,7 +93,7 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULT_CFG["number"]):
         analyze = analyze_double if arr.dtype.itemsize == 8 else analyze_float
         (has_nan, has_pos_inf, has_neg_inf, num_vals, min_val, max_val, 
             val_prec) = analyze(arr, max_precision)
-    elif arr.dtype.kind == "i":
+    elif arr.dtype.kind in "iu":
         has_nan = has_pos_inf = has_neg_inf = False
         num_vals = len(arr)
         min_val = arr.min()
@@ -204,7 +204,7 @@ def choose_formatter(arr, min_width=0, cfg=DEFAULT_CFG):
     dtype = arr.dtype
     if dtype.kind == "b":
         return choose_formatter_bool(arr, min_width, cfg=cfg["bool"])
-    elif dtype.kind in "fi":
+    elif dtype.kind in "fiu":
         return choose_formatter_number(arr, min_width, cfg=cfg["number"])
     elif dtype.kind == "M":
         return choose_formatter_datetime64(arr, min_width, cfg=cfg["time"])
