@@ -1,6 +1,4 @@
-import pytest
-
-from   fixfmt import *
+from   fixfmt import pad, elide, palide, string_length
 
 #-------------------------------------------------------------------------------
 
@@ -129,6 +127,5 @@ def test_string_length():
     assert string_length(u"\u2502\x1b[m") == 1
     assert string_length(u"\x1b[32m\u2502\x1b[m") == 1
     assert string_length(u" \x1b[32m\u2502\x1b[m ") == 3
-
 
 
