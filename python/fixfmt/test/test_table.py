@@ -17,9 +17,13 @@ def test_array_dtypes():
     tbl.add_column("bool", np.arange(8) % 3 == 0)
 
     words = ["foo", "bar", "baz", "bif", "pineapple", "bom", "rok", "jip"]
-
     for dtn in (
             "S4", "S8", 
+    ):
+        tbl.add_column(dtn, np.array(words, dtype=dtn))
+
+    words = ["foo", "bar", "baz", "bif", "pineapple", "xü§", "푒푓푔푒푓푔", "jip"]
+    for dtn in (
             "U4", "U8",
             "object",
     ):

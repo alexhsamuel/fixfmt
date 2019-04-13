@@ -179,6 +179,7 @@ public:
     length_(length),
     format_(std::move(format))
   {
+    assert(itemsize % 4 == 0);
   }
 
   virtual ~UCS32Column() override {}
@@ -188,14 +189,33 @@ public:
   virtual long get_length() const override { return length_; }
 
   virtual std::string operator()(long const index) const override {
-    auto const ptr = values_ + index * itemsize_;
-    // FIXME: This is wrong.  Convert UCS-32 to UTF-8 properly.
+    // Encode UTF-8 from Unicode code points.
+    // FIXME: Is this always right?
+    auto const ptr = reinterpret_cast<unsigned*>(values_ + index * itemsize_);
     std::string s;
-    for (size_t i = 0; i < itemsize_; i += 4)
-      if (ptr[i])
-        s.push_back(ptr[i]);
-      else
+    for (size_t i = 0; i < itemsize_ / 4; i++) {
+      auto const c = ptr[i];
+      if (c == 0)
+        // Skip trailing NULs.
         break;
+      else if (c < 0x80)
+        s.push_back(c);
+      else if (c < 0x800) {
+        s.push_back(192 | ( c >> 6       ));
+        s.push_back(128 | ( c        & 63));
+      }
+      else if (c < 0x10000) {
+        s.push_back(224 | ( c >> 12      ));
+        s.push_back(128 | ((c >>  6) & 63));
+        s.push_back(128 | ( c        & 63));
+      }
+      else {
+        s.push_back(240 | ( c >> 18      ));
+        s.push_back(128 | ((c >> 12) & 63));
+        s.push_back(128 | ((c >>  6) & 63));
+        s.push_back(128 | ( c        & 63));
+      }
+    }
     return format_(s);
   }
 
@@ -282,7 +302,7 @@ ref<Object> add_utf8_column(PyTable* self, Tuple* args, Dict* kw_args)
 {
   // Parse args.
   static char const* arg_names[] = {"itemsize", "buf", "format", nullptr};
-  int itemsize;  // FIXME
+  int itemsize;
   PyObject* array;
   PyString* format;
   Arg::ParseTupleAndKeywords(
@@ -311,7 +331,7 @@ ref<Object> add_ucs32_column(PyTable* self, Tuple* args, Dict* kw_args)
 {
   // Parse args.
   static char const* arg_names[] = {"itemsize", "buf", "format", nullptr};
-  int itemsize;  // FIXME
+  int itemsize;
   PyObject* array;
   PyString* format;
   Arg::ParseTupleAndKeywords(
