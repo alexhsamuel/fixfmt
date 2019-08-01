@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 
 from   . import string_length, palide, center, Bool, Number, String, is_fmt
@@ -9,7 +10,7 @@ from   .lib import ansi
 
 # FIXME: Elsewhere.
 def update_cfg(old, updates):
-    new = dict(old)
+    new = copy.deepcopy(old)
     for key, val in updates.items():
         if isinstance(val, dict):
             val = update_cfg(old.get(key, {}), val)
@@ -180,6 +181,8 @@ UNICODE_BOX_CFG = update_cfg(DEFAULT_CFG, {
 def _colorize(cfg):
     """
     ANSI-colorizes a configuration.
+
+    Modifies `cfg` in place.
     """
     fmt_cfg = cfg["formatters"]["default"]
 
