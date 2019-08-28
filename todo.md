@@ -1,3 +1,17 @@
+Tables:
+
+- [ ] unify Table and RowTable
+- [ ] sane config setup
+- [ ] row sort
+- [ ] row filter
+- [ ] color support
+- [ ] light and dark colors
+- [ ] conditional color support
+- [ ] exceptions for individual cells
+- [ ] color exceptions
+- [ ] auto-expand string (one column) to terminal
+- [ ] progress bars
+
 Things to do:  (* for MVP) 
 
 - Add units and currency.
