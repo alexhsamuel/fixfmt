@@ -41,10 +41,11 @@ public:
   {
   }
 
-  size_t    get_width()     const { return width_; }
+  size_t        get_width()     const { return width_; }
 
-  long      get_scale()     const { return scale_; }
-  int       get_precision() const { return precision_; }
+  long          get_scale()     const { return scale_; }
+  int           get_precision() const { return precision_; }
+  string const& get_nat()       const { return nat_; }
   
   string operator()(long val) const;
 

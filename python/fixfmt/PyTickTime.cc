@@ -2,6 +2,7 @@
 
 #include <Python.h>
 
+#include "PyNumber.hh"
 #include "PyTickTime.hh"
 #include "fixfmt.hh"
 #include "py.hh"
@@ -14,20 +15,38 @@ using std::make_unique;
 
 namespace {
 
-int tp_init(PyTickTime* self, PyObject* args, PyObject* kw_args)
+int
+get_precision(
+  Object* arg)
+{
+  int precision;
+  if (arg == Py_None)
+    precision = fixfmt::TickTime::PRECISION_NONE;
+  else {
+    precision = arg->long_value();
+    if (precision < 0)
+      precision = fixfmt::TickTime::PRECISION_NONE;
+  }
+  return precision;
+}
+
+
+int tp_init(PyTickTime* self, Tuple* args, Dict* kw_args)
 {
   static char const* arg_names[] = {
-    "scale", "precision", nullptr };
-  long scale = fixfmt::TickTime::SCALE_SEC;
-  int precision = fixfmt::TickTime::PRECISION_NONE;
-  if (!PyArg_ParseTupleAndKeywords(
-    args, kw_args, "|li", (char**) arg_names,
-    &scale, &precision))
-    return -1;
+    "scale", "precision", "nat", nullptr };
+  long          scale           = fixfmt::TickTime::SCALE_SEC;
+  Object*       precision_arg   = (Object*) Py_None;
+  char const*   nat             = "NaT";
+  Arg::ParseTupleAndKeywords(
+    args, kw_args, "|lO$et", arg_names,
+    &scale, &precision_arg, "utf-8", &nat);
 
-  // FIXME: Validate args.
+  if (scale <= 0) 
+    throw ValueError("nonpositive scale");
+  auto const precision = get_precision(precision_arg);
 
-  new(self) PyTickTime(make_unique<fixfmt::TickTime>(scale, precision));
+  new(self) PyTickTime(make_unique<fixfmt::TickTime>(scale, precision, nat));
   return 0;
 }
 
@@ -36,7 +55,8 @@ ref<Unicode> tp_repr(PyTickTime* self)
 {
   auto const& fmt = self->fmt_;
   std::stringstream ss;
-  ss << "TickTime(" << fmt->get_scale() << ", " << fmt->get_precision() << ")";
+  ss << "TickTime(" << fmt->get_scale() << ", " << fmt->get_precision()
+     << ", \"" << fmt->get_nat() << "\")";
   return Unicode::from(ss.str());
 }
 
@@ -72,10 +92,17 @@ ref<Object> get_width(PyTickTime* const self, void* /* closure */)
 }
 
 
+ref<Object> get_nat(PyTickTime* const self, void* /* closure */)
+{
+  return Unicode::from(self->fmt_->get_nat());
+}
+
+
 auto getsets = GetSets<PyTickTime>()
   .add_get<get_precision>   ("precision")
   .add_get<get_scale>       ("scale")
   .add_get<get_width>       ("width")
+  .add_get<get_nat>         ("nat")
   ;
 
 
