@@ -34,6 +34,7 @@ Repeat wheel and conda packages on other architectures.
 
 ```
 docker run -ti --rm continuumio/conda_builder_linux bash
+conda update -y conda conda-build
 git clone https://github.com/alexhsamuel/fixfmt
 /opt/miniconda/bin/conda build fixfmt/conda-recipe --python 3.6
 anaconda upload ...
