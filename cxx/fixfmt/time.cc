@@ -12,6 +12,9 @@ TickTime::operator()(
   long val) 
   const 
 {
+  if (val == NAT_VALUE)
+    return nat_;
+
   // FIXME: Validate range.
 
   int const precision = precision_ == PRECISION_NONE ? 0 : precision_;
