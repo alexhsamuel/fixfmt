@@ -203,7 +203,7 @@ def _colorize(cfg):
     # Color lines gray.
     line_style = ansi.style(fg="light_gray")
     style_line = lambda s: s if s is None else line_style(s)
-    for c in (cfg["bottom"], cfg["header"], cfg["row"], cfg["row_ellipsis"], 
+    for c in (cfg["bottom"], cfg["header"], cfg["row"], cfg["row_ellipsis"],
               cfg["top"], cfg["underline"], ):
         c = c["separator"]
         c.update({
@@ -242,7 +242,7 @@ def _get_formatter(name, arr, cfg):
     # Start with the overall default formatter configuration
     fmt_cfg = cfg["default"]
 
-    # For each of the name, dtype name, and dtype kind, look up in the 
+    # For each of the name, dtype name, and dtype kind, look up in the
     # corresponding cfg dict.  If we find a formatter, return it outright.
     # Otherwise, update the formatter cfg.
     for c, k in (
@@ -306,8 +306,8 @@ class Table:
 
         name = arr.dtype.name
         if name in {
-            "int8", "int16", "int32", "int64", 
-            "uint8", "uint16", "uint32", "uint64", 
+            "int8", "int16", "int32", "int64",
+            "uint8", "uint16", "uint32", "uint64",
             "float32", "float64", "bool"
         }:
             getattr(table, "add_" + name)(arr, fmt)
@@ -372,8 +372,8 @@ class Table:
                 name = cfg["prefix"] + name + cfg["suffix"]
                 pad_pos = _get_header_position(fmt)
                 name = palide(
-                    name, fmt.width, 
-                    elide_pos=cfg["elide"]["position"], 
+                    name, fmt.width,
+                    elide_pos=cfg["elide"]["position"],
                     ellipsis=cfg["elide"]["ellipsis"],
                     pad_pos=pad_pos)
                 name = cfg["style"]["prefix"] + name + cfg["style"]["suffix"]
@@ -385,7 +385,7 @@ class Table:
                 return name
 
             header = sep["start"] + "".join(
-                format_name(i, n, f) 
+                format_name(i, n, f)
                 for i, (n, f) in enumerate(zip(self.__names, self.__fmts))
             ) + sep["end"]
             return header
@@ -400,11 +400,11 @@ class Table:
             sep = cfg["separator"]
             return (
                   sep["start"]
-                + "".join( 
+                + "".join(
                       (sep["index"] if i > 0 and i == self.__num_idx
                        else sep["between"] if i > 0
                        else "")
-                    + cfg["line"] * f.width 
+                    + cfg["line"] * f.width
                     for i, f in enumerate(self.__fmts)
                 )
                 + sep["end"]
@@ -471,8 +471,8 @@ class Table:
             ell_end     = cfg_ell["separator"]["end"]
             ell_pad     = cfg_ell["pad"]
             ell_width   = (
-                  table.width 
-                - string_length(ell_start) 
+                  table.width
+                - string_length(ell_start)
                 - string_length(ell_end))
             ell         = center(ell, ell_width, ell_pad)
             yield ell_start + ell + ell_end
@@ -621,9 +621,9 @@ class RowTable:
         sep = cfg["separator"]
         yield (
               sep["start"]
-            + "".join( 
+            + "".join(
                   (sep["between"] if i > 0 else "")
-                + cfg["line"] * f.width 
+                + cfg["line"] * f.width
                 for i, f in enumerate(fmts)
             )
             + sep["end"]
@@ -644,9 +644,9 @@ class RowTable:
             name = cfg["prefix"] + name + cfg["suffix"]
             pad_pos = _get_header_position(fmt)
             name = palide(
-                name, 
-                fmt.width, 
-                elide_pos   =cfg["elide"]["position"], 
+                name,
+                fmt.width,
+                elide_pos   =cfg["elide"]["position"],
                 ellipsis    =cfg["elide"]["ellipsis"],
                 pad_pos     =pad_pos
             )
@@ -654,14 +654,14 @@ class RowTable:
             return name
 
         yield sep["start"] + sep["between"].join(
-            format_name(n, f) 
+            format_name(n, f)
             for n, f in zip(names, fmts)
         ) + sep["end"]
 
 
     def __row(self, names, fmts, vals, cfg):
         sep = cfg["separator"]
-        vals = ( 
+        vals = (
             " " * f.width if v is None else f(v)
             for f, v in zip(fmts, vals)
         )
@@ -681,7 +681,7 @@ class RowTable:
         yield from self.__line(fmts, self.cfg["top"])
         yield from self.__header(names, fmts, self.cfg["header"])
         yield from self.__line(fmts, self.cfg["underline"])
-                                 
+
         defs = [ self.defaults.get(n, None) for n in names ]
 
         for row in self.rows:
@@ -694,8 +694,8 @@ class RowTable:
                 yield from self.__row(names, fmts, vals, self.cfg["row"])
 
         yield from self.__line(fmts, self.cfg["bottom"])
-                        
-                    
+
+
     def print(self, print=print):
         for line in self:
             print(line)
