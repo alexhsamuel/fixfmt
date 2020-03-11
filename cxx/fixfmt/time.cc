@@ -24,7 +24,8 @@ TickTime::operator()(
   if (round_scale_) {
     // Round at required precision.
     // FIXME: Do bankers' rounding; this rounds half away from zero.
-    long const rounded = (val + round_scale_ / 2) / round_scale_;
+    long const rounded
+      = (val > 0 ? val + round_scale_ / 2 : val - round_scale_ / 2) / round_scale_;
     // Separate whole and fractional seconds.
     whole = (time_t) (rounded / prec_scale_);
     frac = rounded % prec_scale_;
@@ -33,6 +34,11 @@ TickTime::operator()(
     // More precision than available.
     whole = (time_t) (val / scale_);
     frac = (val % scale_) * (prec_scale_ / scale_);
+  }
+  // Handle negative ticks.
+  if (frac < 0) {
+    whole--;
+    frac += prec_scale_;
   }
 
   // Break down the whole number of seconds into time components.
