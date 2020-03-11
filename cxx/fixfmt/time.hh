@@ -37,7 +37,10 @@ public:
     bad_result_(width_, '#'),  // FIXME
     scale_(scale),
     precision_(precision),
-    nat_(palide(nat, width_, "", " ", 1, PAD_POS_LEFT_JUSTIFY))
+    nat_(palide(nat, width_, "", " ", 1, PAD_POS_LEFT_JUSTIFY)),
+    prec_(precision_ == PRECISION_NONE ? 0 : precision_),
+    prec_scale_(pow10(prec_)),
+    round_scale_(scale_ > prec_scale_ ? scale_ / prec_scale_ : 0)
   {
   }
 
@@ -57,6 +60,11 @@ private:
   long      const scale_;
   int       const precision_;
   string    const nat_;
+
+  // Intermediate values used in formatting computation.
+  int       const prec_;
+  long      const prec_scale_;
+  long      const round_scale_;
 
 };
 

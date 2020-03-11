@@ -17,26 +17,22 @@ TickTime::operator()(
 
   // FIXME: Validate range.
 
-  int const precision = precision_ == PRECISION_NONE ? 0 : precision_;
-  long const prec_scale = pow10(precision);
-
   // Find the whole number of seconds, and the fractional seconds scaled up
   // by pow10(precision).
   time_t whole;
   long frac;
-  if (scale_ > prec_scale) {
+  if (round_scale_) {
     // Round at required precision.
-    long const round_scale = scale_ / prec_scale;
-    // FIXME: Do bankers' rounding; this rounds half up.
-    long const rounded = (val + round_scale / 2) / round_scale;
+    // FIXME: Do bankers' rounding; this rounds half away from zero.
+    long const rounded = (val + round_scale_ / 2) / round_scale_;
     // Separate whole and fractional seconds.
-    whole = (time_t) (rounded / prec_scale);
-    frac = rounded % prec_scale;
+    whole = (time_t) (rounded / prec_scale_);
+    frac = rounded % prec_scale_;
   }
   else {
     // More precision than available.
     whole = (time_t) (val / scale_);
-    frac = (val % scale_) * (prec_scale / scale_);
+    frac = (val % scale_) * (prec_scale_ / scale_);
   }
 
   // Break down the whole number of seconds into time components.
@@ -51,16 +47,16 @@ TickTime::operator()(
     return bad_result_;
 
   // Tack on subsecond precision, if indicated.
-  if (precision_ != PRECISION_NONE) {
+  if (prec_ > 0) {
     // Decimal point.
     result[pos++] = '.';
     // Render digits of the fractional seconds.
-    for (int i = 0; i < precision; ++i) {
-      result[pos + precision - 1 - i] = '0' + frac % 10;
+    for (int i = 0; i < prec_; ++i) {
+      result[pos + prec_ - 1 - i] = '0' + frac % 10;
       frac /= 10;
     }
     assert(frac == 0);
-    pos += precision;
+    pos += prec_;
   }
 
   // UTC offset.
