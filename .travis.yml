@@ -6,7 +6,7 @@ install:
 # - pip install -r requirements.txt
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 90
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90
-  - ls
+  - git clone https://github.com/google/googletest.git
   - (cd googletest/googletest/make && env CXXFLAGS=-std=c++14 make)
   - python setup.py install
 
