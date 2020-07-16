@@ -48,6 +48,11 @@ TEST(Number, long) {
   ASSERT_EQ("####", fmt(-9999));
 }
 
+TEST(Nubmer, very_long) {
+  Number fmt{20};
+  ASSERT_EQ("  1594917167164323861", fmt(1594917167164323861l));
+}
+
 TEST(Number, double) {
   Number fmt{2, 3};
   ASSERT_EQ((size_t) 7, fmt.get_width());

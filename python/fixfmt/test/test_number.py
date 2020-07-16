@@ -67,6 +67,19 @@ def test_basic():
     assert Number(3, 0)(9.9) == "  10."
 
 
+def test_large():
+    f = Number(20)
+    assert f(1594917167164323861) == "  1594917167164323861"
+    assert f(9223372036854775807) == "  9223372036854775807"
+
+
+@pytest.mark.xfail  # Currently raises OverflowError.
+def test_long():
+    f = Number(24)
+    assert f(  9223372036854775808) == "    9223372036854775808"
+    assert f(100000000000000000000) == "  100000000000000000000"
+
+
 def test_set_bad():
     f = Number(2, 4)
     f.bad = "?"
