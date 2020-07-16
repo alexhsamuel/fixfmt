@@ -397,6 +397,8 @@ public:
   ref<Object> CallObject(Tuple* args);
   static bool Check(PyObject* obj)
     { return true; }
+  bool HasAttrString(char const* const name)
+    { return (bool) PyObject_HasAttrString(this, name); }
   ref<Object> GetAttrString(char const* const name, bool check=true);
   bool IsInstance(PyObject* type)
     { return (bool) PyObject_IsInstance(this, type); }
@@ -636,10 +638,8 @@ public:
   static ref<Long> from(__int128 const val);
   static ref<Long> from(unsigned __int128 const val);
 
-  operator long()
-    { return PyLong_AsLong(this); }
-  operator unsigned long()
-    { return PyLong_AsUnsignedLong(this); }
+  operator long();
+  operator unsigned long();
 
   explicit operator __int128();
   explicit operator unsigned __int128();
@@ -660,6 +660,26 @@ Long::from(unsigned __int128 val)
 { 
   return take_not_null<Long>(
     _PyLong_FromByteArray((unsigned char const*) &val, sizeof(val), 1, 0));
+}
+
+
+inline
+Long::operator long()
+{
+  auto const val = PyLong_AsLong(this);
+  if (val == -1l and PyErr_Occurred())
+    throw Exception();
+  return val;
+}
+
+
+inline
+Long::operator unsigned long()
+{
+  auto const val = PyLong_AsUnsignedLong(this);
+  if (val == (unsigned long) -1 and PyErr_Occurred())
+    throw Exception();
+  return val;
 }
 
 
@@ -779,6 +799,8 @@ public:
   Object* GetItem(Py_ssize_t index) 
     { return check_not_null(PyTuple_GET_ITEM(this, index)); }
 
+  Py_ssize_t Size() 
+    { return PyTuple_GET_SIZE(this); }
   Py_ssize_t GetLength() 
     { return PyTuple_GET_SIZE(this); }
 

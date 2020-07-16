@@ -115,12 +115,18 @@ tp_init(
 
 ref<Object> tp_call(PyNumber* self, Tuple* args, Dict* kw_args)
 {
-  static char const* arg_names[] = {"value", nullptr};
-  double val;
-  // FIXME: Handle integer types separately.
-  Arg::ParseTupleAndKeywords(args, kw_args, "d", arg_names, &val);
+  if (args == nullptr || args->Size() != 1 || kw_args != nullptr)
+    throw TypeError("function takes one positional argument");
 
-  return Unicode::from((*self->fmt_)(val));
+  auto arg = args->GetItem(0);
+  // There doesn't seem to be a great way to distinguish actual integer types
+  // (`int`, `np.int64`) from floating point types (`float`, `np.float64`).
+  // Fake this by looking for the is_integer method, which is available for
+  // floating point types only.
+  return Unicode::from(
+    arg->HasAttrString("is_integer")
+    ? (*self->fmt_)(arg->double_value())
+    : (*self->fmt_)(arg->long_value()));
 }
 
 
