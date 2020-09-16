@@ -619,6 +619,7 @@ class RowTable:
             return
 
         sep = cfg["separator"]
+        fmts = ( f for f in fmts if f is not None )
         yield (
               sep["start"]
             + "".join(
@@ -656,6 +657,7 @@ class RowTable:
         yield sep["start"] + sep["between"].join(
             format_name(n, f)
             for n, f in zip(names, fmts)
+            if f is not None
         ) + sep["end"]
 
 
@@ -664,6 +666,7 @@ class RowTable:
         vals = (
             " " * f.width if v is None else f(v)
             for f, v in zip(fmts, vals)
+            if f is not None
         )
         yield (
               sep["start"]
