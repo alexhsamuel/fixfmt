@@ -81,7 +81,7 @@ setup(
     ],    
 
     package_dir={"": "python"},
-    packages=["fixfmt", "fixfmt.lib"],
+    packages=["fixfmt", "fixfmt.lib", "fixfmt.tbl"],
     package_data={"": ["test/*"]},
     ext_modules=[
         Extension(
