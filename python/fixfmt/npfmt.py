@@ -197,7 +197,7 @@ def choose_formatter_str(arr, min_width=0, cfg=DEFAULT_CFG["string"]):
             size = lambda x: string_length(x.decode())
         elif arr.dtype.kind == "U":
             size = string_length
-        size = np.vectorize(size)(arr).max()
+        size = np.vectorize(size)(arr).max() if len(arr) > 0 else 0
         size = max(min_width, min_size, min(size, max_size))
 
     return String(

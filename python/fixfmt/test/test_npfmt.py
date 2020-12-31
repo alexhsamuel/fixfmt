@@ -85,3 +85,15 @@ def test_choose_formatter_date():
     assert fmt.width == len(fmt(t1.astype(int)))
 
 
+def test_choose_formatter_bytes_empty():
+    arr = np.array([], dtype="S8")
+    fmt = fixfmt.npfmt.choose_formatter(arr)
+    assert isinstance(fmt, fixfmt.String)
+
+
+def test_choose_formatter_unicode_empty():
+    arr = np.array([], dtype="U8")
+    fmt = fixfmt.npfmt.choose_formatter(arr)
+    assert isinstance(fmt, fixfmt.String)
+
+
