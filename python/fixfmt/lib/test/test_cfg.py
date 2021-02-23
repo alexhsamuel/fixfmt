@@ -1,4 +1,4 @@
-from   fixfmt.lib.cfg import merge_dicts
+from   fixfmt.lib.cfg import merge_dicts, unflatten_dict
 
 #-------------------------------------------------------------------------------
 
@@ -37,6 +37,40 @@ def test_merge_dict():
         "j": 18,
         "r": {"t": 19},
         "s": 13
+    }
+
+
+def test_unflatten_dict():
+    assert unflatten_dict({
+        "a": 1,
+        "b": {"d": 3,},
+        "b.c": 2,
+        "b.e.f": 4,
+        "b.g": {"h": 5, "i": 6},
+        "j.k": {"l": 7},
+        "j.k.m": 8,
+        "b.d": 9,
+        "b.g.n": 10,
+    }) == {
+        "a": 1,
+        "b": {
+            "c": 2,
+            "d": 9,
+            "e": {
+                "f": 4,
+            },
+            "g": {
+                "h": 5,
+                "i": 6,
+                "n": 10,
+            },
+        },
+        "j": {
+            "k": {
+                "l": 7,
+                "m": 8,
+            },
+        },
     }
 
 
