@@ -1,8 +1,8 @@
-from   fixfmt.lib.cfg import merge
+from   fixfmt.lib.cfg import merge_dicts
 
 #-------------------------------------------------------------------------------
 
-def test_merge():
+def test_merge_dict():
     d0 = {
         "a": 1,
         "b": {
@@ -27,7 +27,7 @@ def test_merge():
         "j": 18,
         "r": {"t": 19},
     }
-    assert merge(d0, d1) == {
+    assert merge_dicts(d0, d1) == {
         "a": 14,
         "b": {
             "c": 2,
