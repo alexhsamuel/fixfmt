@@ -1,5 +1,6 @@
 import numpy as np
 import fixfmt
+import fixfmt.npfmt
 
 NAT = np.datetime64("NAT")
 
