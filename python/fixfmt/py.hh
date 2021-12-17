@@ -404,10 +404,16 @@ public:
     { return (bool) PyObject_IsInstance(this, type); }
   bool IsInstance(PyTypeObject* type)
     { return IsInstance((PyObject*) type); }
+  bool IsTrue()
+    { return PyObject_IsTrue(this); }
   auto Length()
     { return PyObject_Length(this); }
   auto Repr()
     { return ref<Unicode>::take(PyObject_Repr(this)); }
+  auto RichCompare(PyObject* const other, int const opid)
+    { return ref<Object>::take(PyObject_RichCompare(this, other, opid)); }
+  auto Ne(PyObject* const other)
+    { return RichCompare(other, Py_NE); }
   auto SetAttrString(char const* name, PyObject* obj)
     { check_not_minus_one(PyObject_SetAttrString(this, name, obj)); }
   auto Str()
