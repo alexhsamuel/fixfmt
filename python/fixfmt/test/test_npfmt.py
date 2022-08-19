@@ -65,6 +65,22 @@ def test_choose_formatter_datetime1():
     assert fmt.precision == 1
 
 
+def test_format_date():
+    t = np.datetime64("2022-08-19", "D")
+    fmt = fixfmt.TickDate()
+
+    assert fmt(t.astype(int)) == "2022-08-19"
+    assert fmt(t) == "2022-08-19"
+
+
+def test_format_ticktime():
+    t = np.datetime64("2022-08-19T12:34:56.789", "ms")
+    fmt = fixfmt.TickTime(1000, 2)
+
+    assert fmt(t.astype(int)) == "2022-08-19T12:34:56.79+00:00"
+    assert fmt(t) == "2022-08-19T12:34:56.79+00:00"
+
+
 def test_choose_formatter_datetime2():
     t0 = np.datetime64("2018-01-18T17:05:00")
     t1 = np.datetime64("2018-01-18T18:05:02")
