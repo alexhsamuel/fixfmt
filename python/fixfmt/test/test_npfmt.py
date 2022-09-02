@@ -3,6 +3,11 @@ import numpy as np
 import fixfmt
 import fixfmt.npfmt
 
+try:
+    import ora
+except ImportError:
+    ora = None
+
 #-------------------------------------------------------------------------------
 
 def test_choose_formatter_int():
@@ -60,25 +65,8 @@ def test_choose_formatter_datetime1():
     t1 = np.datetime64("2018-01-18T18:05:02")
     arr = np.arange(t0, t1, np.timedelta64(100, "ms"))
     fmt = fixfmt.npfmt.choose_formatter(arr)
-    assert isinstance(fmt, fixfmt.TickTime)
-    assert fmt.scale == 1000
+    assert isinstance(fmt, ora.TimeFmt)
     assert fmt.precision == 1
-
-
-def test_format_date():
-    t = np.datetime64("2022-08-19", "D")
-    fmt = fixfmt.TickDate()
-
-    assert fmt(t.astype(int)) == "2022-08-19"
-    assert fmt(t) == "2022-08-19"
-
-
-def test_format_ticktime():
-    t = np.datetime64("2022-08-19T12:34:56.789", "ms")
-    fmt = fixfmt.TickTime(1000, 2)
-
-    assert fmt(t.astype(int)) == "2022-08-19T12:34:56.79+00:00"
-    assert fmt(t) == "2022-08-19T12:34:56.79+00:00"
 
 
 def test_choose_formatter_datetime2():
@@ -86,8 +74,7 @@ def test_choose_formatter_datetime2():
     t1 = np.datetime64("2018-01-18T18:05:02")
     arr = np.arange(t0, t1, np.timedelta64(10000, "us"))
     fmt = fixfmt.npfmt.choose_formatter(arr)
-    assert isinstance(fmt, fixfmt.TickTime)
-    assert fmt.scale == 1000000
+    assert isinstance(fmt, ora.TimeFmt)
     assert fmt.precision == 2
 
 
@@ -96,9 +83,9 @@ def test_choose_formatter_date():
     t1 = np.datetime64("2019-01-01")
     arr = np.arange(t0, t1, np.timedelta64(1, "D"))
     fmt = fixfmt.npfmt.choose_formatter(arr)
-    assert isinstance(fmt, fixfmt.TickDate)
-    assert fmt(t0.astype(int)) == "2018-01-01"
-    assert fmt.width == len(fmt(t1.astype(int)))
+    assert isinstance(fmt, ora.DateFmt)
+    assert fmt(t0) == "2018-01-01"
+    assert fmt.width == len(fmt(t1))
 
 
 def test_choose_formatter_bytes_empty():
