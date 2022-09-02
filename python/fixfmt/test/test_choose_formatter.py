@@ -4,6 +4,11 @@ import pytest
 import fixfmt.npfmt
 from   fixfmt.npfmt import choose_formatter
 
+try:
+    import ora
+except ImportError:
+    ora = None
+
 #-------------------------------------------------------------------------------
 
 @pytest.mark.parametrize(
@@ -58,11 +63,11 @@ def test_non_contiguous():
     assert fmt.size == 3
 
     fmt = choose_formatter(arr.time)
-    assert isinstance(fmt, fixfmt.TickTime)
+    assert isinstance(fmt, ora.TimeFmt)
     assert fmt.precision == -1
 
     fmt = choose_formatter(arr.fast)
-    assert isinstance(fmt, fixfmt.TickTime)
+    assert isinstance(fmt, ora.TimeFmt)
     assert fmt.precision == 2
 
 
