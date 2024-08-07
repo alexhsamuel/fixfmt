@@ -31,9 +31,9 @@ TEST_LIBS       = $(GTEST_LIB) $(LIB)
 
 PYTHON	    	= python
 PYTEST	    	= py.test
-PYTHON_CONFIG	= $(shell $(PYTHON) -c 'import sys; print("python-config" if sys.version_info.major == 2 else "python3-config");')
-PY_PREFIX    	= $(shell $(PYTHON_CONFIG) --prefix)
-PY_CPPFLAGS  	= $(CPPFLAGS) $(shell $(PYTHON_CONFIG) --includes)
+PY_PREFIX   	= $(shell $(PYTHON) -c 'import sys; print(sys.prefix)')
+PY_INCLUDE  	= $(shell $(PYTHON) -c 'import sysconfig; print(sysconfig.get_paths()["include"])')
+PY_CPPFLAGS 	= $(CPPFLAGS) -I$(PY_INCLUDE)
 PY_CXXFLAGS  	= $(CXXFLAGS) -DNDEBUG -fno-strict-aliasing -fwrapv
 PY_LDFLAGS   	= -L$(PY_PREFIX)/lib
 ifeq ($(UNAME),Darwin)
