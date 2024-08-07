@@ -98,5 +98,9 @@ setup(
         "build_ext" : BuildExt,
         "install"   : Install,
     },
+
+    test_requirements=[
+        "pytest",
+    ]
 )
 
