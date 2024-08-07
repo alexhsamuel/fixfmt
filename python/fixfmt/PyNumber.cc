@@ -119,14 +119,15 @@ ref<Object> tp_call(PyNumber* self, Tuple* args, Dict* kw_args)
     throw TypeError("function takes one positional argument");
 
   auto arg = args->GetItem(0);
-  // There doesn't seem to be a great way to distinguish actual integer types
-  // (`int`, `np.int64`) from floating point types (`float`, `np.float64`).
-  // Fake this by looking for the is_integer method, which is available for
-  // floating point types only.
+
+  static ref<Object> PY_INTEGRAL;
+  if (PY_INTEGRAL == nullptr)
+    PY_INTEGRAL = import("numbers", "Integral");
+
   return Unicode::from(
-    arg->HasAttrString("is_integer")
-    ? (*self->fmt_)(arg->double_value())
-    : (*self->fmt_)(arg->long_value()));
+    arg->IsInstance(PY_INTEGRAL)
+    ? (*self->fmt_)(arg->long_value())
+    : (*self->fmt_)(arg->double_value()));
 }
 
 

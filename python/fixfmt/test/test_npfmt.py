@@ -125,7 +125,7 @@ def test_choose_formatter_unicode_empty():
 # GH #40
 @skip_np
 def test_int64_convert():
-    fmt = fixfmt.Number(19, -1)
+    fmt = fixfmt.Number(19, -1, sign=" ")
     x = 1600000000000000127
     assert np.int64(x) == x
     assert fmt(np.int64(x)) == "1600000000000000127"
