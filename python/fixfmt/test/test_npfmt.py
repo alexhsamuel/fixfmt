@@ -115,3 +115,12 @@ def test_choose_formatter_unicode_empty():
     assert isinstance(fmt, fixfmt.String)
 
 
+# GH #40
+@skip_np
+def test_int64_convert():
+    fmt = fixfmt.Number(19, -1)
+    x = 1600000000000000127
+    assert np.int64(x) == x
+    assert fmt(np.int64(x)) == "1600000000000000127"
+
+
