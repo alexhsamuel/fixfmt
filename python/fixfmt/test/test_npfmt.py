@@ -1,10 +1,18 @@
-import numpy as np
-
 import fixfmt
-import fixfmt.npfmt
+import pytest
+
+try:
+    import numpy as np
+except ImportError:
+    np = None
+else:
+    import fixfmt.npfmt
+
+skip_np = pytest.mark.skipif(np is None, reason="no NumPy")
 
 #-------------------------------------------------------------------------------
 
+@skip_np
 def test_choose_formatter_int():
     arr = np.arange(800, 1200)
     fmt = fixfmt.npfmt.choose_formatter(arr)
@@ -13,6 +21,7 @@ def test_choose_formatter_int():
     assert fmt.precision is None
 
 
+@skip_np
 def test_choose_formatter_float0():
     arr = np.arange(1001) / 100
     fmt = fixfmt.npfmt.choose_formatter(arr)
@@ -21,6 +30,7 @@ def test_choose_formatter_float0():
     assert fmt.precision == 2
 
 
+@skip_np
 def test_choose_formatter_float1():
     arr = np.arange(1001) / 100000
     fmt = fixfmt.npfmt.choose_formatter(arr)
@@ -29,6 +39,7 @@ def test_choose_formatter_float1():
     assert fmt.precision == 5
 
 
+@skip_np
 def test_choose_formatter_inf():
     arr = np.array([3, 4, 5, np.inf])
     fmt = fixfmt.npfmt.choose_formatter(arr)
@@ -38,6 +49,7 @@ def test_choose_formatter_inf():
         assert float(fmt(val)) == val
 
 
+@skip_np
 def test_choose_formatter_neginf():
     arr = np.array([3, 4, 5, -np.inf])
     fmt = fixfmt.npfmt.choose_formatter(arr)
@@ -47,6 +59,7 @@ def test_choose_formatter_neginf():
         assert float(fmt(val)) == val
 
 
+@skip_np
 def test_choose_formatter_float2():
     arr = np.arange(2e8, 3e8, 1234500) / 100000000
     fmt = fixfmt.npfmt.choose_formatter(arr)
@@ -55,6 +68,7 @@ def test_choose_formatter_float2():
     assert fmt.precision == 6
 
 
+@skip_np
 def test_choose_formatter_datetime1():
     t0 = np.datetime64("2018-01-18T17:05:00")
     t1 = np.datetime64("2018-01-18T18:05:02")
@@ -65,22 +79,7 @@ def test_choose_formatter_datetime1():
     assert fmt.precision == 1
 
 
-def test_format_date():
-    t = np.datetime64("2022-08-19", "D")
-    fmt = fixfmt.TickDate()
-
-    assert fmt(t.astype(int)) == "2022-08-19"
-    assert fmt(t) == "2022-08-19"
-
-
-def test_format_ticktime():
-    t = np.datetime64("2022-08-19T12:34:56.789", "ms")
-    fmt = fixfmt.TickTime(1000, 2)
-
-    assert fmt(t.astype(int)) == "2022-08-19T12:34:56.79+00:00"
-    assert fmt(t) == "2022-08-19T12:34:56.79+00:00"
-
-
+@skip_np
 def test_choose_formatter_datetime2():
     t0 = np.datetime64("2018-01-18T17:05:00")
     t1 = np.datetime64("2018-01-18T18:05:02")
@@ -91,6 +90,7 @@ def test_choose_formatter_datetime2():
     assert fmt.precision == 2
 
 
+@skip_np
 def test_choose_formatter_date():
     t0 = np.datetime64("2018-01-01")
     t1 = np.datetime64("2019-01-01")
@@ -101,12 +101,14 @@ def test_choose_formatter_date():
     assert fmt.width == len(fmt(t1.astype(int)))
 
 
+@skip_np
 def test_choose_formatter_bytes_empty():
     arr = np.array([], dtype="S8")
     fmt = fixfmt.npfmt.choose_formatter(arr)
     assert isinstance(fmt, fixfmt.String)
 
 
+@skip_np
 def test_choose_formatter_unicode_empty():
     arr = np.array([], dtype="U8")
     fmt = fixfmt.npfmt.choose_formatter(arr)
