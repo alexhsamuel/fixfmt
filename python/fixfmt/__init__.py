@@ -1,4 +1,4 @@
-from   ._ext import Bool, Number, String, TickTime, TickDate
+from   ._ext import Bool, Number, String
 from   ._ext import center, elide, pad, palide, string_length
 
 __all__ = (

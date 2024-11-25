@@ -8,8 +8,13 @@ from   math import floor, log10
 import numpy as np
 import re
 
-from   ._ext import Bool, Number, String, TickTime, TickDate
+from   ._ext import Bool, Number, String
 from   ._ext import string_length, analyze_double, analyze_float
+
+try:
+    import ora
+except ImportError:
+    ora = None
 
 #-------------------------------------------------------------------------------
 
@@ -149,6 +154,9 @@ def choose_formatter_number(arr, min_width=0, cfg=DEFAULT_CFG["number"]):
 
 
 def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
+    if ora is None:
+        raise RuntimeError("can't format datetime64 without ora")
+
     min_width   = max(min_width, cfg["min_width"])
 
     # FIXME: Is this really the right way to extract the datetime64 tick scale??
@@ -156,7 +164,7 @@ def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
     assert match is not None
     scale = match.group(1)
     if scale == "D":
-        return TickDate()
+        return ora.DateFmt(missing="NaT", invalid="NaT")
     try:
         scale = {
             "s"     : 0,
@@ -180,7 +188,7 @@ def choose_formatter_datetime64(values, min_width=0, cfg=DEFAULT_CFG["time"]):
         precision = min_prec
 
     precision = -1 if precision < 1 else precision
-    return TickTime(10 ** scale, precision)
+    return ora.TimeFmt(precision, missing="NaT", invalid="NaT")
 
 
 def choose_formatter_str(arr, min_width=0, cfg=DEFAULT_CFG["string"]):
